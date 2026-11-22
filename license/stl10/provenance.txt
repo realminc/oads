@@ -1,0 +1,8 @@
+STL-10 image recognition dataset (stl10_binary.tar.gz)
+
+Source: http://ai.stanford.edu/~acoates/stl10/stl10_binary.tar.gz
+Authors: Adam Coates, Honglak Lee, Andrew Y. Ng, "An Analysis of
+Single-Layer Networks in Unsupervised Feature Learning", AISTATS 2011.
+
+Derived from ImageNet; distributed by the Stanford Unsupervised Feature
+Learning group for academic use. Upstream license: unspecified.

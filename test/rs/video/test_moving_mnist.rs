@@ -22,7 +22,7 @@ fn engine() -> oa::Result<oa::Engine> {
 #[ignore = "requires a Vulkan device and network or cached moving_mnist pack"]
 fn moving_mnist_sequences_shift_targets_by_one_frame() -> oa::Result<()> {
 	let engine = engine()?;
-	let dataset = oads::MovingMnist::load(
+	let dataset = oads::MovingMnist::load_on(
 		&engine,
 		&oads::MovingMnistConfig {
 			count: Some(64),

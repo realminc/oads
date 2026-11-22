@@ -1,0 +1,8 @@
+CREMA-D (Crowd-sourced Emotional Multimodal Actors Dataset) — audio stream
+
+Source: https://gitlab.com/cs-cooper-lab/crema-d-mirror (GitLab mirror of
+https://github.com/CheyneyComputerScience/CREMA-D), AudioWAV/ members.
+Authors: Cao et al., "CREMA-D: Crowd-sourced Emotional Multimodal Actors
+Dataset", IEEE TAC 5(4), 2014.
+License: Open Database License (ODbL) with custom attribution/use terms;
+registration form requested by upstream for usage tracking.

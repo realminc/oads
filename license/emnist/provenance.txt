@@ -1,0 +1,13 @@
+EMNIST (gzip.zip, all six variants)
+
+Source: https://biometrics.nist.gov/cs_links/EMNIST/gzip.zip (NIST mirror
+of the original Western Sydney University distribution)
+Authors: Gregory Cohen, Saeed Afshar, Jonathan Tapson, André van Schaik,
+MARCS Institute, Western Sydney University, 2017.
+
+Derived from the NIST Special Database 19 and distributed under the same
+terms as MNIST: Creative Commons Attribution-ShareAlike 3.0
+(CC BY-SA 3.0), reproduced in CC-BY-SA-3.0.txt.
+
+Paper: Cohen, Afshar, Tapson, van Schaik, "EMNIST: an extension of MNIST
+to handwritten letters", arXiv:1702.05373.

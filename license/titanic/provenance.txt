@@ -1,0 +1,9 @@
+Titanic passenger survival table (titanic.csv)
+
+Source: https://raw.githubusercontent.com/datasciencedojo/datasets/master/titanic.csv
+Origin: the Kaggle/Vanderbilt biostatistics passenger table
+(Frank E. Harrell Jr., biostat.mc.vanderbilt.edu), mirrored by
+Data Science Dojo's datasets repository.
+
+Upstream license: unspecified. Factual manifest of 891 passengers with
+the Kaggle teaching-set columns; the loader consumes the CSV verbatim.

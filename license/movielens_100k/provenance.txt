@@ -1,0 +1,6 @@
+MovieLens ratings dataset (GroupLens Research, University of Minnesota)
+
+Source: https://files.grouplens.org/datasets/movielens/
+License: GroupLens permits use for research purposes with citation of
+F. Maxwell Harper and Joseph A. Konstan, "The MovieLens Datasets: History
+and Context", ACM TiiS 5(4), 2015. Redistribution requires permission.

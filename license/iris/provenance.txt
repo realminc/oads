@@ -1,0 +1,10 @@
+Iris flower data set (iris.data inside iris.zip)
+
+Source: https://archive.ics.uci.edu/static/public/53/iris.zip
+Creator: R.A. Fisher, "The use of multiple measurements in taxonomic
+problems", Annual Eugenics 7 (1936). Donor: Michael Marshall (1988).
+Host: UCI Machine Learning Repository, dataset 53.
+
+The 1936 measurements are public domain; UCI distributes the table
+without a use restriction beyond citation. iris.names is the upstream
+documentation carried in the same zip.

@@ -145,6 +145,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "776dfebd015e2d8732c684a2c71003674ccb49457b539b9e82151ba38e96dd7c"
 
 [[package]]
+name = "bzip2"
+version = "0.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f3a53fac24f34a81bc9954b5d6cfce0c21e18ec6959f44f56e8e90e4bb7c346c"
+dependencies = [
+ "libbz2-rs-sys",
+]
+
+[[package]]
 name = "cc"
 version = "1.11.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -682,6 +691,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "20870f649af7073d53e38067b2a84312175d56ea15217e1b15bc83506ec50afb"
 
 [[package]]
+name = "libbz2-rs-sys"
+version = "0.2.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a5314d1d545fce0307c770d791adf20d997e0b63b64e1ffeed8a920e290eabe4"
+
+[[package]]
 name = "libc"
 version = "0.2.191"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -947,7 +962,7 @@ dependencies = [
 
 [[package]]
 name = "oads-python"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "oadsrust",
  "oarust",
@@ -956,17 +971,18 @@ dependencies = [
 
 [[package]]
 name = "oadsrust"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
+ "bzip2",
  "flate2",
  "oarust",
 ]
 
 [[package]]
 name = "oarust"
-version = "0.14.1"
+version = "0.15.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "892c030c79fc0f1b24bf42fb8d755fab164620e981f0d5368582aab2bc62be55"
+checksum = "2752fd5ad14dacfa221297f4834f1bed06edcfd815c9a408cfebb954aebb843a"
 dependencies = [
  "bitflags",
  "chrono",

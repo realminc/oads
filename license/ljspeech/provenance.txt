@@ -1,0 +1,6 @@
+LJSpeech 1.1 single-speaker TTS corpus (LJSpeech-1.1.tar.bz2)
+
+Source: https://data.keithito.com/data/speech/LJSpeech-1.1.tar.bz2
+Curator: Keith Ito, from LibriVox public-domain audiobook narration.
+License: public domain (LibriVox recordings are released into the
+public domain).

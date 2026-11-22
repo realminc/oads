@@ -1,0 +1,10 @@
+Speech Commands v0.02 (speech_commands_v0.02.tar.gz)
+
+Source: http://download.tensorflow.org/data/speech_commands_v0.02.tar.gz
+Author: Pete Warden, Google Brain, 2018
+("Speech Commands: A Dataset for Limited-Vocabulary Speech Recognition",
+arXiv:1804.03209).
+
+Distributed under Creative Commons Attribution 4.0 (CC BY 4.0),
+reproduced in CC-BY-4.0.txt. The _background_noise_ members are not part
+of the labeled dataset contract.

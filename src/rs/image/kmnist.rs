@@ -7,81 +7,27 @@
 //! sample contract as [`crate::Mnist`], so [`oa::data::collate`] produces
 //! `[B, 1, 28, 28]` NCHW batches.
 
-use std::path::PathBuf;
-
-use oa::data::{Dataset, Sample};
-use oa::matrix::{self, Matrix};
+use oa::data::{Dataset, MatrixDataset, Sample};
+use oa::matrix::Matrix;
 use oa::{Engine, Error, Result};
 
 use crate::decode::{Decoded, MatrixData};
 use crate::extract;
 use crate::idx::{self, IdxSplit};
-use crate::pack::{self, FetchProgress, Pack, PackFile};
+use crate::pack::{self, FetchProgress};
 
-pub(crate) const KMNIST_PACK: Pack = Pack {
-	name: "kmnist",
-	version: "1.0.0",
-	license: "CC-BY-SA-4.0",
-	files: &[
-		PackFile {
-			name: "train-images-idx3-ubyte.gz",
-			size: 18_165_135,
-			shake256: "514a63d19287b9363d1259a7c5a178a75b82322fbe90a9ac9bf240734250006b",
-			urls: &["http://codh.rois.ac.jp/kmnist/dataset/kmnist/train-images-idx3-ubyte.gz"],
-		},
-		PackFile {
-			name: "train-labels-idx1-ubyte.gz",
-			size: 29_497,
-			shake256: "271b9566abb706d1197a89a9940d3ea709ba49a9dc6a3dae7543f1ebf29b58b5",
-			urls: &["http://codh.rois.ac.jp/kmnist/dataset/kmnist/train-labels-idx1-ubyte.gz"],
-		},
-		PackFile {
-			name: "t10k-images-idx3-ubyte.gz",
-			size: 3_041_136,
-			shake256: "b8c5f3e82249027924131038bea598300a7a2639c411d3f2f79500a7667cf7bf",
-			urls: &["http://codh.rois.ac.jp/kmnist/dataset/kmnist/t10k-images-idx3-ubyte.gz"],
-		},
-		PackFile {
-			name: "t10k-labels-idx1-ubyte.gz",
-			size: 5_120,
-			shake256: "e834280bf6aefdd90293b34ead5e67b1e0c30cac93f1ed49ed500f6c7e3fa1d5",
-			urls: &["http://codh.rois.ac.jp/kmnist/dataset/kmnist/t10k-labels-idx1-ubyte.gz"],
-		},
-	],
-};
+#[path = "kmnist.gen.rs"]
+mod generated;
 
-/// Official KMNIST split selection.
-pub type KMnistSplit = IdxSplit;
-
-/// Load options for [`KMnist::load`].
-#[derive(Clone, Debug)]
-pub struct KMnistConfig {
-	/// Which official split to materialize.
-	pub split: KMnistSplit,
-	/// Cache root override. `None` resolves `OA_DATA_DIR`, then the platform
-	/// cache directory; see [`data_root`](crate::pack::data_root).
-	pub cache_dir: Option<PathBuf>,
-	/// Scale pixels into `[0, 1]`. `false` keeps raw `0..=255` values.
-	pub normalize: bool,
-}
-
-impl Default for KMnistConfig {
-	fn default() -> Self {
-		Self {
-			split: IdxSplit::Train,
-			cache_dir: None,
-			normalize: true,
-		}
-	}
-}
+pub(crate) use generated::KMNIST_PACK;
+pub use generated::{KMnistConfig, KMnistSplit};
 
 /// Device-resident KMNIST split implementing [`oa::data::Dataset`].
 ///
 /// `images()` is `[N, 1, 28, 28]` F32 NCHW and `labels()` is `[N]` F32 class
 /// indices `0..=9` (10 Kuzushiji characters).
 pub struct KMnist {
-	images: Matrix,
-	labels: Matrix,
+	dataset: MatrixDataset,
 	split: KMnistSplit,
 }
 
@@ -149,31 +95,23 @@ impl KMnist {
 		})
 	}
 
-	/// Decode the selected split and upload it to `engine`.
+	/// [`load_on`](Self::load_on) with a fetch progress callback.
 	///
 	/// # Errors
 	///
-	/// Returns pack fetch/verification errors, IDX decode errors, and matrix
-	/// upload errors.
-	pub fn load(engine: &Engine, config: &KMnistConfig) -> Result<Self> {
-		Self::load_with_progress(engine, config, &mut |_| true)
-	}
-
-	/// [`load`](Self::load) with a fetch progress callback.
-	///
-	/// # Errors
-	///
-	/// Returns the errors of [`load`](Self::load), plus `Cancelled` when
+	/// Returns the errors of [`load_on`](Self::load_on), plus `Cancelled` when
 	/// the callback aborts a fetch.
-	pub fn load_with_progress(
+	pub fn load_with_progress_on(
 		engine: &Engine,
 		config: &KMnistConfig,
 		progress: &mut impl FnMut(FetchProgress) -> bool,
 	) -> Result<Self> {
 		let decoded = Self::decode_with_progress(config, progress)?;
 		Ok(Self {
-			images: decoded.upload("images", engine)?,
-			labels: decoded.upload("labels", engine)?,
+			dataset: MatrixDataset::new(
+				decoded.upload("images", engine)?,
+				decoded.upload("labels", engine)?,
+			)?,
 			split: config.split,
 		})
 	}
@@ -181,13 +119,13 @@ impl KMnist {
 	/// Full `[N, 1, 28, 28]` F32 image matrix on the owning engine.
 	#[must_use]
 	pub const fn images(&self) -> &Matrix {
-		&self.images
+		self.dataset.x()
 	}
 
 	/// Full `[N]` F32 label matrix on the owning engine.
 	#[must_use]
 	pub const fn labels(&self) -> &Matrix {
-		&self.labels
+		self.dataset.y()
 	}
 
 	/// The split this dataset was materialized from.
@@ -195,29 +133,18 @@ impl KMnist {
 	pub const fn split(&self) -> KMnistSplit {
 		self.split
 	}
-
-	fn check_index(&self, index: i64) -> Result<()> {
-		if index < 0 || index >= self.len() {
-			return Err(Error::out_of_range("kmnist index is outside the dataset"));
-		}
-		Ok(())
-	}
 }
 
 impl Dataset for KMnist {
 	fn len(&self) -> i64 {
-		i64::try_from(self.labels.shape()[0]).unwrap_or(i64::MAX)
+		self.dataset.len()
 	}
 
 	fn get_item(&self, index: i64) -> Result<Matrix> {
-		self.check_index(index)?;
-		matrix::slice(&self.images, 0, index, index + 1)?.squeeze(0)
+		self.dataset.get_item(index)
 	}
 
 	fn get_sample(&self, index: i64) -> Result<Sample> {
-		self.check_index(index)?;
-		let x = matrix::slice(&self.images, 0, index, index + 1)?.squeeze(0)?;
-		let y = matrix::slice(&self.labels, 0, index, index + 1)?;
-		Ok(Sample::new_with_label(x, y))
+		self.dataset.get_sample(index)
 	}
 }

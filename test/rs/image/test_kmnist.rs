@@ -22,7 +22,7 @@ fn engine() -> oa::Result<oa::Engine> {
 #[ignore = "requires a Vulkan device and network or cached kmnist pack"]
 fn kmnist_loads_test_split_and_collates() -> oa::Result<()> {
 	let engine = engine()?;
-	let dataset = oads::KMnist::load(
+	let dataset = oads::KMnist::load_on(
 		&engine,
 		&oads::KMnistConfig {
 			split: oads::IdxSplit::Test,

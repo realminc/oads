@@ -1,0 +1,1655 @@
+{
+ "comment": "oads dataset pack schema \u2014 tool/gen/ds/generate.py emits manifests, configs, dispatch, facades, Python wrappers, and license/doc tables from this file. Decode bodies and custom Dataset impls stay handwritten in src/rs/<domain>/<name>.rs.",
+ "domains": {
+  "audio": {
+   "doc": "Audio datasets: clip archives decoded to PCM sample matrices and MIDI\n//! performances decoded to `(pitch, step, duration)` event matrices.\n//!\n//! Waveform loaders upload a `[N, 1, S]` F32 sample matrix and a `[N]` F32\n//! label matrix, so per-sample slices collate through [`oa::data`] the same\n//! way image batches do. Sequence loaders expose fixed-length event windows\n//! as device slices, so batches collate without padding.",
+   "py_doc": "Audio datasets: clip archives decoded to PCM waveform matrices and MIDI\nperformances decoded to (pitch, step, duration) event matrices.\n\nWaveform loaders upload a [N, 1, S] f32 sample matrix and a [N] f32 label\nmatrix; sequence loaders expose fixed-length event windows as device\nslices. Both collate through `oa.data` without padding."
+  },
+  "image": {
+   "doc": "Image datasets: IDX-digit packs and archive-decoded photographic corpora.\n//!\n//! Every loader uploads a `[N, C, H, W]` F32 image matrix and a `[N]` F32\n//! label matrix, so per-sample slices collate to NCHW batches through\n//! [`oa::data`].",
+   "py_doc": "Image datasets: IDX-digit packs and archive-decoded photographic corpora.\n\nEvery loader uploads a [N, C, H, W] f32 image matrix and a [N] f32 label\nmatrix, so per-sample slices collate to NCHW batches through `oa.data`."
+  },
+  "text": {
+   "doc": "Text datasets: character and document corpora.",
+   "py_doc": "Text datasets: character and document corpora.",
+   "internal_modules": [
+    "document"
+   ]
+  },
+  "video": {
+   "doc": "Video datasets: frame-sequence corpora.\n//!\n//! Loaders upload a `[N, T, C, H, W]` F32 frame tensor; per-sample slices\n//! collate to NTCHW batches through [`oa::data`].",
+   "py_doc": "Video datasets: frame-sequence corpora.\n\nLoaders upload a [N, T, C, H, W] f32 frame matrix; per-sample slices\ncollate to NTCHW batches through `oa.data`."
+  },
+  "tabular": {
+   "doc": "Tabular datasets: fixed-width numeric feature matrices with class labels.\n//!\n//! Every loader uploads a `[N, F]` F32 feature matrix and a `[N]` F32\n//! label matrix, so per-sample slices collate to `[B, F]` batches through\n//! [`oa::data`]. Packs arrive unsplit; partition with\n//! [`oa::data::random_split`].",
+   "py_doc": "Tabular datasets: fixed-width numeric feature matrices with class labels.\n\nEvery loader uploads a [N, F] f32 feature matrix and a [N] f32 label\nmatrix, so per-sample slices collate to [B, F] batches through `oa.data`.\nPacks arrive unsplit; partition with `oa.data.random_split`.",
+   "internal_modules": [
+    "scale",
+    "ratings"
+   ]
+  }
+ },
+ "packs": [
+  {
+   "name": "mnist",
+   "domain": "image",
+   "class": "Mnist",
+   "version": "1.0.0",
+   "license": "CC-BY-SA-3.0",
+   "license_label": "CC BY-SA 3.0",
+   "license_file": "CC-BY-SA-3.0.txt",
+   "upstream": "Yann LeCun et al., cvdf-datasets / ossci-datasets",
+   "upstream_short": "cvdf-datasets GCS, ossci-datasets S3",
+   "progress": true,
+   "split": {
+    "kind": "idx",
+    "doc": "Official MNIST split selection."
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "MnistSplit",
+     "generic": "split",
+     "default": "MnistSplit::Train",
+     "doc": "Which official split to materialize."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    },
+    {
+     "name": "normalize",
+     "type": "bool",
+     "generic": "normalize",
+     "default": "true",
+     "doc": "Scale pixels into `[0, 1]`. `false` keeps raw `0..=255` values."
+    }
+   ],
+   "python": {
+    "contract": "matrix",
+    "feature": "images",
+    "doc": "MNIST handwritten digits; see `oads.dataset.MatrixDataset`.",
+    "feature_doc": "Full image matrix on the owning engine; alias of `x`."
+   },
+   "doc": {
+    "samples": "60,000 train / 10,000 test",
+    "shape": "`[N, 1, 28, 28]` F32"
+   },
+   "files": [
+    {
+     "name": "train-images-idx3-ubyte.gz",
+     "size": 9912422,
+     "shake256": "1314ff889cdcbd8edcfad0916f94202767b7258e93ab75534affc2ccbb6fa575",
+     "urls": [
+      "https://storage.googleapis.com/cvdf-datasets/mnist/train-images-idx3-ubyte.gz",
+      "https://ossci-datasets.s3.amazonaws.com/mnist/train-images-idx3-ubyte.gz"
+     ]
+    },
+    {
+     "name": "train-labels-idx1-ubyte.gz",
+     "size": 28881,
+     "shake256": "6bcc237fd21a81c96ff200bdae886930ad9b9576fcd16bc49038f5ae7e275c01",
+     "urls": [
+      "https://storage.googleapis.com/cvdf-datasets/mnist/train-labels-idx1-ubyte.gz",
+      "https://ossci-datasets.s3.amazonaws.com/mnist/train-labels-idx1-ubyte.gz"
+     ]
+    },
+    {
+     "name": "t10k-images-idx3-ubyte.gz",
+     "size": 1648877,
+     "shake256": "fb5dd7142cba2dad6230d7b75b31917b34294280b67b60d7b95bc2e1e1dcd671",
+     "urls": [
+      "https://storage.googleapis.com/cvdf-datasets/mnist/t10k-images-idx3-ubyte.gz",
+      "https://ossci-datasets.s3.amazonaws.com/mnist/t10k-images-idx3-ubyte.gz"
+     ]
+    },
+    {
+     "name": "t10k-labels-idx1-ubyte.gz",
+     "size": 4542,
+     "shake256": "105e631874f55e52bafd7c85ab4be9152f8296fc7aaa475815d8f56f654faea7",
+     "urls": [
+      "https://storage.googleapis.com/cvdf-datasets/mnist/t10k-labels-idx1-ubyte.gz",
+      "https://ossci-datasets.s3.amazonaws.com/mnist/t10k-labels-idx1-ubyte.gz"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "fashion_mnist",
+   "domain": "image",
+   "class": "FashionMnist",
+   "version": "1.0.0",
+   "license": "MIT",
+   "license_label": "MIT",
+   "license_file": "MIT.txt",
+   "upstream": "Zalando SE",
+   "upstream_short": "zalando eu-central-1 S3, tf-keras-datasets GCS",
+   "progress": false,
+   "split": {
+    "kind": "idx",
+    "doc": "Official Fashion-MNIST split selection."
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "FashionMnistSplit",
+     "generic": "split",
+     "default": "FashionMnistSplit::Train",
+     "doc": "Which official split to materialize."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    },
+    {
+     "name": "normalize",
+     "type": "bool",
+     "generic": "normalize",
+     "default": "true",
+     "doc": "Scale pixels into `[0, 1]`. `false` keeps raw `0..=255` values."
+    }
+   ],
+   "python": {
+    "contract": "matrix",
+    "feature": "images",
+    "doc": "Fashion-MNIST clothing items; see `oads.dataset.MatrixDataset`.",
+    "feature_doc": "Full image matrix on the owning engine; alias of `x`."
+   },
+   "doc": {
+    "samples": "60,000 train / 10,000 test",
+    "shape": "`[N, 1, 28, 28]` F32"
+   },
+   "files": [
+    {
+     "name": "train-images-idx3-ubyte.gz",
+     "size": 26421880,
+     "shake256": "287217197fbade1cabc218dbc30a6ba2da0e6a3af5b4aa4185f3fd24f94ddabf",
+     "urls": [
+      "http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-images-idx3-ubyte.gz",
+      "https://storage.googleapis.com/tensorflow/tf-keras-datasets/train-images-idx3-ubyte.gz"
+     ]
+    },
+    {
+     "name": "train-labels-idx1-ubyte.gz",
+     "size": 29515,
+     "shake256": "8acdf6a86fbee77624e8f5746b475a5bf3f387f76370df41cd7d6b63cea2fa21",
+     "urls": [
+      "http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-labels-idx1-ubyte.gz",
+      "https://storage.googleapis.com/tensorflow/tf-keras-datasets/train-labels-idx1-ubyte.gz"
+     ]
+    },
+    {
+     "name": "t10k-images-idx3-ubyte.gz",
+     "size": 4422102,
+     "shake256": "897f33e93438e9eb054bd6103c0396f009a7d1035be8c726ef28ca3bd8dfabed",
+     "urls": [
+      "http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/t10k-images-idx3-ubyte.gz",
+      "https://storage.googleapis.com/tensorflow/tf-keras-datasets/t10k-images-idx3-ubyte.gz"
+     ]
+    },
+    {
+     "name": "t10k-labels-idx1-ubyte.gz",
+     "size": 5148,
+     "shake256": "16a6ca6f5f7f62ce4ba3d742a4fa9444a73b82bd5e5df971edd4ea468f6d77cf",
+     "urls": [
+      "http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/t10k-labels-idx1-ubyte.gz",
+      "https://storage.googleapis.com/tensorflow/tf-keras-datasets/t10k-labels-idx1-ubyte.gz"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "kmnist",
+   "domain": "image",
+   "class": "KMnist",
+   "version": "1.0.0",
+   "license": "CC-BY-SA-4.0",
+   "license_label": "CC BY-SA 4.0",
+   "license_file": "CC-BY-SA-4.0.txt",
+   "upstream": "ROIS-CDS, National Institute of Informatics",
+   "upstream_short": "codh.rois.ac.jp",
+   "progress": true,
+   "split": {
+    "kind": "idx",
+    "doc": "Official Kuzushiji-MNIST split selection."
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "KMnistSplit",
+     "generic": "split",
+     "default": "KMnistSplit::Train",
+     "doc": "Which official split to materialize."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    },
+    {
+     "name": "normalize",
+     "type": "bool",
+     "generic": "normalize",
+     "default": "true",
+     "doc": "Scale pixels into `[0, 1]`. `false` keeps raw `0..=255` values."
+    }
+   ],
+   "python": {
+    "contract": "matrix",
+    "feature": "images",
+    "doc": "KMNIST Kuzushiji characters; see `oads.dataset.MatrixDataset`.",
+    "feature_doc": "Full image matrix on the owning engine; alias of `x`."
+   },
+   "doc": {
+    "samples": "60,000 train / 10,000 test",
+    "shape": "`[N, 1, 28, 28]` F32"
+   },
+   "files": [
+    {
+     "name": "train-images-idx3-ubyte.gz",
+     "size": 18165135,
+     "shake256": "514a63d19287b9363d1259a7c5a178a75b82322fbe90a9ac9bf240734250006b",
+     "urls": [
+      "http://codh.rois.ac.jp/kmnist/dataset/kmnist/train-images-idx3-ubyte.gz"
+     ]
+    },
+    {
+     "name": "train-labels-idx1-ubyte.gz",
+     "size": 29497,
+     "shake256": "271b9566abb706d1197a89a9940d3ea709ba49a9dc6a3dae7543f1ebf29b58b5",
+     "urls": [
+      "http://codh.rois.ac.jp/kmnist/dataset/kmnist/train-labels-idx1-ubyte.gz"
+     ]
+    },
+    {
+     "name": "t10k-images-idx3-ubyte.gz",
+     "size": 3041136,
+     "shake256": "b8c5f3e82249027924131038bea598300a7a2639c411d3f2f79500a7667cf7bf",
+     "urls": [
+      "http://codh.rois.ac.jp/kmnist/dataset/kmnist/t10k-images-idx3-ubyte.gz"
+     ]
+    },
+    {
+     "name": "t10k-labels-idx1-ubyte.gz",
+     "size": 5120,
+     "shake256": "e834280bf6aefdd90293b34ead5e67b1e0c30cac93f1ed49ed500f6c7e3fa1d5",
+     "urls": [
+      "http://codh.rois.ac.jp/kmnist/dataset/kmnist/t10k-labels-idx1-ubyte.gz"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "cifar10",
+   "domain": "image",
+   "class": "Cifar10",
+   "version": "1.0.0",
+   "license": "unspecified",
+   "license_label": "unspecified",
+   "license_file": "provenance.txt",
+   "upstream": "University of Toronto (Krizhevsky, Hinton)",
+   "upstream_short": "cs.toronto.edu",
+   "progress": true,
+   "split": {
+    "kind": "idx",
+    "doc": "Official CIFAR-10 split selection."
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "Cifar10Split",
+     "generic": "split",
+     "default": "Cifar10Split::Train",
+     "doc": "Which official split to materialize."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    },
+    {
+     "name": "normalize",
+     "type": "bool",
+     "generic": "normalize",
+     "default": "true",
+     "doc": "Scale pixels into `[0, 1]`. `false` keeps raw `0..=255` values."
+    }
+   ],
+   "python": {
+    "contract": "matrix",
+    "feature": "images",
+    "doc": "CIFAR-10 color objects; see `oads.dataset.MatrixDataset`.",
+    "feature_doc": "Full image matrix on the owning engine; alias of `x`."
+   },
+   "doc": {
+    "samples": "50,000 train / 10,000 test",
+    "shape": "`[N, 3, 32, 32]` F32 NCHW"
+   },
+   "files": [
+    {
+     "name": "cifar-10-binary.tar.gz",
+     "size": 170052171,
+     "shake256": "0dbab965f3e25ad6875fa5f79eb7e79f41ee8b81aa3f7049e2a5b92209958e80",
+     "urls": [
+      "https://www.cs.toronto.edu/~kriz/cifar-10-binary.tar.gz"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "mini_speech_commands",
+   "domain": "audio",
+   "class": "MiniSpeechCommands",
+   "version": "1.0.0",
+   "license": "CC-BY-4.0",
+   "license_label": "CC BY 4.0",
+   "license_file": "CC-BY-4.0.txt",
+   "upstream": "Google (Speech Commands v0.01 mini subset)",
+   "upstream_short": "tensorflow download GCS",
+   "progress": true,
+   "split": null,
+   "config": [
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    },
+    {
+     "name": "normalize",
+     "type": "bool",
+     "generic": "normalize",
+     "default": "true",
+     "doc": "Scale samples into `[-1, 1]`. `false` keeps raw `i16` amplitudes as\nF32."
+    }
+   ],
+   "consts": [
+    {
+     "name": "COMMANDS",
+     "type": "[&str; 8]",
+     "value": "[\"down\", \"go\", \"left\", \"no\", \"right\", \"stop\", \"up\", \"yes\"]",
+     "doc": "Command labels in canonical order; label index `i` names `COMMANDS[i]`.",
+     "export": true
+    },
+    {
+     "name": "CLIP_SAMPLE_RATE",
+     "type": "u32",
+     "value": "16_000",
+     "doc": "Clip rate shared by every Speech Commands recording.",
+     "export": true
+    },
+    {
+     "name": "CLIP_SAMPLES",
+     "type": "usize",
+     "value": "16_000",
+     "doc": "One-second clip length in samples; shorter clips are zero-padded.",
+     "export": true
+    }
+   ],
+   "python": {
+    "contract": "matrix",
+    "feature": "samples",
+    "unsplit": true,
+    "load_doc": "Fetch, verify, decode, and upload all 8,000 command clips.\n\n\t\tnormalize=True scales PCM into [-1, 1]; normalize=False keeps raw\n\t\ti16 amplitudes as f32. progress=True renders the download bar.",
+    "feature_doc": "Full [N, 1, 16000] f32 waveform matrix; alias of `x`.",
+    "consts": [
+     "COMMANDS"
+    ],
+    "doc": "Google mini Speech Commands; see `oads.dataset.MatrixDataset`.\n\nsamples is [N, 1, 16000] f32 mono PCM at 16 kHz \u2014 shorter clips are\nzero-padded \u2014 and labels is [N] f32 class indices into COMMANDS. The pack\nhas no official split; shuffle and partition through oa.data."
+   },
+   "doc": {
+    "samples": "8,000 clips",
+    "shape": "`[N, 1, 16000]` F32 PCM"
+   },
+   "files": [
+    {
+     "name": "mini_speech_commands.zip",
+     "size": 182082353,
+     "shake256": "d589233d4d8e49c43f5a4a303d411a54f606cd15a14fe38b245f187e449b1a35",
+     "urls": [
+      "https://storage.googleapis.com/download.tensorflow.org/data/mini_speech_commands.zip",
+      "http://storage.googleapis.com/download.tensorflow.org/data/mini_speech_commands.zip"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "maestro",
+   "domain": "audio",
+   "class": "Maestro",
+   "version": "3.0.0",
+   "license": "CC-BY-NC-SA-4.0",
+   "license_label": "CC BY-NC-SA 4.0",
+   "license_file": "CC-BY-NC-SA-4.0.txt",
+   "upstream": "Yamaha / Google Magenta (MAESTRO v3.0.0)",
+   "upstream_short": "magenta GCS",
+   "progress": true,
+   "split": {
+    "kind": "enum",
+    "doc": "Official MAESTRO v3 performance assignment.",
+    "variants": [
+     {
+      "name": "Train",
+      "doc": "~962 performances reserved for training.",
+      "default": true
+     },
+     {
+      "name": "Validation",
+      "doc": "~137 validation performances."
+     },
+     {
+      "name": "Test",
+      "doc": "~177 test performances."
+     }
+    ],
+    "dispatch": {
+     "Train": "Train",
+     "Test": "Test"
+    }
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "MaestroSplit",
+     "generic": "split",
+     "default": "MaestroSplit::Train",
+     "doc": "Which official split contributes windows."
+    },
+    {
+     "name": "seq_len",
+     "type": "usize",
+     "generic": null,
+     "default": "DEFAULT_SEQ_LEN",
+     "dispatch": "crate::audio::maestro::DEFAULT_SEQ_LEN",
+     "doc": "Events per window; needs `seq_len + 1` events per contributing file."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override; `None` resolves `OA_DATA_DIR`, then the platform\ncache."
+    }
+   ],
+   "consts": [
+    {
+     "name": "DEFAULT_SEQ_LEN",
+     "type": "usize",
+     "value": "25",
+     "doc": "Window length in events; the TensorFlow tutorial uses 25.",
+     "export": true
+    }
+   ],
+   "python": {
+    "contract": "custom"
+   },
+   "doc": {
+    "samples": "5,635,265 train / 736,985 test windows",
+    "shape": "`[25, 3]` note events"
+   },
+   "files": [
+    {
+     "name": "maestro-v3.0.0-midi.zip",
+     "size": 58416533,
+     "shake256": "7f85aca2ee4358bcd87417cac9817121edc3ae83b48dcb248571a5b2e064a24d",
+     "urls": [
+      "https://storage.googleapis.com/magentadata/datasets/maestro/v3.0.0/maestro-v3.0.0-midi.zip"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "tiny_shakespeare",
+   "domain": "text",
+   "class": "TinyShakespeare",
+   "const_name": "SHAKESPEARE_PACK",
+   "version": "1.0.0",
+   "license": "public-domain",
+   "license_label": "public domain",
+   "license_file": "public-domain.txt",
+   "upstream": "karpathy/char-rnn via Project Gutenberg",
+   "upstream_short": "karpathy/char-rnn",
+   "progress": false,
+   "split": null,
+   "config": [
+    {
+     "name": "seq_len",
+     "type": "usize",
+     "generic": null,
+     "default": "DEFAULT_SEQ_LEN",
+     "dispatch": "1",
+     "doc": "Token window length of each sample; must be at least 1. Defaults to\n`DEFAULT_SEQ_LEN`."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "consts": [
+    {
+     "name": "DEFAULT_SEQ_LEN",
+     "type": "usize",
+     "value": "128",
+     "doc": "Token window length of each sample by default.",
+     "export": false
+    }
+   ],
+   "python": {
+    "contract": "custom"
+   },
+   "doc": {
+    "samples": "1,115,394 bytes",
+    "shape": "`[seq_len]` token windows"
+   },
+   "files": [
+    {
+     "name": "input.txt",
+     "size": 1115394,
+     "shake256": "f71bef2200fc229ce76fac55556cac487c21be9ed12e4bfc828882d8219fab91",
+     "urls": [
+      "https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "moving_mnist",
+   "domain": "video",
+   "class": "MovingMnist",
+   "version": "1.0.0",
+   "license": "CC-BY-SA-3.0",
+   "license_label": "CC BY-SA 3.0 (mnist derivative)",
+   "license_file": "provenance.txt",
+   "upstream": "University of Toronto (Srivastava et al.)",
+   "upstream_short": "cs.toronto.edu",
+   "progress": false,
+   "split": null,
+   "config": [
+    {
+     "name": "count",
+     "type": "Option<usize>",
+     "generic": "count",
+     "default": "None",
+     "doc": "Bound the number of materialized sequences; `None` decodes all\n10,000."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    },
+    {
+     "name": "normalize",
+     "type": "bool",
+     "generic": "normalize",
+     "default": "true",
+     "doc": "Scale pixels into `[0, 1]`. `false` keeps raw `0..=255` values."
+    }
+   ],
+   "python": {
+    "contract": "custom"
+   },
+   "doc": {
+    "samples": "10,000 sequences",
+    "shape": "`[T, 1, 64, 64]` per sample"
+   },
+   "files": [
+    {
+     "name": "mnist_test_seq.npy",
+     "size": 819200096,
+     "shake256": "44136c19911ddfc9a8d6353aee5bb7ba42e359e5bfb24a8ea7fe03ec6f4ca6ce",
+     "urls": [
+      "https://www.cs.toronto.edu/~nitish/unsupervised_video/mnist_test_seq.npy",
+      "http://www.cs.toronto.edu/~nitish/unsupervised_video/mnist_test_seq.npy"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "cifar100",
+   "domain": "image",
+   "class": "Cifar100",
+   "version": "1.0.0",
+   "license": "unspecified",
+   "license_label": "unspecified",
+   "license_file": "provenance.txt",
+   "upstream": "University of Toronto (Krizhevsky, Hinton)",
+   "upstream_short": "cs.toronto.edu",
+   "progress": true,
+   "split": {
+    "kind": "idx",
+    "doc": "Official CIFAR-100 split selection."
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "Cifar100Split",
+     "generic": "split",
+     "default": "Cifar100Split::Train",
+     "doc": "Which official split to materialize."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    },
+    {
+     "name": "normalize",
+     "type": "bool",
+     "generic": "normalize",
+     "default": "true",
+     "doc": "Scale pixels into `[0, 1]`. `false` keeps raw `0..=255` values."
+    }
+   ],
+   "python": {
+    "contract": "matrix",
+    "feature": "images",
+    "doc": "CIFAR-100 color objects with fine labels; see `oads.dataset.MatrixDataset`.",
+    "feature_doc": "Full image matrix on the owning engine; alias of `x`."
+   },
+   "doc": {
+    "samples": "50,000 train / 10,000 test",
+    "shape": "`[N, 3, 32, 32]` F32 NCHW"
+   },
+   "files": [
+    {
+     "name": "cifar-100-binary.tar.gz",
+     "size": 168513733,
+     "shake256": "f13e4fcb912e7b97e09df9b585ec0dff2f117da53aba0312c391f641bb2b2f8e",
+     "urls": [
+      "https://www.cs.toronto.edu/~kriz/cifar-100-binary.tar.gz"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "emnist",
+   "domain": "image",
+   "class": "Emnist",
+   "version": "1.0.0",
+   "license": "CC-BY-SA-3.0",
+   "license_label": "CC BY-SA 3.0",
+   "license_file": "CC-BY-SA-3.0.txt",
+   "upstream": "NIST / Western Sydney University (Cohen et al.)",
+   "upstream_short": "biometrics.nist.gov",
+   "progress": true,
+   "split": {
+    "kind": "idx",
+    "doc": "Official EMNIST split selection."
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "EmnistSplit",
+     "generic": "split",
+     "default": "EmnistSplit::Train",
+     "doc": "Which official split to materialize."
+    },
+    {
+     "name": "variant",
+     "type": "super::EmnistVariant",
+     "generic": null,
+     "dispatch": "crate::image::emnist::EmnistVariant::Balanced",
+     "default": "super::EmnistVariant::Balanced",
+     "doc": "Class grouping to decode from the shared zip; see\n[`EmnistVariant`][super::EmnistVariant]."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    },
+    {
+     "name": "normalize",
+     "type": "bool",
+     "generic": "normalize",
+     "default": "true",
+     "doc": "Scale pixels into `[0, 1]`. `false` keeps raw `0..=255` values."
+    }
+   ],
+   "python": {
+    "contract": "matrix",
+    "feature": "images",
+    "doc": "EMNIST handwritten characters (balanced variant); see `oads.dataset.MatrixDataset`.",
+    "feature_doc": "Full image matrix on the owning engine; alias of `x`."
+   },
+   "doc": {
+    "samples": "112,800 train / 18,800 test (balanced)",
+    "shape": "`[N, 1, 28, 28]` F32"
+   },
+   "files": [
+    {
+     "name": "gzip.zip",
+     "size": 561753746,
+     "shake256": "1c1360c74f9a37e9e9af8db6a63ebbae9afc377e1b7bb1204f7f169289c4dc5c",
+     "urls": [
+      "https://biometrics.nist.gov/cs_links/EMNIST/gzip.zip"
+     ]
+    }
+   ],
+   "extra_exports": [
+    "EmnistVariant"
+   ]
+  },
+  {
+   "name": "ag_news",
+   "domain": "text",
+   "class": "AgNews",
+   "version": "1.0.0",
+   "license": "unspecified",
+   "license_label": "unspecified",
+   "license_file": "provenance.txt",
+   "upstream": "Zhang et al., Xiang Zhang's fast-ai distribution",
+   "upstream_short": "s3 fast-ai-nlp",
+   "progress": true,
+   "split": {
+    "kind": "idx",
+    "doc": "Official ag_news split selection."
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "AgNewsSplit",
+     "generic": "split",
+     "default": "AgNewsSplit::Train",
+     "doc": "Which official split to materialize."
+    },
+    {
+     "name": "text_len",
+     "type": "usize",
+     "generic": null,
+     "dispatch": "512",
+     "default": "512",
+     "doc": "Document window in UTF-8 bytes; longer documents truncate,\nshorter ones zero-pad."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    },
+    {
+     "name": "normalize",
+     "type": "bool",
+     "generic": "normalize",
+     "default": "true",
+     "doc": "Scale bytes into `[0, 1]`. `false` keeps raw `0..=255` values."
+    }
+   ],
+   "python": {
+    "contract": "matrix",
+    "feature": "text",
+    "doc": "AG News topic classification; see `oads.dataset.MatrixDataset`.",
+    "feature_doc": "Full byte-window matrix on the owning engine; alias of `x`."
+   },
+   "doc": {
+    "samples": "120,000 train / 7,600 test",
+    "shape": "`[N, 512]` F32 byte windows"
+   },
+   "files": [
+    {
+     "name": "ag_news_csv.tgz",
+     "size": 11784419,
+     "shake256": "75e8c9f5c5638b6728218522709544e4c363421b8d129997b22419b253cc9686",
+     "urls": [
+      "https://s3.amazonaws.com/fast-ai-nlp/ag_news_csv.tgz"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "imdb",
+   "domain": "text",
+   "class": "Imdb",
+   "version": "1.0.0",
+   "license": "unspecified",
+   "license_label": "unspecified",
+   "license_file": "provenance.txt",
+   "upstream": "Maas et al., Stanford AI Lab",
+   "upstream_short": "ai.stanford.edu",
+   "progress": true,
+   "split": {
+    "kind": "idx",
+    "doc": "Official imdb split selection."
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "ImdbSplit",
+     "generic": "split",
+     "default": "ImdbSplit::Train",
+     "doc": "Which official split to materialize."
+    },
+    {
+     "name": "text_len",
+     "type": "usize",
+     "generic": null,
+     "dispatch": "512",
+     "default": "512",
+     "doc": "Document window in UTF-8 bytes; longer documents truncate,\nshorter ones zero-pad."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    },
+    {
+     "name": "normalize",
+     "type": "bool",
+     "generic": "normalize",
+     "default": "true",
+     "doc": "Scale bytes into `[0, 1]`. `false` keeps raw `0..=255` values."
+    }
+   ],
+   "python": {
+    "contract": "matrix",
+    "feature": "text",
+    "doc": "IMDb sentiment reviews; see `oads.dataset.MatrixDataset`.",
+    "feature_doc": "Full byte-window matrix on the owning engine; alias of `x`."
+   },
+   "doc": {
+    "samples": "25,000 train / 25,000 test",
+    "shape": "`[N, 512]` F32 byte windows"
+   },
+   "files": [
+    {
+     "name": "aclImdb_v1.tar.gz",
+     "size": 84125825,
+     "shake256": "2688e6ee353cdc3412901bad1cd42be7d432a845c0b231e2860d822eebd14e81",
+     "urls": [
+      "https://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "yelp_polarity",
+   "domain": "text",
+   "class": "YelpPolarity",
+   "version": "1.0.0",
+   "license": "unspecified",
+   "license_label": "unspecified",
+   "license_file": "provenance.txt",
+   "upstream": "Zhang et al., Yelp (fast-ai distribution)",
+   "upstream_short": "s3 fast-ai-nlp",
+   "progress": true,
+   "split": {
+    "kind": "idx",
+    "doc": "Official yelp_polarity split selection."
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "YelpPolaritySplit",
+     "generic": "split",
+     "default": "YelpPolaritySplit::Train",
+     "doc": "Which official split to materialize."
+    },
+    {
+     "name": "text_len",
+     "type": "usize",
+     "generic": null,
+     "dispatch": "512",
+     "default": "512",
+     "doc": "Document window in UTF-8 bytes; longer documents truncate,\nshorter ones zero-pad."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    },
+    {
+     "name": "normalize",
+     "type": "bool",
+     "generic": "normalize",
+     "default": "true",
+     "doc": "Scale bytes into `[0, 1]`. `false` keeps raw `0..=255` values."
+    }
+   ],
+   "python": {
+    "contract": "matrix",
+    "feature": "text",
+    "doc": "Yelp review polarity; see `oads.dataset.MatrixDataset`.",
+    "feature_doc": "Full byte-window matrix on the owning engine; alias of `x`."
+   },
+   "doc": {
+    "samples": "560,000 train / 38,000 test",
+    "shape": "`[N, 512]` F32 byte windows"
+   },
+   "files": [
+    {
+     "name": "yelp_review_polarity_csv.tgz",
+     "size": 166373201,
+     "shake256": "993cc252c7472e4d5e9d28cadfcb90beea92a31c06f1bb26bd003571c258277c",
+     "urls": [
+      "https://fast-ai-nlp.s3.amazonaws.com/yelp_review_polarity_csv.tgz",
+      "https://s3.amazonaws.com/fast-ai-nlp/yelp_review_polarity_csv.tgz"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "speech_commands",
+   "domain": "audio",
+   "class": "SpeechCommands",
+   "version": "0.2.0",
+   "license": "CC-BY-4.0",
+   "license_label": "CC BY 4.0",
+   "license_file": "CC-BY-4.0.txt",
+   "upstream": "Google (Speech Commands v0.02)",
+   "upstream_short": "tensorflow download",
+   "progress": true,
+   "split": {
+    "kind": "enum",
+    "doc": "Official Speech Commands v0.02 split selection.",
+    "variants": [
+     {
+      "name": "Train",
+      "doc": "Clips named by neither list.",
+      "default": true
+     },
+     {
+      "name": "Validation",
+      "doc": "`validation_list.txt` members."
+     },
+     {
+      "name": "Test",
+      "doc": "`testing_list.txt` members."
+     }
+    ],
+    "dispatch": {
+     "Train": "Train",
+     "Test": "Test"
+    }
+   },
+   "consts": [
+    {
+     "name": "COMMANDS",
+     "type": "[&str; 35]",
+     "value": "[\"backward\", \"bed\", \"bird\", \"cat\", \"dog\", \"down\", \"eight\", \"five\", \"follow\", \"forward\", \"four\", \"go\", \"happy\", \"house\", \"learn\", \"left\", \"marvin\", \"nine\", \"no\", \"off\", \"on\", \"one\", \"right\", \"seven\", \"sheila\", \"six\", \"stop\", \"three\", \"tree\", \"two\", \"up\", \"visual\", \"wow\", \"yes\", \"zero\"]",
+     "doc": "Command labels in canonical order; label index `i` names `COMMANDS[i]`.",
+     "export": false
+    },
+    {
+     "name": "CLIP_SAMPLE_RATE",
+     "type": "u32",
+     "value": "16_000",
+     "doc": "Clip rate shared by every Speech Commands recording.",
+     "export": false
+    },
+    {
+     "name": "CLIP_SAMPLES",
+     "type": "usize",
+     "value": "16_000",
+     "doc": "One-second clip length in samples; shorter clips are zero-padded.",
+     "export": false
+    }
+   ],
+   "config": [
+    {
+     "name": "split",
+     "type": "SpeechCommandsSplit",
+     "generic": "split",
+     "default": "SpeechCommandsSplit::Train",
+     "doc": "Which official split to materialize."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    },
+    {
+     "name": "normalize",
+     "type": "bool",
+     "generic": "normalize",
+     "default": "true",
+     "doc": "Scale samples into `[-1, 1]`. `false` keeps raw `i16` amplitudes as\nF32."
+    }
+   ],
+   "python": {
+    "contract": "matrix",
+    "feature": "samples",
+    "doc": "Google Speech Commands v0.02; see `oads.dataset.MatrixDataset`.\n\nsamples is [N, 1, 16000] f32 mono PCM at 16 kHz \u2014 shorter clips are\nzero-padded \u2014 and labels is [N] f32 class indices into COMMANDS.",
+    "feature_doc": "Full [N, 1, 16000] f32 waveform matrix; alias of `x`.",
+    "consts": [
+     "COMMANDS"
+    ]
+   },
+   "doc": {
+    "samples": "84,843 train / 9,981 validation / 11,005 test",
+    "shape": "`[N, 1, 16000]` F32 PCM"
+   },
+   "files": [
+    {
+     "name": "speech_commands_v0.02.tar.gz",
+     "size": 2428923189,
+     "shake256": "f95034ea22e755d99cf746f26ed06f4ddfd6901762e1381400fcdd7392ef3f15",
+     "urls": [
+      "http://download.tensorflow.org/data/speech_commands_v0.02.tar.gz"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "groove",
+   "domain": "audio",
+   "class": "Groove",
+   "version": "1.0.0",
+   "license": "CC-BY-4.0",
+   "license_label": "CC BY 4.0",
+   "license_file": "CC-BY-4.0.txt",
+   "upstream": "Google Magenta (Groove MIDI Dataset v1.0.0, MIDI only)",
+   "upstream_short": "magenta GCS",
+   "progress": true,
+   "split": {
+    "kind": "enum",
+    "doc": "Official groove info.csv performance assignment.",
+    "variants": [
+     {
+      "name": "Train",
+      "doc": "897 performances reserved for training.",
+      "default": true
+     },
+     {
+      "name": "Validation",
+      "doc": "124 validation performances."
+     },
+     {
+      "name": "Test",
+      "doc": "129 test performances."
+     }
+    ],
+    "dispatch": {
+     "Train": "Train",
+     "Test": "Test"
+    }
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "GrooveSplit",
+     "generic": "split",
+     "default": "GrooveSplit::Train",
+     "doc": "Which official split contributes windows."
+    },
+    {
+     "name": "seq_len",
+     "type": "usize",
+     "generic": null,
+     "default": "DEFAULT_SEQ_LEN",
+     "dispatch": "crate::audio::groove::DEFAULT_SEQ_LEN",
+     "doc": "Events per window; needs `seq_len + 1` events per contributing file."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override; `None` resolves `OA_DATA_DIR`, then the platform\ncache."
+    }
+   ],
+   "consts": [
+    {
+     "name": "DEFAULT_SEQ_LEN",
+     "type": "usize",
+     "value": "25",
+     "doc": "Window length in drum events; matches the MAESTRO contract.",
+     "export": false
+    }
+   ],
+   "python": {
+    "contract": "custom"
+   },
+   "doc": {
+    "samples": "322,968 train / 39,261 test windows",
+    "shape": "`[seq_len, 3]` drum events"
+   },
+   "files": [
+    {
+     "name": "groove-v1.0.0-midionly.zip",
+     "size": 3260318,
+     "shake256": "d52d9a1b1aa16a2dee606304c0dc3e81e805261de9c26698c556a6b28f811399",
+     "urls": [
+      "https://storage.googleapis.com/magentadata/datasets/groove/groove-v1.0.0-midionly.zip"
+     ]
+    }
+   ],
+   "extra_exports": []
+  },
+  {
+   "name": "iris",
+   "domain": "tabular",
+   "class": "Iris",
+   "version": "1.0.0",
+   "license": "PUBLIC-DOMAIN",
+   "license_label": "public domain",
+   "license_file": "public-domain.txt",
+   "upstream": "R. A. Fisher / UCI ML Repository (iris.data)",
+   "upstream_short": "UCI archive",
+   "progress": true,
+   "split": null,
+   "config": [
+    {
+     "name": "normalize",
+     "type": "bool",
+     "generic": "normalize",
+     "default": "true",
+     "doc": "Scale each column to `[0, 1]` by its min-max range; `false` keeps\ncentimetres."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override; `None` resolves `OA_DATA_DIR`, then the platform\ncache."
+    }
+   ],
+   "consts": [
+    {
+     "name": "CLASSES",
+     "type": "[&str; 3]",
+     "value": "[\"setosa\", \"versicolor\", \"virginica\"]",
+     "doc": "Species labels in canonical order; label index `i` names `CLASSES[i]`.",
+     "export": true
+    },
+    {
+     "name": "FEATURE_COUNT",
+     "type": "usize",
+     "value": "4",
+     "doc": "Sepal/petal length and width columns in centimetres.",
+     "export": false
+    }
+   ],
+   "python": {
+    "contract": "matrix",
+    "feature": "features",
+    "unsplit": true,
+    "doc": "Fisher's Iris flower data; see `oads.dataset.MatrixDataset`.\n\nfeatures is [150, 4] f32 (sepal/petal length and width) and labels is\n[150] f32 class indices into CLASSES. The pack carries all 150 rows\nunsplit; partition with oa.data.random_split.",
+    "feature_doc": "Full [150, 4] f32 feature matrix; alias of `x`.",
+    "load_doc": "Fetch, verify, decode, and upload all 150 rows.\n\nnormalize=True scales each column to [0, 1] by its min-max range;\nnormalize=False keeps centimetres. progress=True renders the download\nbar.",
+    "consts": [
+     "CLASSES"
+    ]
+   },
+   "doc": {
+    "samples": "150 rows",
+    "shape": "`[150, 4]` F32 features"
+   },
+   "files": [
+    {
+     "name": "iris.zip",
+     "size": 3738,
+     "shake256": "7418f5e74f2344148ad3b6b98401bf9acc347d0e00ded050131fb5e49259afff",
+     "urls": [
+      "https://archive.ics.uci.edu/static/public/53/iris.zip"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "titanic",
+   "domain": "tabular",
+   "class": "Titanic",
+   "version": "1.0.0",
+   "license": "UNSPECIFIED",
+   "license_label": "unspecified",
+   "license_file": "provenance.txt",
+   "upstream": "Data Science Dojo mirror of the Kaggle/Vanderbilt passenger table",
+   "upstream_short": "datasciencedojo GitHub",
+   "progress": true,
+   "split": null,
+   "config": [
+    {
+     "name": "normalize",
+     "type": "bool",
+     "generic": "normalize",
+     "default": "true",
+     "doc": "Scale each column to `[0, 1]` by its min-max range; `false` keeps\nencoded units."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override; `None` resolves `OA_DATA_DIR`, then the platform\ncache."
+    }
+   ],
+   "consts": [
+    {
+     "name": "FEATURE_COUNT",
+     "type": "usize",
+     "value": "9",
+     "doc": "`[pclass, sex, age, sibsp, parch, fare, embarked_C, embarked_Q,\nembarked_S]` per passenger.",
+     "export": false
+    }
+   ],
+   "python": {
+    "contract": "matrix",
+    "feature": "features",
+    "unsplit": true,
+    "doc": "Titanic passenger survival table; see `oads.dataset.MatrixDataset`.\n\nfeatures is [891, 9] f32 \u2014 pclass, sex, age, sibsp, parch, fare, and\none-hot embarked \u2014 and labels is [891] f32 survival flags. Missing age\nfills with the column median; missing embarked fills S. The pack carries\nall 891 rows unsplit; partition with oa.data.random_split.",
+    "feature_doc": "Full [891, 9] f32 feature matrix; alias of `x`.",
+    "load_doc": "Fetch, verify, decode, and upload all 891 rows.\n\nnormalize=True scales each column to [0, 1] by its min-max range;\nnormalize=False keeps encoded units. progress=True renders the\ndownload bar."
+   },
+   "doc": {
+    "samples": "891 rows",
+    "shape": "`[891, 9]` F32 features"
+   },
+   "files": [
+    {
+     "name": "titanic.csv",
+     "size": 60302,
+     "shake256": "f2633850d881726f82fe8afaec62694aa126dc5d39ba48d61cee8ae3d01fe56f",
+     "urls": [
+      "https://raw.githubusercontent.com/datasciencedojo/datasets/master/titanic.csv"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "stl10",
+   "domain": "image",
+   "class": "Stl10",
+   "version": "1.0.0",
+   "license": "unspecified",
+   "license_label": "unspecified",
+   "license_file": "provenance.txt",
+   "upstream": "Stanford (Coates, Lee, Ng, AISTATS 2011)",
+   "upstream_short": "ai.stanford.edu",
+   "progress": true,
+   "split": {
+    "kind": "idx",
+    "doc": "Official STL-10 labeled split selection."
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "Stl10Split",
+     "generic": "split",
+     "default": "Stl10Split::Train",
+     "doc": "Which official split to materialize."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    },
+    {
+     "name": "normalize",
+     "type": "bool",
+     "generic": "normalize",
+     "default": "true",
+     "doc": "Scale pixels into `[0, 1]`. `false` keeps raw `0..=255` values."
+    }
+   ],
+   "python": {
+    "contract": "matrix",
+    "feature": "images",
+    "doc": "STL-10 image recognition; see `oads.dataset.MatrixDataset`.",
+    "feature_doc": "Full image matrix on the owning engine; alias of `x`."
+   },
+   "doc": {
+    "samples": "5,000 train / 8,000 test (archive also carries 100,000 unlabeled)",
+    "shape": "`[N, 3, 96, 96]` F32 NCHW"
+   },
+   "consts": [
+    {
+     "name": "CLASSES",
+     "type": "[&str; 10]",
+     "value": "[\"airplane\", \"bird\", \"car\", \"cat\", \"deer\", \"dog\", \"horse\", \"monkey\", \"ship\", \"truck\"]",
+     "doc": "Class names in canonical order; label index `i` names `CLASSES[i]`."
+    },
+    {
+     "name": "IMAGE_SIDE",
+     "type": "usize",
+     "value": "96",
+     "doc": "Square image extent in pixels."
+    }
+   ],
+   "files": [
+    {
+     "name": "stl10_binary.tar.gz",
+     "size": 2640397119,
+     "shake256": "7cc3c2e49b06e72f77d77d4c788a9177f6ee6035e5a4689e0c04582269f90d9e",
+     "urls": [
+      "http://ai.stanford.edu/~acoates/stl10/stl10_binary.tar.gz"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "movielens_100k",
+   "domain": "tabular",
+   "class": "Movielens100k",
+   "version": "0.9.0",
+   "license": "custom research license",
+   "license_label": "see provenance",
+   "license_file": "provenance.txt",
+   "upstream": "GroupLens Research (University of Minnesota)",
+   "upstream_short": "files.grouplens.org",
+   "progress": true,
+   "split": {
+    "kind": "idx",
+    "doc": "Official u1.base/u1.test split selection."
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "Movielens100kSplit",
+     "generic": "split",
+     "default": "Movielens100kSplit::Train",
+     "doc": "Which official u1 cross-validation split to materialize."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "matrix",
+    "feature": "features",
+    "doc": "MovieLens 100k ratings; see `oads.dataset.MatrixDataset`.",
+    "feature_doc": "Full [N, 3] f32 (user_id, item_id, timestamp) matrix; alias of `x`.",
+    "label": "ratings",
+    "label_doc": "Full [N] f32 rating value matrix; alias of `labels`."
+   },
+   "consts": [
+    {
+     "name": "FEATURE_COUNT",
+     "type": "usize",
+     "value": "3",
+     "export": false,
+     "doc": "`[user_id, item_id, timestamp]` per rating row."
+    }
+   ],
+   "doc": {
+    "samples": "80,000 train / 20,000 test (u1 cross-validation)",
+    "shape": "`[N, 3]` F32 features + `[N]` F32 ratings"
+   },
+   "files": [
+    {
+     "name": "ml-100k.zip",
+     "size": 4924029,
+     "shake256": "acd15fe1a40e7edb02c19b0c011233b307605b387a0bbbb780a337206e43dca6",
+     "urls": [
+      "https://files.grouplens.org/datasets/movielens/ml-100k.zip"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "movielens_1m",
+   "domain": "tabular",
+   "class": "Movielens1m",
+   "version": "0.9.0",
+   "license": "custom research license",
+   "license_label": "see provenance",
+   "license_file": "provenance.txt",
+   "upstream": "GroupLens Research (University of Minnesota)",
+   "upstream_short": "files.grouplens.org",
+   "progress": true,
+   "split": null,
+   "config": [
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "matrix",
+    "feature": "features",
+    "doc": "MovieLens 1M ratings; see `oads.dataset.MatrixDataset`.",
+    "feature_doc": "Full [N, 3] f32 (user_id, item_id, timestamp) matrix; alias of `x`.",
+    "label": "ratings",
+    "label_doc": "Full [N] f32 rating value matrix; alias of `labels`."
+   },
+   "consts": [
+    {
+     "name": "FEATURE_COUNT",
+     "type": "usize",
+     "value": "3",
+     "export": false,
+     "doc": "`[user_id, item_id, timestamp]` per rating row."
+    }
+   ],
+   "doc": {
+    "samples": "1,000,209 ratings unsplit",
+    "shape": "`[N, 3]` F32 features + `[N]` F32 ratings"
+   },
+   "files": [
+    {
+     "name": "ml-1m.zip",
+     "size": 5917549,
+     "shake256": "7401d8d38b5d51c53a33191bc369674d9add2568d4fac0fe27e5207501494a2e",
+     "urls": [
+      "https://files.grouplens.org/datasets/movielens/ml-1m.zip"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "ljspeech",
+   "domain": "audio",
+   "class": "LjSpeech",
+   "version": "1.1.0",
+   "license": "public domain (librivox)",
+   "license_label": "public domain",
+   "license_file": "provenance.txt",
+   "upstream": "Keith Ito (LibriVox public-domain narration)",
+   "upstream_short": "data.keithito.com",
+   "progress": true,
+   "split": null,
+   "config": [
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "custom"
+   },
+   "consts": [
+    {
+     "name": "SAMPLE_RATE",
+     "type": "usize",
+     "value": "22050",
+     "export": true,
+     "doc": "PCM samples per second; every clip is 22,050 Hz mono 16-bit."
+    }
+   ],
+   "doc": {
+    "samples": "13,100 clips unsplit",
+    "shape": "`[N, K]` transcript bytes + lazy `[1, T]` waveforms"
+   },
+   "files": [
+    {
+     "name": "LJSpeech-1.1.tar.bz2",
+     "size": 2748572632,
+     "shake256": "7b8a9d69d9004dec8c9b5f43684944b072b5713e3aa8b9a94ec039f920f9c40a",
+     "urls": [
+      "https://data.keithito.com/data/speech/LJSpeech-1.1.tar.bz2"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "crema_d",
+   "domain": "audio",
+   "class": "CremaD",
+   "version": "1.0.0",
+   "license": "Open Database License + custom use terms",
+   "license_label": "ODbL/custom",
+   "license_file": "provenance.txt",
+   "upstream": "Cheyney Computer Science / Cooper Lab (CREMA-D)",
+   "upstream_short": "gitlab.com cs-cooper-lab",
+   "progress": true,
+   "split": {
+    "kind": "enum",
+    "doc": "Derived speaker-disjoint split selection; the corpus ships no official split.",
+    "variants": [
+     {
+      "name": "Train",
+      "doc": "~81% of clips; actors not in validation/test.",
+      "default": true
+     },
+     {
+      "name": "Validation",
+      "doc": "Actors at sorted positions i%10==5."
+     },
+     {
+      "name": "Test",
+      "doc": "Actors at sorted positions i%10==0."
+     }
+    ],
+    "dispatch": {
+     "Train": "Train",
+     "Test": "Test"
+    }
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "CremaDSplit",
+     "generic": "split",
+     "default": "CremaDSplit::Train",
+     "doc": "Which derived speaker-disjoint split to materialize."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "custom"
+   },
+   "consts": [
+    {
+     "name": "CLASSES",
+     "type": "[&str; 6]",
+     "value": "[\"NEU\", \"HAP\", \"SAD\", \"ANG\", \"FEA\", \"DIS\"]",
+     "export": false,
+     "doc": "Emotion labels in canonical order; label index `i` names `CLASSES[i]`."
+    },
+    {
+     "name": "SAMPLE_RATE",
+     "type": "usize",
+     "value": "16000",
+     "export": false,
+     "doc": "PCM samples per second; every clip is 16,000 Hz mono 16-bit."
+    }
+   ],
+   "doc": {
+    "samples": "7,442 clips; derived speaker-disjoint train/validation/test",
+    "shape": "`[N, 1, T]` F32 padded waveforms + `[N]` lengths/labels"
+   },
+   "files": [
+    {
+     "name": "crema-d-mirror-main.tar.gz",
+     "size": 2934014374,
+     "shake256": "48a4e8126c03cf2bc3f1853866ecc2ea23b6659cd14ce05fd9fc4c658347e718",
+     "urls": [
+      "https://gitlab.com/cs-cooper-lab/crema-d-mirror/-/archive/main/crema-d-mirror-main.tar.gz"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "vctk",
+   "domain": "audio",
+   "class": "Vctk",
+   "version": "0.92.0",
+   "license": "CC-BY-4.0",
+   "license_label": "CC BY 4.0",
+   "license_file": "CC-BY-4.0.txt",
+   "upstream": "University of Edinburgh CSTR (Yamagishi et al.)",
+   "upstream_short": "datashare.ed.ac.uk",
+   "progress": true,
+   "split": null,
+   "config": [
+    {
+     "name": "mic",
+     "type": "super::VctkMic",
+     "generic": null,
+     "dispatch": "crate::audio::vctk::VctkMic::Mic1",
+     "default": "super::VctkMic::Mic1",
+     "doc": "Microphone channel to index; see\n[`VctkMic`][super::VctkMic]."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "custom"
+   },
+   "consts": [
+    {
+     "name": "SAMPLE_RATE",
+     "type": "usize",
+     "value": "48000",
+     "export": false,
+     "doc": "PCM samples per second; every clip is 48,000 Hz mono FLAC."
+    }
+   ],
+   "extra_exports": [
+    "VctkMic"
+   ],
+   "doc": {
+    "samples": "~44k utterances across ~110 speakers, per-mic index",
+    "shape": "lazy `[1, T]` F32 FLAC waveforms + `[N]` speaker ids/lengths"
+   },
+   "files": [
+    {
+     "name": "DS_10283_3443.zip",
+     "size": 11749118645,
+     "shake256": "c19bf0fe7668604ce2b590e63fc52f54b63645f59b2f83600cce812da0a7c0a9",
+     "urls": [
+      "https://datashare.ed.ac.uk/download/DS_10283_3443.zip"
+     ]
+    }
+   ]
+  }
+ ]
+}

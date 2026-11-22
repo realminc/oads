@@ -22,7 +22,7 @@ fn engine() -> oa::Result<oa::Engine> {
 #[ignore = "requires a Vulkan device and network or cached mnist pack"]
 fn mnist_loads_train_split_and_collates() -> oa::Result<()> {
 	let engine = engine()?;
-	let dataset = oads::Mnist::load(&engine, &oads::MnistConfig::default())?;
+	let dataset = oads::Mnist::load_on(&engine, &oads::MnistConfig::default())?;
 	assert_eq!(dataset.len(), 60_000);
 	assert_eq!(dataset.split(), oads::MnistSplit::Train);
 	assert_eq!(dataset.images().shape(), &[60_000, 1, 28, 28]);
@@ -55,7 +55,7 @@ fn mnist_loads_train_split_and_collates() -> oa::Result<()> {
 #[ignore = "requires a Vulkan device and network or cached mnist pack"]
 fn mnist_test_split_has_expected_shape() -> oa::Result<()> {
 	let engine = engine()?;
-	let dataset = oads::Mnist::load(
+	let dataset = oads::Mnist::load_on(
 		&engine,
 		&oads::MnistConfig {
 			split: oads::MnistSplit::Test,

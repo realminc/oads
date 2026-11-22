@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://realm.software/">
-    <img src="https://raw.githubusercontent.com/realminc/oa/main/sdk/asset/docs/readme/realmIdentityAscii.gif" width="100%" alt="Realm ASCII identity">
+    <img src="https://dev.realm.software/images/realm/coverData.webp" width="100%" alt="oads — dataset packs for OA">
   </a>
 </p>
 
@@ -27,7 +27,7 @@ upstream into the oads cache on first load, verified, and uploaded to
 
 ```toml
 [dependencies]
-oadsrust = "0.1"
+oadsrust = "0.2"
 ```
 
 ```bash
@@ -44,7 +44,8 @@ through `oads._native`.
 use oa::data::collate;
 use oads::{Mnist, MnistConfig};
 
-let dataset = Mnist::load(&engine, &MnistConfig::default())?;
+// Uploads on this thread's default engine (oa::Engine::current()).
+let dataset = Mnist::load(&MnistConfig::default())?;
 assert_eq!(dataset.images().shape(), &[60_000, 1, 28, 28]);
 
 let batch = collate(&[dataset.get_sample(0)?, dataset.get_sample(1)?])?;
@@ -55,12 +56,19 @@ assert_eq!(batch.x.shape(), &[2, 1, 28, 28]);
 ```python
 import oads
 
-dataset = oads.Mnist.load(engine)
+dataset = oads.Mnist.load()  # engine=None resolves oa.Engine.current()
 assert dataset.images.shape == [60000, 1, 28, 28]
 
 x, y = dataset.get_sample(0)
 assert x.shape == [1, 28, 28]
 ```
+
+Every loader follows the OA engine convention: the engineless `load` /
+`load_with_progress` resolve the calling thread's default engine, and the
+`*_on` variants — `Mnist::load_on(&engine, &config)`,
+`Mnist::load_with_progress_on(&engine, &config, &mut cb)` — pin an explicit
+one. Install a default once with `oa::Engine::set_default` /
+`oa.Engine.set_default` and every subsequent `load` targets it.
 
 Loaders implement `oa::data::Dataset`, so `oa.data` collation, shuffling,
 and `random_split` work unchanged — oads produces the data; OA owns the
@@ -69,20 +77,35 @@ inside TensorFlow.
 
 ## Datasets
 
+A selection of the most-used loaders — the full catalog lives in
+[docs/datasets.md](docs/datasets.md):
+
 | Domain | Loader | Samples | Shape | Upstream license |
 | --- | --- | --- | --- | --- |
 | image | `Mnist` | 60,000 train / 10,000 test | `[N, 1, 28, 28]` F32 | [CC BY-SA 3.0](license/mnist) |
 | image | `FashionMnist` | 60,000 train / 10,000 test | `[N, 1, 28, 28]` F32 | [MIT](license/fashion_mnist) |
-| image | `KMnist` | 60,000 train / 10,000 test | `[N, 1, 28, 28]` F32 | [CC BY-SA 4.0](license/kmnist) |
-| image | `Cifar10` | 50,000 train / 10,000 test | `[N, 3, 32, 32]` F32 NCHW | [unspecified](license) |
+| image | `Cifar10` | 50,000 train / 10,000 test | `[N, 3, 32, 32]` F32 NCHW | [unspecified](license/cifar10) |
+| image | `Cifar100` | 50,000 train / 10,000 test | `[N, 3, 32, 32]` F32 NCHW | [unspecified](license/cifar100) |
+| audio | `SpeechCommands` | 84,843 train / 9,981 validation / 11,005 test | `[N, 1, 16000]` F32 PCM | [CC BY 4.0](license/speech_commands) |
+| text | `Imdb` | 25,000 train / 25,000 test | `[N, 512]` F32 byte windows | [unspecified](license/imdb) |
+| text | `AgNews` | 120,000 train / 7,600 test | `[N, 512]` F32 byte windows | [unspecified](license/ag_news) |
+| text | `YelpPolarity` | 560,000 train / 38,000 test | `[N, 512]` F32 byte windows | [unspecified](license/yelp_polarity) |
 | text | `TinyShakespeare` | 1,115,394 bytes | `[seq_len]` token windows | [public domain](license/tiny_shakespeare) |
-| video | `MovingMnist` | 10,000 sequences | `[T, 1, 64, 64]` per sample | [unspecified](license) |
+| video | `MovingMnist` | 10,000 sequences | `[T, 1, 64, 64]` per sample | [CC BY-SA 3.0 (mnist derivative)](license/moving_mnist) |
+
+Also in the catalog: `KMnist`, `Emnist` (six variants), `Stl10`,
+`MiniSpeechCommands`, `Groove`, `LjSpeech`, `CremaD`, `Vctk`, `Maestro`
+(note events, non-commercial license), `Iris`, `Titanic`,
+`Movielens100k`, and `Movielens1m`.
 
 Images and labels are F32 — `oa::matrix::slice` is F32-only — with pixels
 scaled into `[0, 1]` unless `normalize=false`. `MovingMnist` stores frames
 flat as `[N*T, 1, 64, 64]` and returns input/target sequences shifted one
 frame apart for next-frame prediction; `TinyShakespeare` returns byte-token
-windows and the window shifted one byte ahead.
+windows and the window shifted one byte ahead. `Maestro` stores one
+`[E, 3]` (pitch, step, duration) event matrix and returns fixed
+`[seq_len, 3]` device slices paired with the one-event-shifted target —
+the next-event prediction contract.
 
 ## Pack transport
 
@@ -132,3 +155,9 @@ The repository is MIT-licensed; see [LICENSE](LICENSE). Each dataset
 carries its own upstream license — recorded in the manifest and carried in
 [license/](license) — and the loader design is adapted from
 tensorflow/datasets (Apache-2.0), credited in the same index.
+
+<p align="center">
+  <a href="https://realm.software/">
+    <img src="https://raw.githubusercontent.com/realminc/oa/main/sdk/asset/docs/readme/realmIdentityAscii.gif" width="100%" alt="Realm ASCII identity">
+  </a>
+</p>

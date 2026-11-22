@@ -6,50 +6,18 @@
 //! `seq_len`-byte token window whose label is the same window shifted one
 //! byte ahead — the standard character language-model contract.
 
-use std::path::PathBuf;
-
 use oa::data::{Dataset, Sample};
 use oa::matrix::{self, Matrix};
 use oa::{Engine, Error, Result};
 
 use crate::decode::{Decoded, MatrixData};
-use crate::pack::{self, FetchProgress, Pack, PackFile};
+use crate::pack::{self, FetchProgress};
 
-const DEFAULT_SEQ_LEN: usize = 128;
+#[path = "tiny_shakespeare.gen.rs"]
+mod generated;
 
-pub(crate) const SHAKESPEARE_PACK: Pack = Pack {
-	name: "tiny_shakespeare",
-	version: "1.0.0",
-	license: "public-domain",
-	files: &[PackFile {
-		name: "input.txt",
-		size: 1_115_394,
-		shake256: "f71bef2200fc229ce76fac55556cac487c21be9ed12e4bfc828882d8219fab91",
-		urls: &[
-			"https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt",
-		],
-	}],
-};
-
-/// Load options for [`TinyShakespeare::load`].
-#[derive(Clone, Debug)]
-pub struct TinyShakespeareConfig {
-	/// Token window length of each sample; must be at least 1. Defaults to
-	/// `DEFAULT_SEQ_LEN` (128).
-	pub seq_len: usize,
-	/// Cache root override. `None` resolves `OA_DATA_DIR`, then the platform
-	/// cache directory; see [`data_root`](crate::pack::data_root).
-	pub cache_dir: Option<PathBuf>,
-}
-
-impl Default for TinyShakespeareConfig {
-	fn default() -> Self {
-		Self {
-			seq_len: DEFAULT_SEQ_LEN,
-			cache_dir: None,
-		}
-	}
-}
+pub(crate) use generated::SHAKESPEARE_PACK;
+pub use generated::TinyShakespeareConfig;
 
 /// Device-resident Tiny Shakespeare text implementing [`oa::data::Dataset`].
 ///
@@ -108,20 +76,24 @@ impl TinyShakespeare {
 		})
 	}
 
-	/// Decode the corpus and upload its tokens to `engine`.
+	/// Decode the corpus and upload its tokens to `engine`, with a fetch progress callback.
 	///
 	/// # Errors
 	///
 	/// Returns pack fetch/verification errors, an error when `seq_len` is 0
 	/// or leaves no sample window, an error when the payload is not valid
 	/// UTF-8, and matrix upload errors.
-	pub fn load(engine: &Engine, config: &TinyShakespeareConfig) -> Result<Self> {
+	pub fn load_with_progress_on(
+		engine: &Engine,
+		config: &TinyShakespeareConfig,
+		progress: &mut impl FnMut(FetchProgress) -> bool,
+	) -> Result<Self> {
 		if config.seq_len == 0 {
 			return Err(Error::invalid_argument(
 				"tiny_shakespeare seq_len must be at least 1",
 			));
 		}
-		let decoded = Self::decode(config)?;
+		let decoded = Self::decode_with_progress(config, progress)?;
 		let count = decoded.matrix("tokens")?.shape[0];
 		if count <= config.seq_len {
 			return Err(Error::invalid_argument(format!(

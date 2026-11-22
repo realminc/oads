@@ -22,7 +22,7 @@ fn engine() -> oa::Result<oa::Engine> {
 #[ignore = "requires a Vulkan device and network or cached fashion_mnist pack"]
 fn fashion_mnist_loads_test_split_and_collates() -> oa::Result<()> {
 	let engine = engine()?;
-	let dataset = oads::FashionMnist::load(
+	let dataset = oads::FashionMnist::load_on(
 		&engine,
 		&oads::FashionMnistConfig {
 			split: oads::IdxSplit::Test,

@@ -1,0 +1,6 @@
+The Iris flower data (Fisher, 1936; Marshall/UCI, 1988) is a factual
+measurement table distributed by the UCI Machine Learning Repository
+without a use restriction. It is treated as public domain; cite
+Dua, D. and Graff, C. (2019). UCI Machine Learning Repository
+[http://archive.ics.uci.edu/ml]. Irvine, CA: University of California,
+School of Information and Computer Science.

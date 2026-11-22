@@ -22,7 +22,7 @@ fn engine() -> oa::Result<oa::Engine> {
 #[ignore = "requires a Vulkan device and network or cached cifar10 pack"]
 fn cifar10_loads_test_split_and_collates() -> oa::Result<()> {
 	let engine = engine()?;
-	let dataset = oads::Cifar10::load(
+	let dataset = oads::Cifar10::load_on(
 		&engine,
 		&oads::Cifar10Config {
 			split: oads::IdxSplit::Test,

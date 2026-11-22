@@ -1,0 +1,9 @@
+AG News (ag_news_csv.tgz)
+
+Source: https://s3.amazonaws.com/fast-ai-nlp/ag_news_csv.tgz
+Authors: Xiang Zhang, Junbo Zhao, Yann LeCun ("Character-level
+Convolutional Networks for Text Classification", NeurIPS 2015).
+Corpus assembled from AG's news articles by ComeToMyHead/Fuana.
+
+The upstream CSV distribution attaches no license text. Downstream terms
+are unspecified; this notice records the provenance asserted upstream.

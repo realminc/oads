@@ -99,17 +99,7 @@ impl Default for DecodeConfig {
 ///
 /// Returns an error when `name` is not a registered pack.
 pub fn manifest(name: &str) -> Result<&'static Pack> {
-	match name {
-		"mnist" => Ok(&crate::image::mnist::MNIST_PACK),
-		"fashion_mnist" => Ok(&crate::image::fashion_mnist::FASHION_MNIST_PACK),
-		"kmnist" => Ok(&crate::image::kmnist::KMNIST_PACK),
-		"cifar10" => Ok(&crate::image::cifar10::CIFAR10_PACK),
-		"tiny_shakespeare" => Ok(&crate::text::tiny_shakespeare::SHAKESPEARE_PACK),
-		"moving_mnist" => Ok(&crate::video::moving_mnist::MOVING_MNIST_PACK),
-		_ => Err(Error::invalid_argument(format!(
-			"unknown dataset pack '{name}'"
-		))),
-	}
+	crate::decode_dispatch::manifest_of(name)
 }
 
 /// Materialize and decode a registered pack on the host.
@@ -137,53 +127,5 @@ pub fn load_with_progress(
 	config: &DecodeConfig,
 	progress: &mut impl FnMut(FetchProgress) -> bool,
 ) -> Result<Decoded> {
-	match name {
-		"mnist" => crate::image::mnist::Mnist::decode_with_progress(
-			&crate::image::mnist::MnistConfig {
-				split: config.split,
-				cache_dir: config.cache_dir.clone(),
-				normalize: config.normalize,
-			},
-			progress,
-		),
-		"fashion_mnist" => crate::image::fashion_mnist::FashionMnist::decode(
-			&crate::image::fashion_mnist::FashionMnistConfig {
-				split: config.split,
-				cache_dir: config.cache_dir.clone(),
-				normalize: config.normalize,
-			},
-		),
-		"kmnist" => crate::image::kmnist::KMnist::decode_with_progress(
-			&crate::image::kmnist::KMnistConfig {
-				split: config.split,
-				cache_dir: config.cache_dir.clone(),
-				normalize: config.normalize,
-			},
-			progress,
-		),
-		"cifar10" => crate::image::cifar10::Cifar10::decode_with_progress(
-			&crate::image::cifar10::Cifar10Config {
-				split: config.split,
-				cache_dir: config.cache_dir.clone(),
-				normalize: config.normalize,
-			},
-			progress,
-		),
-		"tiny_shakespeare" => crate::text::tiny_shakespeare::TinyShakespeare::decode(
-			&crate::text::tiny_shakespeare::TinyShakespeareConfig {
-				seq_len: 1,
-				cache_dir: config.cache_dir.clone(),
-			},
-		),
-		"moving_mnist" => crate::video::moving_mnist::MovingMnist::decode(
-			&crate::video::moving_mnist::MovingMnistConfig {
-				count: config.count,
-				cache_dir: config.cache_dir.clone(),
-				normalize: config.normalize,
-			},
-		),
-		_ => Err(Error::invalid_argument(format!(
-			"unknown dataset pack '{name}'"
-		))),
-	}
+	crate::decode_dispatch::load_of(name, config, progress)
 }

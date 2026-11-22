@@ -7,30 +7,22 @@
 //! indices `0..=9` — the same per-sample contract as [`crate::Mnist`] but
 //! color, so [`oa::data::collate`] yields `[B, 3, 32, 32]` batches.
 
-use std::path::PathBuf;
-
-use oa::data::{Dataset, Sample};
-use oa::matrix::{self, Matrix};
+use oa::data::{Dataset, MatrixDataset, Sample};
+use oa::matrix::Matrix;
 use oa::{Engine, Error, Result};
 
 use crate::decode::{Decoded, MatrixData};
 use crate::extract;
 use crate::idx::IdxSplit;
-use crate::pack::{self, FetchProgress, Pack, PackFile};
+use crate::pack::{self, FetchProgress};
 
 const RECORD_LEN: usize = 3_073;
 
-pub(crate) const CIFAR10_PACK: Pack = Pack {
-	name: "cifar10",
-	version: "1.0.0",
-	license: "unspecified",
-	files: &[PackFile {
-		name: "cifar-10-binary.tar.gz",
-		size: 170_052_171,
-		shake256: "0dbab965f3e25ad6875fa5f79eb7e79f41ee8b81aa3f7049e2a5b92209958e80",
-		urls: &["https://www.cs.toronto.edu/~kriz/cifar-10-binary.tar.gz"],
-	}],
-};
+#[path = "cifar10.gen.rs"]
+mod generated;
+
+pub(crate) use generated::CIFAR10_PACK;
+pub use generated::{Cifar10Config, Cifar10Split};
 
 const TRAIN_MEMBERS: &[&str] = &[
 	"data_batch_1.bin",
@@ -41,38 +33,12 @@ const TRAIN_MEMBERS: &[&str] = &[
 ];
 const TEST_MEMBERS: &[&str] = &["test_batch.bin"];
 
-/// Official CIFAR-10 split selection.
-pub type Cifar10Split = IdxSplit;
-
-/// Load options for [`Cifar10::load`].
-#[derive(Clone, Debug)]
-pub struct Cifar10Config {
-	/// Which official split to materialize.
-	pub split: Cifar10Split,
-	/// Cache root override. `None` resolves `OA_DATA_DIR`, then the platform
-	/// cache directory; see [`data_root`](crate::pack::data_root).
-	pub cache_dir: Option<PathBuf>,
-	/// Scale pixels into `[0, 1]`. `false` keeps raw `0..=255` values.
-	pub normalize: bool,
-}
-
-impl Default for Cifar10Config {
-	fn default() -> Self {
-		Self {
-			split: IdxSplit::Train,
-			cache_dir: None,
-			normalize: true,
-		}
-	}
-}
-
 /// Device-resident CIFAR-10 split implementing [`oa::data::Dataset`].
 ///
 /// `images()` is `[N, 3, 32, 32]` F32 NCHW and `labels()` is `[N]` F32 class
 /// indices `0..=9`.
 pub struct Cifar10 {
-	images: Matrix,
-	labels: Matrix,
+	dataset: MatrixDataset,
 	split: Cifar10Split,
 }
 
@@ -135,31 +101,23 @@ impl Cifar10 {
 		})
 	}
 
-	/// Decode the selected split and upload it to `engine`.
+	/// [`load_on`](Self::load_on) with a fetch progress callback.
 	///
 	/// # Errors
 	///
-	/// Returns pack fetch/verification errors, archive decode errors, and
-	/// matrix upload errors.
-	pub fn load(engine: &Engine, config: &Cifar10Config) -> Result<Self> {
-		Self::load_with_progress(engine, config, &mut |_| true)
-	}
-
-	/// [`load`](Self::load) with a fetch progress callback.
-	///
-	/// # Errors
-	///
-	/// Returns the errors of [`load`](Self::load), plus `Cancelled` when
+	/// Returns the errors of [`load_on`](Self::load_on), plus `Cancelled` when
 	/// the callback aborts a fetch.
-	pub fn load_with_progress(
+	pub fn load_with_progress_on(
 		engine: &Engine,
 		config: &Cifar10Config,
 		progress: &mut impl FnMut(FetchProgress) -> bool,
 	) -> Result<Self> {
 		let decoded = Self::decode_with_progress(config, progress)?;
 		Ok(Self {
-			images: decoded.upload("images", engine)?,
-			labels: decoded.upload("labels", engine)?,
+			dataset: MatrixDataset::new(
+				decoded.upload("images", engine)?,
+				decoded.upload("labels", engine)?,
+			)?,
 			split: config.split,
 		})
 	}
@@ -167,13 +125,13 @@ impl Cifar10 {
 	/// Full `[N, 3, 32, 32]` F32 image matrix on the owning engine.
 	#[must_use]
 	pub const fn images(&self) -> &Matrix {
-		&self.images
+		self.dataset.x()
 	}
 
 	/// Full `[N]` F32 label matrix on the owning engine.
 	#[must_use]
 	pub const fn labels(&self) -> &Matrix {
-		&self.labels
+		self.dataset.y()
 	}
 
 	/// The split this dataset was materialized from.
@@ -181,30 +139,19 @@ impl Cifar10 {
 	pub const fn split(&self) -> Cifar10Split {
 		self.split
 	}
-
-	fn check_index(&self, index: i64) -> Result<()> {
-		if index < 0 || index >= self.len() {
-			return Err(Error::out_of_range("cifar10 index is outside the dataset"));
-		}
-		Ok(())
-	}
 }
 
 impl Dataset for Cifar10 {
 	fn len(&self) -> i64 {
-		i64::try_from(self.labels.shape()[0]).unwrap_or(i64::MAX)
+		self.dataset.len()
 	}
 
 	fn get_item(&self, index: i64) -> Result<Matrix> {
-		self.check_index(index)?;
-		matrix::slice(&self.images, 0, index, index + 1)?.squeeze(0)
+		self.dataset.get_item(index)
 	}
 
 	fn get_sample(&self, index: i64) -> Result<Sample> {
-		self.check_index(index)?;
-		let x = matrix::slice(&self.images, 0, index, index + 1)?.squeeze(0)?;
-		let y = matrix::slice(&self.labels, 0, index, index + 1)?;
-		Ok(Sample::new_with_label(x, y))
+		self.dataset.get_sample(index)
 	}
 }
 

@@ -1,6 +1,6 @@
 [package]
 name = "oadsrust"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 rust-version = "1.98"
 autotests = false
@@ -24,6 +24,10 @@ name = "oads"
 path = "src/rs/lib.rs"
 
 [[test]]
+name = "audio"
+path = "test/rs/test_audio.rs"
+
+[[test]]
 name = "pack"
 path = "test/rs/test_pack.rs"
 
@@ -39,6 +43,11 @@ path = "test/rs/test_text.rs"
 name = "video"
 path = "test/rs/test_video.rs"
 
+[[test]]
+name = "tabular"
+path = "test/rs/test_tabular.rs"
+
 [dependencies]
-oarust = { version = "0.14" }
+oarust = { version = "0.15" }
 flate2 = "1"
+bzip2 = "0.6.1"

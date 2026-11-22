@@ -22,7 +22,7 @@ fn engine() -> oa::Result<oa::Engine> {
 #[ignore = "requires a Vulkan device and network or cached tiny_shakespeare pack"]
 fn tiny_shakespeare_windows_shift_labels_by_one() -> oa::Result<()> {
 	let engine = engine()?;
-	let dataset = oads::TinyShakespeare::load(
+	let dataset = oads::TinyShakespeare::load_on(
 		&engine,
 		&oads::TinyShakespeareConfig {
 			seq_len: 32,
@@ -41,6 +41,13 @@ fn tiny_shakespeare_windows_shift_labels_by_one() -> oa::Result<()> {
 	let x = sample.x.read::<f32>()?;
 	let y = sample.y.expect("label").read::<f32>()?;
 	assert_eq!(&y[..31], &x[1..]);
+
+	// Engineless load resolves the thread default installed by `engine()`.
+	let defaulted = oads::TinyShakespeare::load(&oads::TinyShakespeareConfig {
+		seq_len: 32,
+		..Default::default()
+	})?;
+	assert_eq!(defaulted.len(), dataset.len());
 
 	// Token values are exact UTF-8 bytes.
 	let tokens = dataset.tokens().read::<f32>()?;

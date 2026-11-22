@@ -9,53 +9,19 @@
 //! `oa::matrix::slice` is rank-one through rank-four; reshape to
 //! `[N, T, 1, 64, 64]` when a per-batch dimension is needed.
 
-use std::path::PathBuf;
-
 use oa::data::{Dataset, Sample};
 use oa::matrix::{self, Matrix};
 use oa::{Engine, Error, Result};
 
 use crate::decode::{Decoded, MatrixData};
 use crate::npy;
-use crate::pack::{self, FetchProgress, Pack, PackFile};
+use crate::pack::{self, FetchProgress};
 
-pub(crate) const MOVING_MNIST_PACK: Pack = Pack {
-	name: "moving_mnist",
-	version: "1.0.0",
-	license: "CC-BY-SA-3.0",
-	files: &[PackFile {
-		name: "mnist_test_seq.npy",
-		size: 819_200_096,
-		shake256: "44136c19911ddfc9a8d6353aee5bb7ba42e359e5bfb24a8ea7fe03ec6f4ca6ce",
-		urls: &[
-			"https://www.cs.toronto.edu/~nitish/unsupervised_video/mnist_test_seq.npy",
-			"http://www.cs.toronto.edu/~nitish/unsupervised_video/mnist_test_seq.npy",
-		],
-	}],
-};
+#[path = "moving_mnist.gen.rs"]
+mod generated;
 
-/// Load options for [`MovingMnist::load`].
-#[derive(Clone, Debug)]
-pub struct MovingMnistConfig {
-	/// Materialize at most this many sequences. `None` loads all 10,000 —
-	/// roughly 3.3 GiB of F32 device memory.
-	pub count: Option<usize>,
-	/// Cache root override. `None` resolves `OA_DATA_DIR`, then the platform
-	/// cache directory; see [`data_root`](crate::pack::data_root).
-	pub cache_dir: Option<PathBuf>,
-	/// Scale pixels into `[0, 1]`. `false` keeps raw `0..=255` values.
-	pub normalize: bool,
-}
-
-impl Default for MovingMnistConfig {
-	fn default() -> Self {
-		Self {
-			count: None,
-			cache_dir: None,
-			normalize: true,
-		}
-	}
-}
+pub(crate) use generated::MOVING_MNIST_PACK;
+pub use generated::MovingMnistConfig;
 
 /// Device-resident Moving MNIST sequences implementing [`oa::data::Dataset`].
 ///
@@ -130,23 +96,13 @@ impl MovingMnist {
 		})
 	}
 
-	/// Decode the sequences and upload them to `engine`.
+	/// [`load_on`](Self::load_on) with a fetch progress callback.
 	///
 	/// # Errors
 	///
-	/// Returns pack fetch/verification errors, npy decode errors, and matrix
-	/// upload errors.
-	pub fn load(engine: &Engine, config: &MovingMnistConfig) -> Result<Self> {
-		Self::load_with_progress(engine, config, &mut |_| true)
-	}
-
-	/// [`load`](Self::load) with a fetch progress callback.
-	///
-	/// # Errors
-	///
-	/// Returns the errors of [`load`](Self::load), plus `Cancelled` when
+	/// Returns the errors of [`load_on`](Self::load_on), plus `Cancelled` when
 	/// the callback aborts a fetch.
-	pub fn load_with_progress(
+	pub fn load_with_progress_on(
 		engine: &Engine,
 		config: &MovingMnistConfig,
 		progress: &mut impl FnMut(FetchProgress) -> bool,

@@ -1,0 +1,10 @@
+IMDb Large Movie Review Dataset (aclImdb_v1.tar.gz)
+
+Source: https://ai.stanford.edu/~amaas/data/sentiment/
+Authors: Andrew L. Maas, Raymond E. Daly, Peter T. Pham, Dan Huang,
+Andrew Y. Ng, Christopher Potts, Stanford University ("Learning Word
+Vectors for Sentiment Analysis", ACL 2011).
+
+The upstream distribution states the data may be used for research or
+non-commercial purposes. This notice records the provenance asserted
+upstream.

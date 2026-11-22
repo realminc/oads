@@ -1,0 +1,10 @@
+Yelp Review Polarity (yelp_review_polarity_csv.tgz)
+
+Source: https://s3.amazonaws.com/fast-ai-nlp/yelp_review_polarity_csv.tgz
+Authors: Xiang Zhang, Junbo Zhao, Yann LeCun ("Character-level
+Convolutional Networks for Text Classification", NeurIPS 2015),
+derived from the Yelp Dataset Challenge 2015 corpus.
+
+The upstream CSV distribution attaches no license text; Yelp corpus
+terms follow the Yelp Dataset Challenge academic-use agreement.
+This notice records the provenance asserted upstream.

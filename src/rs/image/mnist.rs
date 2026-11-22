@@ -6,93 +6,27 @@
 //! [`oa::data::Dataset::get_item`] returns the `[1, 28, 28]` CHW slice so
 //! [`oa::data::collate`] produces `[B, 1, 28, 28]` NCHW batches.
 
-use std::path::PathBuf;
-
-use oa::data::{Dataset, Sample};
-use oa::matrix::{self, Matrix};
+use oa::data::{Dataset, MatrixDataset, Sample};
+use oa::matrix::Matrix;
 use oa::{Engine, Error, Result};
 
 use crate::decode::{Decoded, MatrixData};
 use crate::extract;
 use crate::idx::{self, IdxSplit};
-use crate::pack::{self, FetchProgress, Pack, PackFile};
+use crate::pack::{self, FetchProgress};
 
-pub(crate) const MNIST_PACK: Pack = Pack {
-	name: "mnist",
-	version: "1.0.0",
-	license: "CC-BY-SA-3.0",
-	files: &[
-		PackFile {
-			name: "train-images-idx3-ubyte.gz",
-			size: 9_912_422,
-			shake256: "1314ff889cdcbd8edcfad0916f94202767b7258e93ab75534affc2ccbb6fa575",
-			urls: &[
-				"https://storage.googleapis.com/cvdf-datasets/mnist/train-images-idx3-ubyte.gz",
-				"https://ossci-datasets.s3.amazonaws.com/mnist/train-images-idx3-ubyte.gz",
-			],
-		},
-		PackFile {
-			name: "train-labels-idx1-ubyte.gz",
-			size: 28_881,
-			shake256: "6bcc237fd21a81c96ff200bdae886930ad9b9576fcd16bc49038f5ae7e275c01",
-			urls: &[
-				"https://storage.googleapis.com/cvdf-datasets/mnist/train-labels-idx1-ubyte.gz",
-				"https://ossci-datasets.s3.amazonaws.com/mnist/train-labels-idx1-ubyte.gz",
-			],
-		},
-		PackFile {
-			name: "t10k-images-idx3-ubyte.gz",
-			size: 1_648_877,
-			shake256: "fb5dd7142cba2dad6230d7b75b31917b34294280b67b60d7b95bc2e1e1dcd671",
-			urls: &[
-				"https://storage.googleapis.com/cvdf-datasets/mnist/t10k-images-idx3-ubyte.gz",
-				"https://ossci-datasets.s3.amazonaws.com/mnist/t10k-images-idx3-ubyte.gz",
-			],
-		},
-		PackFile {
-			name: "t10k-labels-idx1-ubyte.gz",
-			size: 4_542,
-			shake256: "105e631874f55e52bafd7c85ab4be9152f8296fc7aaa475815d8f56f654faea7",
-			urls: &[
-				"https://storage.googleapis.com/cvdf-datasets/mnist/t10k-labels-idx1-ubyte.gz",
-				"https://ossci-datasets.s3.amazonaws.com/mnist/t10k-labels-idx1-ubyte.gz",
-			],
-		},
-	],
-};
+#[path = "mnist.gen.rs"]
+mod generated;
 
-/// Official MNIST split selection.
-pub type MnistSplit = IdxSplit;
-
-/// Load options for [`Mnist::load`].
-#[derive(Clone, Debug)]
-pub struct MnistConfig {
-	/// Which official split to materialize.
-	pub split: MnistSplit,
-	/// Cache root override. `None` resolves `OA_DATA_DIR`, then the platform
-	/// cache directory; see [`data_root`](crate::pack::data_root).
-	pub cache_dir: Option<PathBuf>,
-	/// Scale pixels into `[0, 1]`. `false` keeps raw `0..=255` values.
-	pub normalize: bool,
-}
-
-impl Default for MnistConfig {
-	fn default() -> Self {
-		Self {
-			split: MnistSplit::Train,
-			cache_dir: None,
-			normalize: true,
-		}
-	}
-}
+pub(crate) use generated::MNIST_PACK;
+pub use generated::{MnistConfig, MnistSplit};
 
 /// Device-resident MNIST split implementing [`oa::data::Dataset`].
 ///
 /// `images()` is `[N, 1, 28, 28]` F32 NCHW and `labels()` is `[N]` F32 class
 /// indices `0..=9`.
 pub struct Mnist {
-	images: Matrix,
-	labels: Matrix,
+	dataset: MatrixDataset,
 	split: MnistSplit,
 }
 
@@ -160,33 +94,23 @@ impl Mnist {
 		})
 	}
 
-	/// Decode the selected split and upload it to `engine`.
+	/// [`load_on`](Self::load_on) with a fetch progress callback.
 	///
 	/// # Errors
 	///
-	/// Returns pack fetch/verification errors, IDX decode errors, and matrix
-	/// upload errors.
-	pub fn load(engine: &Engine, config: &MnistConfig) -> Result<Self> {
-		Self::load_with_progress(engine, config, &mut |_| true)
-	}
-
-	/// [`load`](Self::load) with a fetch progress callback.
-	///
-	/// # Errors
-	///
-	/// Returns the errors of [`load`](Self::load), plus `Cancelled` when
+	/// Returns the errors of [`load_on`](Self::load_on), plus `Cancelled` when
 	/// the callback aborts a fetch.
-	pub fn load_with_progress(
+	pub fn load_with_progress_on(
 		engine: &Engine,
 		config: &MnistConfig,
 		progress: &mut impl FnMut(FetchProgress) -> bool,
 	) -> Result<Self> {
 		let decoded = Self::decode_with_progress(config, progress)?;
-		Ok(Self {
-			images: decoded.upload("images", engine)?,
-			labels: decoded.upload("labels", engine)?,
-			split: config.split,
-		})
+		Self::new(
+			decoded.upload("images", engine)?,
+			decoded.upload("labels", engine)?,
+			config.split,
+		)
 	}
 
 	/// Wrap caller-owned matrices as an MNIST dataset.
@@ -196,30 +120,16 @@ impl Mnist {
 	///
 	/// # Errors
 	///
-	/// Returns an error for mismatched counts, wrong ranks, wrong dtypes, or
-	/// matrices owned by different engines.
+	/// Returns an error for a non-rank-4 image matrix, plus the count,
+	/// dtype, and engine errors of [`MatrixDataset::new`].
 	pub fn new(images: Matrix, labels: Matrix, split: MnistSplit) -> Result<Self> {
-		if images.shape().len() != 4
-			|| labels.shape().len() != 1
-			|| images.shape()[0] != labels.shape()[0]
-		{
+		if images.shape().len() != 4 {
 			return Err(Error::invalid_argument(
-				"mnist requires [N, C, H, W] images and [N] labels with equal counts",
-			));
-		}
-		if images.dtype() != oa::DType::F32 || labels.dtype() != oa::DType::F32 {
-			return Err(Error::invalid_argument(
-				"mnist requires F32 images and labels",
-			));
-		}
-		if !images.same_engine(&labels) {
-			return Err(Error::invalid_argument(
-				"mnist images and labels must share one engine",
+				"mnist requires [N, C, H, W] images",
 			));
 		}
 		Ok(Self {
-			images,
-			labels,
+			dataset: MatrixDataset::new(images, labels)?,
 			split,
 		})
 	}
@@ -227,13 +137,13 @@ impl Mnist {
 	/// Full `[N, 1, 28, 28]` F32 image matrix on the owning engine.
 	#[must_use]
 	pub const fn images(&self) -> &Matrix {
-		&self.images
+		self.dataset.x()
 	}
 
 	/// Full `[N]` F32 label matrix on the owning engine.
 	#[must_use]
 	pub const fn labels(&self) -> &Matrix {
-		&self.labels
+		self.dataset.y()
 	}
 
 	/// The split this dataset was materialized from.
@@ -241,29 +151,18 @@ impl Mnist {
 	pub const fn split(&self) -> MnistSplit {
 		self.split
 	}
-
-	fn check_index(&self, index: i64) -> Result<()> {
-		if index < 0 || index >= self.len() {
-			return Err(Error::out_of_range("mnist index is outside the dataset"));
-		}
-		Ok(())
-	}
 }
 
 impl Dataset for Mnist {
 	fn len(&self) -> i64 {
-		i64::try_from(self.labels.shape()[0]).unwrap_or(i64::MAX)
+		self.dataset.len()
 	}
 
 	fn get_item(&self, index: i64) -> Result<Matrix> {
-		self.check_index(index)?;
-		matrix::slice(&self.images, 0, index, index + 1)?.squeeze(0)
+		self.dataset.get_item(index)
 	}
 
 	fn get_sample(&self, index: i64) -> Result<Sample> {
-		self.check_index(index)?;
-		let x = matrix::slice(&self.images, 0, index, index + 1)?.squeeze(0)?;
-		let y = matrix::slice(&self.labels, 0, index, index + 1)?;
-		Ok(Sample::new_with_label(x, y))
+		self.dataset.get_sample(index)
 	}
 }

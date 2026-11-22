@@ -1,0 +1,22 @@
+maestro
+=======
+
+Pack:      maestro-v3.0.0-midi.zip (58,416,533 bytes)
+Upstream:  https://magenta.tensorflow.org/datasets/maestro
+Mirror:    https://storage.googleapis.com/magentadata/datasets/maestro/v3.0.0/maestro-v3.0.0-midi.zip
+Version:   3.0.0 (2020-11-26 CSV manifest revision)
+License:   Creative Commons Attribution-NonCommercial-ShareAlike 4.0
+           International (CC BY-NC-SA 4.0); verbatim text in
+           CC-BY-NC-SA-4.0.txt, shipped upstream as maestro-v3.0.0/LICENSE.
+Paper:     Hawthorne et al., "Enabling Factorized Piano Music Modeling and
+           Generation with the MAESTRO Dataset", ICLR 2019.
+
+Contents: ~1,200 Yamaha Disklavier MIDI performances from the International
+Piano-e-Competition, ~200 hours. The pack CSV
+(maestro-v3.0.0.csv) carries composer, title, year, duration, and the
+official train/validation/test split assignment decoded by the loader.
+
+Non-commercial use only: the NonCommercial clause restricts downstream
+use of the dataset and derivatives to non-commercial purposes; the
+ShareAlike clause requires derivatives under the same license. Keep this
+notice with any republished corpus.
