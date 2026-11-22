@@ -1,0 +1,44 @@
+[package]
+name = "oadsrust"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.98"
+autotests = false
+description = "Content-addressed dataset packs and loaders for OA"
+repository = "https://github.com/realminc/oads"
+license = "MIT"
+readme = "README.md"
+include = [
+	"/Cargo.toml", "/Cargo.lock", "/rustfmt.toml", "/rust-toolchain.toml",
+	"/README.md", "/LICENSE", "/.oads-public-snapshot", "/license/**",
+	"/src/rs/**", "/test/rs/**",
+	"!**/__pycache__/**", "!**/*.pyc",
+]
+
+[workspace]
+members = ["src/py"]
+default-members = ["."]
+
+[lib]
+name = "oads"
+path = "src/rs/lib.rs"
+
+[[test]]
+name = "pack"
+path = "test/rs/test_pack.rs"
+
+[[test]]
+name = "image"
+path = "test/rs/test_image.rs"
+
+[[test]]
+name = "text"
+path = "test/rs/test_text.rs"
+
+[[test]]
+name = "video"
+path = "test/rs/test_video.rs"
+
+[dependencies]
+oarust = { version = "0.14" }
+flate2 = "1"

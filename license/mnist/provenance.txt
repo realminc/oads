@@ -1,0 +1,12 @@
+MNIST handwritten digits (IDX ubyte payloads)
+
+Source: http://yann.lecun.com/exdb/mnist/
+Mirrors: storage.googleapis.com/cvdf-datasets/mnist/,
+ossci-datasets.s3.amazonaws.com/mnist/
+
+The files derive from NIST Special Databases 1 and 3, United States
+government works. LeCun's original distribution attaches no explicit license
+text. The CC BY-SA 3.0 designation carried in this directory is the
+conservative attribution used by the canonical public mirrors (Kaggle and
+the tf/keras distribution metadata); we record it rather than assert a
+weaker one ourselves.

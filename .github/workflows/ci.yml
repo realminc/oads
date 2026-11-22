@@ -1,0 +1,369 @@
+# oads CI — Verify, Package, Release
+#
+# Triggers:
+#   realminc/oads tag (v*) on main      → verify + wheel + release
+#   realminc/oads pull request to main  → verify + wheel, without publication
+#   tag (v*)                            → GitHub release; crates.io and
+#                                         PyPI publish when the
+#                                         *_PUBLISH repo vars are set
+#
+# Every job is repository-gated: the private realminc/oads-dev staging
+# repository may receive the same refs, but it must not consume runner
+# time. Loader tests that need a Vulkan device or upstream network stay
+# hardware-gated outside hosted CI; the pack host tests run fully
+# hermetic (file:// and loopback HTTP transports only).
+
+name: CI
+
+on:
+  push:
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CARGO_INCREMENTAL: "0"
+  CARGO_BUILD_JOBS: "2"
+  # oarust's build script compiles OA shaders; keep the pinned Slang pair
+  # identical to realminc/oa's workflow.
+  SLANG_VERSION: "2026.14"
+  SLANG_SHA256: "9445cf0b35332bfda055c9424e307f957ff58befb04c5b45b9f9f29894a41cf8"
+
+jobs:
+  verify:
+    name: Format, lint, host tests, crate archive
+    if: github.repository == 'realminc/oads'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify sanitized public source
+        run: |
+          python3 - <<'PY'
+          import pathlib
+          import subprocess
+
+          assert pathlib.Path(".oads-public-snapshot").is_file()
+          private = (
+              ".cursor", ".devin", ".vscode", ".zed", "AGENTS.md",
+              "/".join(("docs", "internal")), "/".join(("tool", "release")),
+          )
+          paths = subprocess.check_output(
+              ["git", "ls-files", "-z"], text=True
+          ).split("\0")
+          leaked = [name for name in paths if any(
+              name == prefix or name.startswith(prefix + "/") for prefix in private
+          )]
+          assert not leaked, leaked
+          print("Public source inventory excludes private engineering files")
+          PY
+
+      - name: Verify release tag and version sources agree
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          set -euo pipefail
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          CARGO_VERSION="$(python3 -c 'import tomllib; print(tomllib.loads(open("Cargo.toml").read())["package"]["version"])')"
+          PYTHON_VERSION="$(python3 -c 'import tomllib; print(tomllib.loads(open("pyproject.toml").read())["project"]["version"])')"
+          test "$CARGO_VERSION" = "$TAG_VERSION" || {
+            echo "::error::Cargo.toml=$CARGO_VERSION does not match tag $TAG_VERSION"
+            exit 1
+          }
+          test "$PYTHON_VERSION" = "$TAG_VERSION" || {
+            echo "::error::pyproject.toml=$PYTHON_VERSION does not match tag $TAG_VERSION"
+            exit 1
+          }
+
+      - name: Verify tag is on main
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main
+          if ! git merge-base --is-ancestor ${{ github.sha }} origin/main; then
+            echo "::error::Tag must be on main branch"
+            exit 1
+          fi
+
+      - name: Install native build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            clang libclang-dev libasound2-dev libpipewire-0.3-dev libvulkan-dev \
+            libwayland-dev libxkbcommon-dev libx11-dev libxcursor-dev libxrandr-dev \
+            libxi-dev libxfixes-dev libxss-dev libxtst-dev spirv-tools \
+            pkg-config cmake unzip
+          # Set AR to use system ar instead of llvm-ar
+          echo "AR=ar" >> "$GITHUB_ENV"
+
+      - name: Install Slang
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/slang.tar.gz" \
+            "https://github.com/shader-slang/slang/releases/download/v${SLANG_VERSION}/slang-${SLANG_VERSION}-linux-x86_64.tar.gz"
+          printf '%s  %s\n' "$SLANG_SHA256" "$RUNNER_TEMP/slang.tar.gz" | sha256sum --check --strict
+          sudo mkdir -p /opt/slang
+          sudo tar -xzf "$RUNNER_TEMP/slang.tar.gz" -C /opt/slang
+          test -x /opt/slang/bin/slangc
+          echo /opt/slang/bin >> "$GITHUB_PATH"
+
+      - name: Install pinned Rust and Python toolchain
+        run: |
+          toolchain=$(python3 -c 'import tomllib; print(tomllib.load(open("rust-toolchain.toml", "rb"))["toolchain"]["channel"])')
+          rustup toolchain install "$toolchain" --profile minimal --component rustfmt --component clippy
+          rustup override set "$toolchain"
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
+
+      - name: Format, lint, test, and document
+        run: |
+          cargo fmt --all --check
+          cargo clippy --workspace --all-targets --locked -- -D warnings
+          cargo test --workspace --locked
+          cargo test --test pack --locked
+          RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps --locked
+          git diff --check
+          git diff --exit-code
+
+      - name: Compile and verify the Rust registry archive
+        run: cargo package -p oadsrust --locked
+
+      - name: Stage release evidence
+        run: |
+          mkdir -p dist
+          version=$(python3 -c 'import tomllib; print(tomllib.load(open("Cargo.toml", "rb"))["package"]["version"])')
+          cp target/package/oadsrust-*.crate dist/
+          tar -czf "dist/oads-${version}-rustdoc.tar.gz" -C target doc
+          git archive --format=tar.gz -o "dist/oads-${version}-source.tar.gz" HEAD
+          {
+            git rev-parse HEAD
+            rustc -Vv
+            cargo -V
+            cargo tree --workspace --locked --prefix none
+          } > dist/build-info.txt
+          (cd dist && sha256sum * > SHA256SUMS.txt)
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: oads-release
+          path: dist/
+          if-no-files-found: error
+          retention-days: 14
+
+  wheel:
+    name: Build and test portable Python wheel
+    if: github.repository == 'realminc/oads'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
+
+      - name: Install native build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            clang libclang-dev libasound2-dev libpipewire-0.3-dev libvulkan-dev \
+            libwayland-dev libxkbcommon-dev libx11-dev libxcursor-dev libxrandr-dev \
+            libxi-dev libxfixes-dev libxss-dev libxtst-dev spirv-tools \
+            pkg-config cmake unzip
+          echo "AR=ar" >> "$GITHUB_ENV"
+          curl -fsSL -o "$RUNNER_TEMP/slang.tar.gz" \
+            "https://github.com/shader-slang/slang/releases/download/v${SLANG_VERSION}/slang-${SLANG_VERSION}-linux-x86_64.tar.gz"
+          printf '%s  %s\n' "$SLANG_SHA256" "$RUNNER_TEMP/slang.tar.gz" | sha256sum --check --strict
+          sudo mkdir -p /opt/slang
+          sudo tar -xzf "$RUNNER_TEMP/slang.tar.gz" -C /opt/slang
+          test -x /opt/slang/bin/slangc
+          echo /opt/slang/bin >> "$GITHUB_PATH"
+
+      - name: Install pinned Rust and build tools
+        run: |
+          toolchain=$(python3 -c 'import tomllib; print(tomllib.load(open("rust-toolchain.toml", "rb"))["toolchain"]["channel"])')
+          rustup toolchain install "$toolchain" --profile minimal
+          rustup override set "$toolchain"
+          python -m pip install --upgrade pip
+          python -m pip install maturin
+
+      - name: Build ABI3 wheel
+        run: python -m maturin build --release --locked
+
+      - name: Test installed wheel package integrity
+        run: |
+          python -m venv "$RUNNER_TEMP/oads-wheel-smoke"
+          "$RUNNER_TEMP/oads-wheel-smoke/bin/pip" install target/wheels/oadspython-*.whl
+          cd "$RUNNER_TEMP"
+          "$RUNNER_TEMP/oads-wheel-smoke/bin/python" - <<'PY'
+          import hashlib
+          import importlib.metadata
+          import pathlib
+          import tempfile
+
+          import oads
+          import oads.image
+          import oads.pack
+          import oads.text
+          import oads.video
+
+          assert importlib.metadata.version("oadspython") == oads.__version__
+          assert callable(oads.Mnist.load)
+          manifest = {
+              "name": "wheel-smoke", "version": "0.0.1", "license": "test",
+              "files": [],
+          }
+          with tempfile.TemporaryDirectory() as tmp:
+              root = pathlib.Path(tmp)
+              payload = b"oads wheel smoke"
+              source = root / "blob.bin"
+              source.write_bytes(payload)
+              manifest["files"] = [{
+                  "name": "blob.bin", "size": len(payload),
+                  "shake256": hashlib.shake_256(payload).hexdigest(32),
+                  "urls": [source.as_uri()],
+              }]
+              directory = oads.pack.ensure_pack(manifest, root / "cache")
+              assert (directory / "blob.bin").read_bytes() == payload
+          PY
+          package_root="$("$RUNNER_TEMP/oads-wheel-smoke/bin/python" -c \
+            'import pathlib, oads; print(pathlib.Path(oads.__file__).parent)')"
+          "$RUNNER_TEMP/oads-wheel-smoke/bin/python" -m compileall -q "$package_root"
+          unzip -l "$GITHUB_WORKSPACE"/target/wheels/oadspython-*.whl > wheel-files.txt
+          grep -q 'oads/_native.abi3.so' wheel-files.txt
+
+      - name: Stage wheel artifacts
+        run: |
+          mkdir -p dist
+          cp target/wheels/oadspython-*.whl dist/
+          (cd dist && sha256sum *.whl > SHA256SUMS.txt)
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: oads-wheels
+          path: dist/
+          if-no-files-found: error
+          retention-days: 14
+
+  release:
+    name: Publish GitHub development release
+    if: github.repository == 'realminc/oads' && startsWith(github.ref, 'refs/tags/v')
+    needs: [verify, wheel]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: oads-release
+          path: dist
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: oads-wheels
+          path: dist
+      - name: Verify assets and create development release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          (cd dist && sha256sum --check SHA256SUMS.txt --ignore-missing)
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            echo "Release already exists; refusing to replace published assets"
+            exit 0
+          fi
+          version=$(python3 -c 'import tomllib; print(tomllib.load(open("Cargo.toml", "rb"))["package"]["version"])')
+          gh release create "$GITHUB_REF_NAME" dist/* --verify-tag --prerelease \
+            --title "oads $version — development release" \
+            --generate-notes
+
+  crates:
+    name: Publish verified oadsrust crate
+    if: github.repository == 'realminc/oads' && startsWith(github.ref, 'refs/tags/v') && vars.CRATES_IO_PUBLISH == 'true'
+    needs: [verify]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: crates-io
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install native build dependencies and pinned Rust
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            clang libclang-dev libasound2-dev libpipewire-0.3-dev libvulkan-dev \
+            libwayland-dev libxkbcommon-dev libx11-dev libxcursor-dev libxrandr-dev \
+            libxi-dev libxfixes-dev libxss-dev libxtst-dev spirv-tools \
+            pkg-config cmake unzip
+          echo "AR=ar" >> "$GITHUB_ENV"
+          curl -fsSL -o "$RUNNER_TEMP/slang.tar.gz" \
+            "https://github.com/shader-slang/slang/releases/download/v${SLANG_VERSION}/slang-${SLANG_VERSION}-linux-x86_64.tar.gz"
+          printf '%s  %s\n' "$SLANG_SHA256" "$RUNNER_TEMP/slang.tar.gz" | sha256sum --check --strict
+          sudo mkdir -p /opt/slang
+          sudo tar -xzf "$RUNNER_TEMP/slang.tar.gz" -C /opt/slang
+          echo /opt/slang/bin >> "$GITHUB_PATH"
+          toolchain=$(python3 -c 'import tomllib; print(tomllib.load(open("rust-toolchain.toml", "rb"))["toolchain"]["channel"])')
+          rustup toolchain install "$toolchain" --profile minimal
+      - name: Check whether this version is already published
+        id: published
+        run: |
+          version=$(python3 -c 'import tomllib; print(tomllib.load(open("Cargo.toml", "rb"))["package"]["version"])')
+          code=$(curl -fsSL -o /dev/null -w '%{http_code}' -H "User-Agent: realminc/oads-ci" \
+            "https://crates.io/api/v1/crates/oadsrust/${version}" || true)
+          echo "exists=$([ "$code" = "200" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+      - name: Authenticate to crates.io through GitHub OIDC
+        id: auth
+        if: steps.published.outputs.exists != 'true'
+        uses: rust-lang/crates-io-auth-action@3268eb413133e2960fa4ae0e963ca76380c54cd9 # v1
+      - name: Publish oadsrust to crates.io
+        if: steps.published.outputs.exists != 'true'
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
+        run: cargo publish -p oadsrust --locked
+
+  pypi:
+    name: Publish verified oadspython wheel
+    if: github.repository == 'realminc/oads' && startsWith(github.ref, 'refs/tags/v') && vars.PYPI_PUBLISH == 'true'
+    needs: [wheel]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment: pypi
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: oads-wheels
+          path: dist
+      - name: Verify wheel hashes
+        run: |
+          (cd dist && sha256sum --check SHA256SUMS.txt)
+          rm dist/SHA256SUMS.txt
+      - name: Publish oadspython to PyPI through GitHub OIDC
+        uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # release/v1
+        with:
+          packages-dir: dist/
+          skip-existing: true

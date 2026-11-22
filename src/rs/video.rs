@@ -1,0 +1,8 @@
+//! Video datasets: frame-sequence corpora.
+//!
+//! Loaders upload a `[N, T, C, H, W]` F32 frame tensor; per-sample slices
+//! collate to NTCHW batches through [`oa::data`].
+
+pub mod moving_mnist;
+
+pub use moving_mnist::{MovingMnist, MovingMnistConfig};

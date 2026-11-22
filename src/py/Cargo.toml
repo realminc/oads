@@ -1,0 +1,19 @@
+[package]
+name = "oads-python"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.98"
+publish = false
+
+[lib]
+name = "oads_native"
+crate-type = ["cdylib"]
+path = "pyo3/lib.rs"
+
+[dependencies]
+oads = { package = "oadsrust", path = "../.." }
+oa = { package = "oarust", version = "0.14.1" }
+pyo3 = { version = "0.27", features = ["abi3-py310", "multiple-pymethods"] }
+
+[lints.rust]
+unsafe_op_in_unsafe_fn = "deny"

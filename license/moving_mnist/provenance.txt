@@ -1,0 +1,10 @@
+Moving MNIST (mnist_test_seq.npy)
+
+Source: https://www.cs.toronto.edu/~nitish/unsupervised_video/
+Authors: Nitish Srivastava, Elman Mansimov, Ruslan Salakhutdinov,
+University of Toronto.
+
+The file is generated from MNIST (CC BY-SA 3.0 provenance; see
+license/mnist/). Upstream publishes no license text of its own; the CC
+BY-SA 3.0 designation carried for mnist applies to this derivative as a
+share-alike corpus.

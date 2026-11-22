@@ -1,0 +1,10 @@
+CIFAR-10 (binary tarball, cifar-10-binary.tar.gz)
+
+Source: https://www.cs.toronto.edu/~kriz/cifar.html
+Collector: Alex Krizhevsky, Vinod Nair, Geoffrey Hinton, University of
+Toronto, 2009.
+
+The upstream distribution attaches no license text and the project page
+states no license terms. The dataset is an 80 Million Tiny Images subset
+and is conventionally used for research. Downstream redistribution terms
+are unspecified; this notice records the provenance asserted upstream.

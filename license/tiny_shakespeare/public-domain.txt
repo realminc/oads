@@ -1,0 +1,12 @@
+Tiny Shakespeare (input.txt)
+
+Source: https://github.com/karpathy/char-rnn/blob/master/data/tinyshakespeare/input.txt
+
+The payload concatenates the Complete Works of William Shakespeare as
+published by Project Gutenberg. Shakespeare's text is in the public domain;
+the karpathy/char-rnn repository carries no license file for this data.
+
+No license text is attached upstream. This notice records the provenance
+asserted by the upstream source. Project Gutenberg marks its Shakespeare
+ebook as public domain in the United States; redistribution terms may differ
+in jurisdictions that do not recognize the public domain.

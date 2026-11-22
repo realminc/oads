@@ -1,0 +1,8 @@
+KMNIST Kuzushiji-MNIST (IDX ubyte payloads)
+
+Source: http://codh.rois.ac.jp/kmnist/dataset/kmnist/
+
+Per the official repository (github.com/rois-codh/kmnist), the dataset is
+licensed CC BY-SA 4.0. Suggested attribution:
+
+  "KMNIST Dataset" (created by CODH), adapted from "Kuzushiji Dataset"
