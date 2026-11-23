@@ -1,0 +1,11 @@
+NSynth test split (nsynth-test.jsonwav.tar.gz)
+
+Source: https://storage.googleapis.com/magentadata/datasets/nsynth/
+License: CC-BY-4.0
+Citation: Engel et al., "Neural Audio Synthesis of Musical Notes
+with WaveNet Autoencoders", ICML 2017.
+
+Only the test split (4,096 notes, 16,000 Hz mono PCM, four-second
+clips) is distributed through this pack. `examples.json` per-note
+metadata (pitch, velocity, instrument id, family, qualities) joins
+`audio/<note_str>.wav` members at index time.

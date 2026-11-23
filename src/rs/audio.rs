@@ -9,18 +9,28 @@
 
 pub mod crema_d;
 pub mod groove;
+pub mod gtzan;
+pub mod librispeech;
+pub mod libritts;
 pub mod ljspeech;
 pub mod maestro;
 pub mod mini_speech_commands;
+pub mod nsynth;
 pub mod speech_commands;
 pub mod vctk;
+pub mod waves_yesno;
 
 pub use crema_d::{CremaD, CremaDConfig, CremaDSplit};
 pub use groove::{Groove, GrooveConfig, GrooveSplit};
+pub use gtzan::{Gtzan, GtzanConfig};
+pub use librispeech::{Librispeech, LibrispeechConfig};
+pub use libritts::{Libritts, LibrittsConfig};
 pub use ljspeech::{LjSpeech, LjSpeechConfig, SAMPLE_RATE};
 pub use maestro::{DEFAULT_SEQ_LEN, Maestro, MaestroConfig, MaestroSplit};
 pub use mini_speech_commands::{
 	CLIP_SAMPLE_RATE, CLIP_SAMPLES, COMMANDS, MiniSpeechCommands, MiniSpeechCommandsConfig,
 };
+pub use nsynth::{FAMILIES, Nsynth, NsynthConfig};
 pub use speech_commands::{SpeechCommands, SpeechCommandsConfig, SpeechCommandsSplit};
 pub use vctk::{Vctk, VctkConfig, VctkMic};
+pub use waves_yesno::{WavesYesno, WavesYesnoConfig};

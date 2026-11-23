@@ -27,6 +27,52 @@
 | audio | `LjSpeech` | 13,100 clips unsplit | `[N, K]` transcript bytes + lazy `[1, T]` waveforms | [public domain](../../license/ljspeech) |
 | audio | `CremaD` | 7,442 clips; derived speaker-disjoint train/validation/test | `[N, 1, T]` F32 padded waveforms + `[N]` lengths/labels | [ODbL/custom](../../license/crema_d) |
 | audio | `Vctk` | ~44k utterances across ~110 speakers, per-mic index | lazy `[1, T]` F32 FLAC waveforms + `[N]` speaker ids/lengths | [CC BY 4.0](../../license/vctk) |
+| image | `CatsVsDogs` | 25,000 photos (12,500 per class) | lazy `[1, 3, H, W]` F32 NCHW + `[N]` labels | [unspecified](../../license/cats_vs_dogs) |
+| image | `RockPaperScissors` | 2,520 train / 372 test | lazy `[1, 3, 300, 300]` F32 NCHW + `[N]` labels | [unspecified](../../license/rock_paper_scissors) |
+| image | `HorsesOrHumans` | 1,027 train / 256 validation | lazy `[1, 3, 300, 300]` F32 NCHW + `[N]` labels | [unspecified](../../license/horses_or_humans) |
+| image | `OxfordIiitPet` | 7,390 images over 37 breeds | lazy `[1, 3, H, W]` F32 NCHW + `[N]` labels | [unspecified](../../license/oxford_iiit_pet) |
+| image | `StanfordDogs` | 20,580 images over 120 breeds | lazy `[1, 3, H, W]` F32 NCHW + `[N]` labels | [unspecified](../../license/stanford_dogs) |
+| image | `Imagenette` | 9,469 train / 3,925 validation | lazy `[1, 3, H, W]` F32 NCHW + `[N]` labels | [unspecified](../../license/imagenette) |
+| image | `Imagewang` | 14,669 train / 3,929 validation | lazy `[1, 3, H, W]` F32 NCHW + `[N]` labels | [unspecified](../../license/imagewang) |
+| image | `Cub200` | 11,788 images over 200 species | lazy `[1, 3, H, W]` F32 NCHW + `[N]` labels | [unspecified](../../license/cub200) |
+| image | `Eurosat` | 27,000 images over 10 classes | lazy `[1, 3, 64, 64]` F32 NCHW + `[N]` labels | [unspecified](../../license/eurosat) |
+| image | `Food101` | 75,750 train / 25,250 test | lazy `[1, 3, H, W]` F32 NCHW + `[N]` labels | [unspecified](../../license/food101) |
+| image | `Beans` | 1,034 train / 133 validation / 128 test | lazy `[1, 3, H, W]` F32 NCHW + `[N]` labels | [unspecified](../../license/beans) |
+| image | `Dtd` | 1,880 train / 1,880 validation / 1,880 test (fold 1) | lazy `[1, 3, H, W]` F32 NCHW + `[N]` labels | [unspecified](../../license/dtd) |
+| image | `Lfw` | 13,233 images over 5,749 identities | lazy `[1, 3, 250, 250]` F32 NCHW + `[N]` labels | [unspecified](../../license/lfw) |
+| image | `UcMerced` | 2,100 images over 21 classes | lazy `[1, 3, 256, 256]` F32 NCHW + `[N]` labels | [unspecified](../../license/uc_merced) |
+| image | `OxfordFlowers102` | 8,189 images over 102 classes | lazy `[1, 3, H, W]` F32 NCHW + `[N]` labels | [unspecified](../../license/oxford_flowers102) |
+| image | `Places365Small` | 1,839,960 images over 365 classes | lazy `[1, 3, 256, 256]` F32 NCHW + `[N]` labels | [MIT](../../license/places365_small) |
+| image | `Cars196` | 16,185 images over 196 classes | lazy `[1, 3, H, W]` F32 NCHW + `[N]` labels | [unspecified](../../license/cars196) |
+| audio | `Librispeech` | 2,703 utterances from 40 speakers (dev-clean) | lazy `[1, T]` F32 FLAC waveforms + `[N]` speaker ids/lengths | [CC BY 4.0](../../license/librispeech) |
+| audio | `Libritts` | 5,736 utterances from 40 speakers (dev-clean) | lazy `[1, T]` F32 WAV waveforms + `[N]` speaker ids/lengths | [CC BY 4.0](../../license/libritts) |
+| audio | `Nsynth` | 4,096 four-second notes, 11 instrument families (test) | lazy `[1, T]` F32 WAV waveforms + `[N]` family/pitch/velocity | [CC BY 4.0](../../license/nsynth) |
+| text | `GlueSst2` | Stanford Sentiment Treebank binary sentiment task | `[N, K]` sentence bytes + `[N]` labels | [GLUE/custom](../../license/glue_sst2) |
+| text | `GlueCola` | Corpus of Linguistic Acceptability binary judgment task | `[N, K]` sentence bytes + `[N]` labels | [GLUE/custom](../../license/glue_cola) |
+| text | `GlueQqp` | Quora Question Pairs duplicate-detection task | `[N, K]` question-pair bytes + `[N]` labels | [GLUE/custom](../../license/glue_qqp) |
+| text | `GlueQnli` | Question-answering NLI task derived from SQuAD | `[N, K]` question/sentence bytes + `[N]` labels | [GLUE/custom](../../license/glue_qnli) |
+| text | `GlueRte` | Recognizing Textual Entailment task | `[N, K]` sentence-pair bytes + `[N]` labels | [GLUE/custom](../../license/glue_rte) |
+| text | `GlueWnli` | Winograd Schema NLI coreference task | `[N, K]` sentence-pair bytes + `[N]` labels | [GLUE/custom](../../license/glue_wnli) |
+| text | `GlueMnli` | Multi-Genre Natural Language Inference task | `[N, K]` sentence-pair bytes + `[N]` labels | [GLUE/custom](../../license/glue_mnli) |
+| text | `GlueStsb` | Semantic Textual Similarity regression task | `[N, K]` sentence-pair bytes + `[N]` scores | [GLUE/custom](../../license/glue_stsb) |
+| image | `Svhn` | 73,257 train + 531,131 extra + 26,032 test cropped digits | `[N, 3, 32, 32]` F32 NCHW + `[N]` labels | [non-commercial](../../license/svhn) |
+| image | `Smallnorb` | 24,300 train + 24,300 test stereo pairs | `[N, 2, 96, 96]` F32 + `[N]` labels + `[N, 4]` info | [CC BY-SA 3.0](../../license/smallnorb) |
+| audio | `WavesYesno` | 60 recordings x 8 yes/no labels | `[N, 1, T]` F32 padded waveforms + `[N, 8]` labels | [CC BY 3.0](../../license/waves_yesno) |
+| text | `SquadV2` | 130,319 train / 11,873 validation questions | question/context/answer byte matrices + answer_start + is_impossible | [CC BY-SA 4.0](../../license/squad_v2) |
+| image | `Omniglot` | 19,280 train / 13,180 test images | lazy `[1, C, H, W]` F32 PNG decode | [MIT](../../license/omniglot) |
+| text | `SuperglueBoolq` | Boolean Questions yes/no reading-comprehension task | `passage`/`question` `[N, K_i]` byte matrices + `[N]` bool labels | [SuperGLUE/custom](../../license/superglue_boolq) |
+| text | `SuperglueCb` | CommitmentBank three-class NLI task | `premise`/`hypothesis` `[N, K_i]` byte matrices + `[N]` labels | [SuperGLUE/custom](../../license/superglue_cb) |
+| text | `SuperglueCopa` | Choice of Plausible Alternatives causal-reasoning task | `premise`/`choice1`/`choice2`/`question` `[N, K_i]` byte matrices + `[N]` labels | [SuperGLUE/custom](../../license/superglue_copa) |
+| text | `SuperglueMultirc` | Multi-Sentence Reading Comprehension answer-validation task | `passage`/`question`/`answer` `[N, K_i]` byte matrices + `[N]` labels | [SuperGLUE/custom](../../license/superglue_multirc) |
+| text | `SuperglueRecord` | Reading Comprehension with Commonsense Reasoning cloze task | `passage`/`query`/`answer` `[N, K_i]` byte matrices (no labels; answer is a field) | [SuperGLUE/custom](../../license/superglue_record) |
+| text | `SuperglueRte` | Recognizing Textual Entailment (SuperGLUE merge) task | `premise`/`hypothesis` `[N, K_i]` byte matrices + `[N]` labels | [SuperGLUE/custom](../../license/superglue_rte) |
+| text | `SuperglueWic` | Word-in-Context word-sense disambiguation task | `word`/`sentence1`/`sentence2` `[N, K_i]` byte matrices + `[N]` bool labels | [SuperGLUE/custom](../../license/superglue_wic) |
+| text | `SuperglueWsc` | Winograd Schema Challenge coreference task | `text`/`span1`/`span2` `[N, K_i]` byte matrices + `[N]` bool labels | [SuperGLUE/custom](../../license/superglue_wsc) |
+| text | `AnliR1` | Adversarial NLI round 1 context-hypothesis pairs | `context`/`hypothesis` `[N, K_i]` byte matrices + `[N]` labels | [CC BY-NC-SA 4.0](../../license/anli_r1) |
+| text | `AnliR2` | Adversarial NLI round 2 context-hypothesis pairs | `context`/`hypothesis` `[N, K_i]` byte matrices + `[N]` labels | [CC BY-NC-SA 4.0](../../license/anli_r2) |
+| text | `AnliR3` | Adversarial NLI round 3 context-hypothesis pairs | `context`/`hypothesis` `[N, K_i]` byte matrices + `[N]` labels | [CC BY-NC-SA 4.0](../../license/anli_r3) |
+| text | `Xnli` | 15-language NLI dev/test pairs | `premise`/`hypothesis` `[N, K_i]` byte matrices + `[N]` labels + `[N]` language ids | [OANC/CC](../../license/xnli) |
+| audio | `Gtzan` | 999 genre clips (corrupt `jazz.00054.wav` skipped upstream) | lazy `[1, T_i]` F32 waveform per clip + genre index | [research-only](../../license/gtzan) |
 
 ## Registered packs
 
@@ -60,3 +106,49 @@ texts, and provenance live under `license/`.
 | `ljspeech` | 1.1.0 | data.keithito.com |
 | `crema_d` | 1.0.0 | gitlab.com cs-cooper-lab |
 | `vctk` | 0.92.0 | datashare.ed.ac.uk |
+| `cats_vs_dogs` | 1.0.0 | microsoft.com |
+| `rock_paper_scissors` | 1.0.0 | tensorflow.org |
+| `horses_or_humans` | 1.0.0 | tensorflow.org |
+| `oxford_iiit_pet` | 3.2.0 | robots.ox.ac.uk |
+| `stanford_dogs` | 0.2.0 | stanford.edu |
+| `imagenette` | 1.0.0 | fast.ai |
+| `imagewang` | 1.0.0 | fast.ai |
+| `cub200` | 1.0.0 | caltech.edu |
+| `eurosat` | 2.0.0 | huggingface.co/torchgeo |
+| `food101` | 3.0.0 | vision.ee.ethz.ch |
+| `beans` | 0.1.0 | huggingface.co/AI-Lab-Makerere |
+| `dtd` | 3.0.1 | robots.ox.ac.uk |
+| `lfw` | 0.4.0 | figshare |
+| `uc_merced` | 1.0.0 | huggingface.co/torchgeo |
+| `oxford_flowers102` | 2.0.0 | robots.ox.ac.uk |
+| `places365_small` | 1.0.0 | csail.mit.edu |
+| `cars196` | 1.0.0 | huggingface.co/cars196-img |
+| `librispeech` | 1.0.0 | openslr.org/12 |
+| `libritts` | 1.0.0 | openslr.org/60 |
+| `nsynth` | 1.0.0 | storage.googleapis.com/magentadata |
+| `glue_sst2` | 1.0.0 | dl.fbaipublicfiles.com/glue |
+| `glue_cola` | 1.0.0 | dl.fbaipublicfiles.com/glue |
+| `glue_qqp` | 1.0.0 | dl.fbaipublicfiles.com/glue |
+| `glue_qnli` | 1.0.0 | dl.fbaipublicfiles.com/glue |
+| `glue_rte` | 1.0.0 | dl.fbaipublicfiles.com/glue |
+| `glue_wnli` | 1.0.0 | dl.fbaipublicfiles.com/glue |
+| `glue_mnli` | 1.0.0 | dl.fbaipublicfiles.com/glue |
+| `glue_stsb` | 1.0.0 | dl.fbaipublicfiles.com/glue |
+| `svhn` | 1.0.0 | ufldl.stanford.edu |
+| `smallnorb` | 1.0.0 | cs.nyu.edu/~ylclab |
+| `waves_yesno` | 1.0.0 | openslr.org/1 |
+| `squad_v2` | 1.0.0 | rajpurkar.github.io/SQuAD-explorer |
+| `omniglot` | 1.0.0 | github.com/brendenlake/omniglot |
+| `superglue_boolq` | 1.0.0 | dl.fbaipublicfiles.com/glue/superglue |
+| `superglue_cb` | 1.0.0 | dl.fbaipublicfiles.com/glue/superglue |
+| `superglue_copa` | 1.0.0 | dl.fbaipublicfiles.com/glue/superglue |
+| `superglue_multirc` | 1.0.0 | dl.fbaipublicfiles.com/glue/superglue |
+| `superglue_record` | 1.0.0 | dl.fbaipublicfiles.com/glue/superglue |
+| `superglue_rte` | 1.0.0 | dl.fbaipublicfiles.com/glue/superglue |
+| `superglue_wic` | 1.0.0 | dl.fbaipublicfiles.com/glue/superglue |
+| `superglue_wsc` | 1.0.0 | dl.fbaipublicfiles.com/glue/superglue |
+| `anli_r1` | 1.0.0 | dl.fbaipublicfiles.com/anli |
+| `anli_r2` | 1.0.0 | dl.fbaipublicfiles.com/anli |
+| `anli_r3` | 1.0.0 | dl.fbaipublicfiles.com/anli |
+| `xnli` | 1.0.0 | dl.fbaipublicfiles.com/XNLI |
+| `gtzan` | 1.0.0 | hf.co/datasets/marsyas/gtzan |

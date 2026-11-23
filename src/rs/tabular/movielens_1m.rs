@@ -1,6 +1,6 @@
 //! MovieLens 1M ratings as a device-resident [`oa::data::Dataset`].
 //!
-//! `ml-1m.zip` is materialized through [`ensure_pack`](crate::pack::ensure_pack)
+//! `ml-1m.zip` is materialized through [`ensure_pack`](crate::core::pack::ensure_pack)
 //! under `movielens_1m/0.9.0`; the `ratings.dat` member decodes to a
 //! `[N, 3]` F32 feature matrix of `(user_id, item_id, timestamp)` triples
 //! and a `[N]` F32 rating matrix in `1..=5`. The pack carries all
@@ -11,9 +11,9 @@ use oa::data::{Dataset, MatrixDataset, Sample};
 use oa::matrix::Matrix;
 use oa::{Engine, Error, Result};
 
-use crate::decode::{Decoded, MatrixData};
-use crate::extract;
-use crate::pack::{self, FetchProgress};
+use crate::core::decode::{Decoded, MatrixData};
+use crate::core::extract;
+use crate::core::pack::{self, FetchProgress};
 use crate::tabular::ratings;
 
 #[path = "movielens_1m.gen.rs"]

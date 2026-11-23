@@ -1,0 +1,7 @@
+SQuAD 2.0 reading comprehension
+
+Source: train-v2.0.json + dev-v2.0.json via https://rajpurkar.github.io/SQuAD-explorer/dataset/
+License: CC BY-SA 4.0
+Citation: Rajpurkar, Jia & Liang, "Know What You Don't Know: Unanswerable Questions for SQuAD", ACL 2018.
+
+paragraphs[].qas[] are flattened to question/context rows; `is_impossible` questions carry `answer_start == -1` and an empty answer.

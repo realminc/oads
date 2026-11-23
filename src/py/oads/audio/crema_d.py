@@ -47,7 +47,7 @@ class CremaD:
 	) -> "CremaD":
 		"""Fetch, verify, decode, and upload the selected split.
 
-		split is 'train', 'test', or (Rust only) 'validation'.
+		split is 'train', 'validation', or 'test'.
 		progress=True renders the download bar; a callable receives
 		(file, fetched, total) samples instead.
 		"""

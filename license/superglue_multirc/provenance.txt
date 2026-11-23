@@ -1,0 +1,9 @@
+pack: superglue_multirc
+source: MultiRC (SuperGLUE)
+url: https://dl.fbaipublicfiles.com/glue/superglue/data/v2/MultiRC.zip
+fetched: 2026-11-23
+license: see license/README.md label for superglue_multirc
+
+SuperGLUE Multi-Sentence Reading Comprehension task (MultiRC.zip),
+Khashabi et al. 2018. Various upstream licenses per the SuperGLUE
+collection terms.

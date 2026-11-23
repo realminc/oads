@@ -1,0 +1,9 @@
+Places365-Standard (small, 256x256, easy format)
+
+Source: http://places2.csail.mit.edu/download.html
+Archive: data.csail.mit.edu/places/places365/places365standard_easyformat.tar
+Authors: Bolei Zhou, Agata Lapedriza, Aditya Khosla, Aude Oliva,
+Antonio Torralba — MIT CSAIL (2017).
+
+Places365 is released under the MIT license per the project page;
+images were gathered from web sources for research benchmarking.

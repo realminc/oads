@@ -1,0 +1,9 @@
+pack: superglue_rte
+source: RTE (SuperGLUE)
+url: https://dl.fbaipublicfiles.com/glue/superglue/data/v2/RTE.zip
+fetched: 2026-11-23
+license: see license/README.md label for superglue_rte
+
+SuperGLUE Recognizing Textual Entailment task (RTE.zip), merged
+RTE1-5 challenges. Various upstream licenses per the SuperGLUE
+collection terms.

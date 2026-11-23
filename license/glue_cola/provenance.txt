@@ -1,0 +1,7 @@
+Corpus of Linguistic Acceptability (GLUE CoLA)
+
+Source: CoLA.zip via https://dl.fbaipublicfiles.com/glue/data/CoLA.zip
+License: Dataset-specific; research use
+Citation: Warstadt, Singh & Bowman, "Neural Network Acceptability Judgments", TACL 2019.
+
+Task TSVs only; the `original/` source subtree in the archive is not indexed.

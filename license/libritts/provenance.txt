@@ -1,0 +1,13 @@
+LibriTTS dev-clean (dev-clean.tar.gz)
+
+Source: https://www.openslr.org/resources/60/dev-clean.tar.gz
+License: CC-BY-4.0 (LibriVox public-domain narrations)
+Citation: Zen et al., "LibriTTS: A Corpus Derived from LibriSpeech
+for Text-to-Speech", Interspeech 2019.
+
+Only the dev-clean subset (5,736 utterances, 40 speakers) is
+distributed through this pack. Clips are 24,000 Hz mono PCM WAV;
+`*.normalized.txt` transcripts are the indexed training text.
+`*.original.txt` sidecars remain in the archive but are not indexed.
+Speaker ids derive from the directory prefix, not from the upstream
+SPEAKERS.TXT table.

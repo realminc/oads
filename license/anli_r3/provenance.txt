@@ -1,0 +1,8 @@
+pack: anli_r3
+source: ANLI R3
+url: https://dl.fbaipublicfiles.com/anli/anli_v1.0.zip
+fetched: 2026-11-23
+license: see license/README.md label for anli_r3
+
+Adversarial NLI round 3 (anli_v1.0.zip R3/), Nie et al. 2020,
+Facebook AI Research. CC BY-NC-SA 4.0.

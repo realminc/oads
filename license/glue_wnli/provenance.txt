@@ -1,0 +1,7 @@
+Winograd NLI (GLUE WNLI)
+
+Source: WNLI.zip via https://dl.fbaipublicfiles.com/glue/data/WNLI.zip
+License: Dataset-specific
+Citation: Levesque, Davis & Morgenstern, Winograd Schema Challenge.
+
+Task TSVs only; sentence pair + numeric labels are indexed.

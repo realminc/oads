@@ -2,20 +2,20 @@
 //! [`oa::data::Dataset`].
 //!
 //! The CSV tarball is materialized through
-//! [`ensure_pack`](crate::pack::ensure_pack) under `yelp_polarity/1.0.0`.
+//! [`ensure_pack`](crate::core::pack::ensure_pack) under `yelp_polarity/1.0.0`.
 //! Each review encodes as a `[text_len]` F32 UTF-8 byte window, truncated
 //! or zero-padded; `labels()` is `[N]` F32 class indices `0..=1`
 //! (negative/positive — raw CSV labels `1..=2` minus one).
 
 use oa::data::{Dataset, MatrixDataset, Sample};
 use oa::matrix::Matrix;
-use oa::{Engine, Result};
+use oa::{Engine, Error, Result};
 
-use crate::csv;
-use crate::decode::Decoded;
-use crate::extract;
-use crate::idx::IdxSplit;
-use crate::pack::{self, FetchProgress};
+use crate::core::csv;
+use crate::core::decode::Decoded;
+use crate::core::extract;
+use crate::core::idx::IdxSplit;
+use crate::core::pack::{self, FetchProgress};
 use crate::text::document;
 
 #[path = "yelp_polarity.gen.rs"]
@@ -64,6 +64,11 @@ impl YelpPolarity {
 		let member = match config.split {
 			IdxSplit::Train => "train.csv",
 			IdxSplit::Test => "test.csv",
+			IdxSplit::Validation => {
+				return Err(Error::invalid_argument(
+					"yelp_polarity carries no validation split",
+				));
+			}
 		};
 		let records = csv::parse("yelp_polarity", extract::tar_member(&tar, member)?)?;
 		let mut documents = Vec::with_capacity(records.len());

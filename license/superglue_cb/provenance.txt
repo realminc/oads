@@ -1,0 +1,8 @@
+pack: superglue_cb
+source: CB (SuperGLUE)
+url: https://dl.fbaipublicfiles.com/glue/superglue/data/v2/CB.zip
+fetched: 2026-11-23
+license: see license/README.md label for superglue_cb
+
+SuperGLUE CommitmentBank task (CB.zip), de Marneffe et al. 2019.
+Various upstream licenses per the SuperGLUE collection terms.

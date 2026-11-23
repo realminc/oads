@@ -1,6 +1,6 @@
 //! MNIST handwritten digits as a device-resident [`oa::data::Dataset`].
 //!
-//! The official IDX payloads are materialized through [`ensure_pack`](crate::pack::ensure_pack) under
+//! The official IDX payloads are materialized through [`ensure_pack`](crate::core::pack::ensure_pack) under
 //! `mnist/1.0.0`, gunzipped and decoded on the host, and uploaded once as a
 //! `[N, 1, 28, 28]` F32 image matrix and a `[N]` F32 label matrix.
 //! [`oa::data::Dataset::get_item`] returns the `[1, 28, 28]` CHW slice so
@@ -10,10 +10,10 @@ use oa::data::{Dataset, MatrixDataset, Sample};
 use oa::matrix::Matrix;
 use oa::{Engine, Error, Result};
 
-use crate::decode::{Decoded, MatrixData};
-use crate::extract;
-use crate::idx::{self, IdxSplit};
-use crate::pack::{self, FetchProgress};
+use crate::core::decode::{Decoded, MatrixData};
+use crate::core::extract;
+use crate::core::idx::{self, IdxSplit};
+use crate::core::pack::{self, FetchProgress};
 
 #[path = "mnist.gen.rs"]
 mod generated;
@@ -64,6 +64,9 @@ impl Mnist {
 		let (images_name, labels_name) = match config.split {
 			IdxSplit::Train => ("train-images-idx3-ubyte.gz", "train-labels-idx1-ubyte.gz"),
 			IdxSplit::Test => ("t10k-images-idx3-ubyte.gz", "t10k-labels-idx1-ubyte.gz"),
+			IdxSplit::Validation => {
+				return Err(Error::invalid_argument("mnist carries no validation split"));
+			}
 		};
 		let (shape, values) = idx::decode_images(
 			"mnist",

@@ -1,7 +1,7 @@
 //! MAESTRO v3 MIDI performances as a windowed [`oa::data::Dataset`].
 //!
 //! The `maestro-v3.0.0-midi.zip` payload is materialized through
-//! [`ensure_pack`](crate::pack::ensure_pack) under `maestro/3.0.0`, walked in
+//! [`ensure_pack`](crate::core::pack::ensure_pack) under `maestro/3.0.0`, walked in
 //! memory, and decoded on the host: every `.midi` member parses through
 //! the `midi` parser into `(pitch, step, duration)` events in seconds under
 //! that file's tempo map. Events concatenate into one `[E, 3]` F32 matrix;
@@ -20,10 +20,10 @@ use oa::matrix::{self, Matrix};
 use oa::{Engine, Error, Result};
 use std::collections::HashMap;
 
-use crate::decode::{Decoded, MatrixData};
-use crate::extract;
-use crate::midi;
-use crate::pack::{self, FetchProgress};
+use crate::core::decode::{Decoded, MatrixData};
+use crate::core::extract;
+use crate::core::midi;
+use crate::core::pack::{self, FetchProgress};
 
 #[path = "maestro.gen.rs"]
 mod generated;

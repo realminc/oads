@@ -1,0 +1,8 @@
+pack: superglue_wsc
+source: WSC (SuperGLUE)
+url: https://dl.fbaipublicfiles.com/glue/superglue/data/v2/WSC.zip
+fetched: 2026-11-23
+license: see license/README.md label for superglue_wsc
+
+SuperGLUE Winograd Schema Challenge task (WSC.zip), Levesque et al.
+2012. Various upstream licenses per the SuperGLUE collection terms.

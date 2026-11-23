@@ -1,0 +1,12 @@
+Omniglot handwritten characters
+
+Source: https://github.com/brendenlake/omniglot (images_background.zip,
+images_evaluation.zip)
+License: MIT (Lake et al. omniglot repository)
+Citation: Lake, Salakhutdinov & Tenenbaum, "Human-level concept
+learning through probabilistic program induction", Science 2015.
+
+Classes are `<Alphabet>/<character>` directory pairs; character names
+repeat across alphabets, so the alphabet name stays embedded in each
+class label. `images_background` maps to train (19,280 images, 964
+classes) and `images_evaluation` to test (13,180 images, 659 classes).

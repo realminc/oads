@@ -2,7 +2,7 @@
 //! [`oa::data::Dataset`].
 //!
 //! `LJSpeech-1.1.tar.bz2` is materialized through
-//! [`ensure_pack`](crate::pack::ensure_pack) under `ljspeech/1.1.0` and its
+//! [`ensure_pack`](crate::core::pack::ensure_pack) under `ljspeech/1.1.0` and its
 //! `wavs/` members extract once to `<pack>/extracted/wavs/` for reuse. The
 //! supervised pair is `metadata.csv` normalized-transcript bytes ->
 //! 22,050 Hz mono PCM: [`LjSpeech::get_item`] returns a `[K]` padded
@@ -17,11 +17,11 @@ use oa::data::{Dataset, Sample};
 use oa::matrix::{self, Matrix};
 use oa::{Engine, Error, Result};
 
-use crate::csv;
-use crate::decode::{Decoded, MatrixData};
-use crate::extract;
-use crate::pack::{self, FetchProgress};
-use crate::wav;
+use crate::core::csv;
+use crate::core::decode::{Decoded, MatrixData};
+use crate::core::extract;
+use crate::core::pack::{self, FetchProgress};
+use crate::core::wav;
 
 #[path = "ljspeech.gen.rs"]
 mod generated;

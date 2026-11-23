@@ -5,18 +5,61 @@
 //! label matrix, so per-sample slices collate to NCHW batches through
 //! [`oa::data`].
 
+pub mod beans;
+pub mod cars196;
+pub mod cats_vs_dogs;
 pub mod cifar10;
 pub mod cifar100;
+pub mod cub200;
+pub mod dtd;
 pub mod emnist;
+pub mod eurosat;
 pub mod fashion_mnist;
+pub(crate) mod folder;
+pub mod food101;
+pub mod horses_or_humans;
+pub mod imagenette;
+pub mod imagewang;
 pub mod kmnist;
+pub mod lfw;
 pub mod mnist;
+pub mod omniglot;
+pub mod oxford_flowers102;
+pub mod oxford_iiit_pet;
+pub mod places365_small;
+pub mod rock_paper_scissors;
+pub mod smallnorb;
+pub mod stanford_dogs;
 pub mod stl10;
+pub mod svhn;
+pub mod uc_merced;
 
+pub use beans::{Beans, BeansConfig, BeansSplit};
+pub use cars196::{Cars196, Cars196Config, Cars196Split};
+pub use cats_vs_dogs::{CatsVsDogs, CatsVsDogsConfig};
 pub use cifar10::{Cifar10, Cifar10Config, Cifar10Split};
 pub use cifar100::{Cifar100, Cifar100Config, Cifar100Split};
+pub use cub200::{Cub200, Cub200Config};
+pub use dtd::{Dtd, DtdConfig, DtdSplit};
 pub use emnist::{Emnist, EmnistConfig, EmnistSplit, EmnistVariant};
+pub use eurosat::{Eurosat, EurosatConfig};
 pub use fashion_mnist::{FashionMnist, FashionMnistConfig, FashionMnistSplit};
+pub use food101::{Food101, Food101Config, Food101Split};
+pub use horses_or_humans::{HorsesOrHumans, HorsesOrHumansConfig, HorsesOrHumansSplit};
+pub use imagenette::{Imagenette, ImagenetteConfig, ImagenetteSplit};
+pub use imagewang::{Imagewang, ImagewangConfig, ImagewangSplit};
 pub use kmnist::{KMnist, KMnistConfig, KMnistSplit};
+pub use lfw::{Lfw, LfwConfig};
 pub use mnist::{Mnist, MnistConfig, MnistSplit};
+pub use omniglot::{Omniglot, OmniglotConfig, OmniglotSplit};
+pub use oxford_flowers102::{
+	NAMES, OxfordFlowers102, OxfordFlowers102Config, OxfordFlowers102Split,
+};
+pub use oxford_iiit_pet::{OxfordIiitPet, OxfordIiitPetConfig};
+pub use places365_small::{Places365Small, Places365SmallConfig, Places365SmallSplit};
+pub use rock_paper_scissors::{RockPaperScissors, RockPaperScissorsConfig, RockPaperScissorsSplit};
+pub use smallnorb::{Smallnorb, SmallnorbConfig, SmallnorbSplit};
+pub use stanford_dogs::{StanfordDogs, StanfordDogsConfig};
 pub use stl10::{Stl10, Stl10Config, Stl10Split};
+pub use svhn::{Svhn, SvhnConfig, SvhnSplit};
+pub use uc_merced::{UcMerced, UcMercedConfig};

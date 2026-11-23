@@ -1,6 +1,6 @@
 //! CIFAR-10 object recognition as a device-resident [`oa::data::Dataset`].
 //!
-//! The binary tarball is materialized through [`ensure_pack`](crate::pack::ensure_pack) under
+//! The binary tarball is materialized through [`ensure_pack`](crate::core::pack::ensure_pack) under
 //! `cifar10/1.0.0`, and each `*.bin` member is a run of 3,073-byte records:
 //! one label byte followed by 1,024 red, green, and blue planar pixel bytes.
 //! Upload produces `[N, 3, 32, 32]` F32 NCHW images and `[N]` F32 class
@@ -11,10 +11,10 @@ use oa::data::{Dataset, MatrixDataset, Sample};
 use oa::matrix::Matrix;
 use oa::{Engine, Error, Result};
 
-use crate::decode::{Decoded, MatrixData};
-use crate::extract;
-use crate::idx::IdxSplit;
-use crate::pack::{self, FetchProgress};
+use crate::core::decode::{Decoded, MatrixData};
+use crate::core::extract;
+use crate::core::idx::IdxSplit;
+use crate::core::pack::{self, FetchProgress};
 
 const RECORD_LEN: usize = 3_073;
 
@@ -72,6 +72,11 @@ impl Cifar10 {
 		let members = match config.split {
 			IdxSplit::Train => TRAIN_MEMBERS,
 			IdxSplit::Test => TEST_MEMBERS,
+			IdxSplit::Validation => {
+				return Err(Error::invalid_argument(
+					"cifar10 carries no validation split",
+				));
+			}
 		};
 		let mut labels = Vec::new();
 		let mut pixels = Vec::new();

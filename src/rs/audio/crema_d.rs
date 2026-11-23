@@ -1,7 +1,7 @@
 //! CREMA-D speech-emotion clips as a device-resident [`oa::data::Dataset`].
 //!
 //! `crema-d-mirror-main.tar.gz` is materialized through
-//! [`ensure_pack`](crate::pack::ensure_pack) under `crema_d/1.0.0`; the
+//! [`ensure_pack`](crate::core::pack::ensure_pack) under `crema_d/1.0.0`; the
 //! `AudioWAV/*.wav` members decode to a `[N, 1, T]` F32 waveform matrix
 //! zero-padded to the longest clip, a `[N]` F32 matrix of true sample
 //! counts, and `[N]` F32 emotion indices into [`CLASSES`]. Filenames carry
@@ -19,10 +19,10 @@ use oa::data::{Dataset, MatrixDataset, Sample};
 use oa::matrix::Matrix;
 use oa::{Engine, Error, Result};
 
-use crate::decode::{Decoded, MatrixData};
-use crate::extract;
-use crate::pack::{self, FetchProgress};
-use crate::wav;
+use crate::core::decode::{Decoded, MatrixData};
+use crate::core::extract;
+use crate::core::pack::{self, FetchProgress};
+use crate::core::wav;
 
 #[path = "crema_d.gen.rs"]
 mod generated;

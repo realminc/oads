@@ -1,6 +1,6 @@
 //! CIFAR-100 labeled color images as a device-resident [`oa::data::Dataset`].
 //!
-//! The binary archive is materialized through [`ensure_pack`](crate::pack::ensure_pack) under
+//! The binary archive is materialized through [`ensure_pack`](crate::core::pack::ensure_pack) under
 //! `cifar100/1.0.0`, decoded on the host, and uploaded once as a
 //! `[N, 3, 32, 32]` F32 image matrix and a `[N]` F32 label matrix holding the
 //! fine label index `0..=99`. `get_item` returns the `[3, 32, 32]` CHW slice
@@ -10,10 +10,10 @@ use oa::data::{Dataset, MatrixDataset, Sample};
 use oa::matrix::Matrix;
 use oa::{Engine, Error, Result};
 
-use crate::decode::{Decoded, MatrixData};
-use crate::extract;
-use crate::idx::IdxSplit;
-use crate::pack::{self, FetchProgress};
+use crate::core::decode::{Decoded, MatrixData};
+use crate::core::extract;
+use crate::core::idx::IdxSplit;
+use crate::core::pack::{self, FetchProgress};
 
 const RECORD_LEN: usize = 3_074;
 
@@ -68,6 +68,11 @@ impl Cifar100 {
 		let member = match config.split {
 			IdxSplit::Train => "train.bin",
 			IdxSplit::Test => "test.bin",
+			IdxSplit::Validation => {
+				return Err(Error::invalid_argument(
+					"cifar100 carries no validation split",
+				));
+			}
 		};
 		let records = extract::tar_member(&tar, member)?;
 		if records.len() % RECORD_LEN != 0 {

@@ -1,7 +1,7 @@
 //! Google Speech Commands v0.02 as a device-resident [`oa::data::Dataset`].
 //!
 //! The 2.4 GB tarball is materialized through
-//! [`ensure_pack`](crate::pack::ensure_pack) under `speech_commands/0.2.0`
+//! [`ensure_pack`](crate::core::pack::ensure_pack) under `speech_commands/0.2.0`
 //! and walked in memory; every member under `<command>/*.wav` becomes one
 //! clip row. Members named by `testing_list.txt`/`validation_list.txt` form
 //! the test and validation splits; the rest are train. `_background_noise_`
@@ -13,10 +13,10 @@ use oa::data::{Dataset, MatrixDataset, Sample};
 use oa::matrix::Matrix;
 use oa::{Engine, Error, Result};
 
-use crate::decode::{Decoded, MatrixData};
-use crate::extract;
-use crate::pack::{self, FetchProgress};
-use crate::wav;
+use crate::core::decode::{Decoded, MatrixData};
+use crate::core::extract;
+use crate::core::pack::{self, FetchProgress};
+use crate::core::wav;
 
 #[path = "speech_commands.gen.rs"]
 mod generated;

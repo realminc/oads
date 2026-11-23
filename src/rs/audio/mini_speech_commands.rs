@@ -1,7 +1,7 @@
 //! Google mini Speech Commands as a device-resident [`oa::data::Dataset`].
 //!
 //! The `mini_speech_commands.zip` payload is materialized through
-//! [`ensure_pack`](crate::pack::ensure_pack) under
+//! [`ensure_pack`](crate::core::pack::ensure_pack) under
 //! `mini_speech_commands/1.0.0`, walked in memory, and decoded on the host
 //! into a `[N, 1, 16000]` F32 waveform matrix and a `[N]` F32 label matrix.
 //! Every clip is mono s16 PCM at [`CLIP_SAMPLE_RATE`]; clips shorter than
@@ -19,10 +19,10 @@ use oa::data::{Dataset, MatrixDataset, Sample};
 use oa::matrix::Matrix;
 use oa::{Engine, Error, Result};
 
-use crate::decode::{Decoded, MatrixData};
-use crate::extract;
-use crate::pack::{self, FetchProgress};
-use crate::wav;
+use crate::core::decode::{Decoded, MatrixData};
+use crate::core::extract;
+use crate::core::pack::{self, FetchProgress};
+use crate::core::wav;
 
 /// Command labels in canonical order; label index `i` names `COMMANDS[i]`.
 #[path = "mini_speech_commands.gen.rs"]

@@ -1,7 +1,7 @@
 //! Groove MIDI Dataset drum performances as a windowed [`oa::data::Dataset`].
 //!
 //! `groove-v1.0.0-midionly.zip` is materialized through
-//! [`ensure_pack`](crate::pack::ensure_pack) under `groove/1.0.0`. Each
+//! [`ensure_pack`](crate::core::pack::ensure_pack) under `groove/1.0.0`. Each
 //! `groove/drummer*/session*/*.mid` member decodes through the crate SMF
 //! parser into `(pitch, step, duration)` events — General MIDI drum note,
 //! gap to the next onset, and sustain in seconds under the file's tempo map
@@ -16,11 +16,11 @@ use oa::matrix::{self, Matrix};
 use oa::{Engine, Error, Result};
 use std::collections::{HashMap, HashSet};
 
-use crate::csv;
-use crate::decode::{Decoded, MatrixData};
-use crate::extract;
-use crate::midi;
-use crate::pack::{self, FetchProgress};
+use crate::core::csv;
+use crate::core::decode::{Decoded, MatrixData};
+use crate::core::extract;
+use crate::core::midi;
+use crate::core::pack::{self, FetchProgress};
 
 #[path = "groove.gen.rs"]
 mod generated;

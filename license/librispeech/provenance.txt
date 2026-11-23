@@ -1,0 +1,11 @@
+LibriSpeech dev-clean (dev-clean.tar.gz)
+
+Source: https://www.openslr.org/resources/12/dev-clean.tar.gz
+License: CC-BY-4.0 (LibriVox public-domain narrations)
+Citation: Panayotov et al., "Librispeech: An ASR Corpus Based on
+Public Domain Audio Books", ICASSP 2015.
+
+Only the dev-clean subset (2,703 utterances, 40 speakers, ~5.4h) is
+distributed through this pack. `*.trans.txt` transcripts join
+`<speaker>-<chapter>-<n>.flac` clips at index time; speaker ids derive
+from the directory prefix, not from the upstream SPEAKERS.TXT table.

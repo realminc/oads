@@ -1,0 +1,7 @@
+Recognizing Textual Entailment (GLUE RTE)
+
+Source: RTE.zip via https://dl.fbaipublicfiles.com/glue/data/RTE.zip
+License: Dataset-specific; combined RTE1-5 challenge corpora
+Citation: Dagan et al., RTE challenge series; Wang et al., GLUE, 2018.
+
+Task TSVs only; sentence pair + binary entailment labels are indexed.

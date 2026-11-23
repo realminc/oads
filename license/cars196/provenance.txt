@@ -1,0 +1,13 @@
+Stanford Cars-196 (cars196_train.zip + cars196_test.zip)
+
+Source mirror: https://huggingface.co/datasets/haodoz0118/cars196-img
+Original: Stanford AI Lab (Krause et al., "3D Object
+Representations for Fine-Grained Categorization", 3DRR 2013);
+ai.stanford.edu/~jkrause/cars/car_dataset.html is retired.
+
+The upstream distribution attaches no license text. Images were
+collected from public web sources for research benchmarking;
+redistribution terms are unspecified. The loaded mirror files ship
+flat `NNNNN_<Make>_<Model>_<Year>.jpg` members rather than the
+original MATLAB-annotated layout; the class label derives from the
+filename stem minus its leading ordinal.

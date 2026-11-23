@@ -1,0 +1,7 @@
+Waves yes/no speech corpus
+
+Source: waves_yesno.tar.gz via https://www.openslr.org/resources/1/waves_yesno.tar.gz
+License: CC-BY-3.0
+Citation: Amir & Keret, Hebrew University of Jerusalem; OpenSLR resource 1.
+
+60 recordings of eight spoken yes/no tokens each; filename `<b0>_.._<b7>.wav` bits are per-token labels. 8 kHz mono PCM16.

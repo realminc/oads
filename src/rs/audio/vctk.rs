@@ -2,7 +2,7 @@
 //! [`oa::data::Dataset`].
 //!
 //! `DS_10283_3443.zip` is materialized through
-//! [`ensure_pack`](crate::pack::ensure_pack) under `vctk/0.92.0` and its
+//! [`ensure_pack`](crate::core::pack::ensure_pack) under `vctk/0.92.0` and its
 //! `wav48_silence_trimmed/<speaker>/*_mic{1,2}.flac` members extract once
 //! to `<pack>/extracted/` for reuse (the archive's nested
 //! `VCTK-Corpus-0.92.zip` member is a redundant copy and is skipped). The
@@ -21,9 +21,9 @@ use oa::data::{Dataset, Sample};
 use oa::matrix::{self, Matrix};
 use oa::{Engine, Error, Result};
 
-use crate::decode::{Decoded, MatrixData};
-use crate::extract;
-use crate::pack::{self, FetchProgress};
+use crate::core::decode::{Decoded, MatrixData};
+use crate::core::extract;
+use crate::core::pack::{self, FetchProgress};
 
 #[path = "vctk.gen.rs"]
 mod generated;
@@ -111,7 +111,7 @@ impl Vctk {
 		for mic in [VctkMic::Mic1, VctkMic::Mic2] {
 			let index = std::fs::read(extracted.join(format!("index_{}.csv", mic.suffix())))
 				.map_err(|error| Error::io("read vctk index", error))?;
-			let rows = crate::csv::parse("vctk", &index)?;
+			let rows = crate::core::csv::parse("vctk", &index)?;
 			let mut max_text = 0_usize;
 			for record in &rows {
 				if record.len() != 4 {
@@ -200,7 +200,7 @@ impl Vctk {
 		let extracted = root.join(PACK_DIR).join("extracted");
 		let index = std::fs::read(extracted.join(format!("index_{}.csv", config.mic.suffix())))
 			.map_err(|error| Error::io("read vctk index", error))?;
-		let rows = crate::csv::parse("vctk", &index)?;
+		let rows = crate::core::csv::parse("vctk", &index)?;
 		let clips = rows
 			.iter()
 			.map(|record| (record[0].clone(), record[1].clone()))
@@ -334,21 +334,7 @@ fn read_speakers(extracted: &std::path::Path) -> Result<Vec<String>> {
 /// Sample rate, channel count, and total frame count from a FLAC
 /// STREAMINFO block (always the first metadata block after `fLaC`).
 fn flac_streaminfo(data: &[u8]) -> Result<(u32, u32, u64)> {
-	if data.len() < 42 || &data[..4] != b"fLaC" {
-		return Err(Error::data_loss("vctk clip is not a FLAC stream"));
-	}
-	if data[4] & 0x7f != 0 {
-		return Err(Error::data_loss("vctk clip has no leading STREAMINFO"));
-	}
-	let packed = u64::from_be_bytes(
-		data[18..26]
-			.try_into()
-			.map_err(|_| Error::data_loss("vctk STREAMINFO is truncated"))?,
-	);
-	let rate = (packed >> 44) as u32;
-	let channels = ((packed >> 41) & 0x7) as u32 + 1;
-	let samples = packed & 0xF_FFFF_FFFF;
-	Ok((rate, channels, samples))
+	crate::core::flac::streaminfo("vctk", data)
 }
 
 /// Materialize `extracted/index_mic{1,2}.csv`, `speakers.txt`, and

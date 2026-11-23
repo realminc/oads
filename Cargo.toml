@@ -1,6 +1,6 @@
 [package]
 name = "oadsrust"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2024"
 rust-version = "1.98"
 autotests = false
@@ -51,3 +51,4 @@ path = "test/rs/test_tabular.rs"
 oarust = { version = "0.15" }
 flate2 = "1"
 bzip2 = "0.6.1"
+serde_json = "1.0.154"

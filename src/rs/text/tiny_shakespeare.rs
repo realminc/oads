@@ -1,6 +1,6 @@
 //! Tiny Shakespeare as a device-resident character dataset.
 //!
-//! The ~1.1 MB `input.txt` is materialized through [`ensure_pack`](crate::pack::ensure_pack) under
+//! The ~1.1 MB `input.txt` is materialized through [`ensure_pack`](crate::core::pack::ensure_pack) under
 //! `tiny_shakespeare/1.0.0`, decoded to UTF-8 text on the host, and uploaded
 //! once as a `[N]` F32 matrix of byte values `0..=255`. A sample is a
 //! `seq_len`-byte token window whose label is the same window shifted one
@@ -10,8 +10,8 @@ use oa::data::{Dataset, Sample};
 use oa::matrix::{self, Matrix};
 use oa::{Engine, Error, Result};
 
-use crate::decode::{Decoded, MatrixData};
-use crate::pack::{self, FetchProgress};
+use crate::core::decode::{Decoded, MatrixData};
+use crate::core::pack::{self, FetchProgress};
 
 #[path = "tiny_shakespeare.gen.rs"]
 mod generated;

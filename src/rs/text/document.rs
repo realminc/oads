@@ -7,7 +7,7 @@
 
 use oa::Result;
 
-use crate::decode::MatrixData;
+use crate::core::decode::MatrixData;
 
 /// Encode `(label, utf-8 text)` pairs as a `[N, text_len]` F32 window
 /// matrix and a `[N]` F32 label matrix.

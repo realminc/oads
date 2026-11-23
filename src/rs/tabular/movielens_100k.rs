@@ -1,6 +1,6 @@
 //! MovieLens 100k ratings as a device-resident [`oa::data::Dataset`].
 //!
-//! `ml-100k.zip` is materialized through [`ensure_pack`](crate::pack::ensure_pack)
+//! `ml-100k.zip` is materialized through [`ensure_pack`](crate::core::pack::ensure_pack)
 //! under `movielens_100k/0.9.0`; the official `u1.base`/`u1.test`
 //! cross-validation members decode to a `[N, 3]` F32 feature matrix of
 //! `(user_id, item_id, timestamp)` triples and a `[N]` F32 rating matrix in
@@ -11,10 +11,10 @@ use oa::data::{Dataset, MatrixDataset, Sample};
 use oa::matrix::Matrix;
 use oa::{Engine, Error, Result};
 
-use crate::decode::{Decoded, MatrixData};
-use crate::extract;
-use crate::idx::IdxSplit;
-use crate::pack::{self, FetchProgress};
+use crate::core::decode::{Decoded, MatrixData};
+use crate::core::extract;
+use crate::core::idx::IdxSplit;
+use crate::core::pack::{self, FetchProgress};
 use crate::tabular::ratings;
 
 #[path = "movielens_100k.gen.rs"]
@@ -65,6 +65,11 @@ impl Movielens100k {
 		let member = match config.split {
 			IdxSplit::Train => "ml-100k/u1.base",
 			IdxSplit::Test => "ml-100k/u1.test",
+			IdxSplit::Validation => {
+				return Err(Error::invalid_argument(
+					"movielens_100k carries no validation split",
+				));
+			}
 		};
 		let mut ratings_bytes = None;
 		extract::walk_zip(&zip, |name, data| {

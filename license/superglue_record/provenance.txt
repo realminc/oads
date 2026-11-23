@@ -1,0 +1,9 @@
+pack: superglue_record
+source: ReCoRD (SuperGLUE)
+url: https://dl.fbaipublicfiles.com/glue/superglue/data/v2/ReCoRD.zip
+fetched: 2026-11-23
+license: see license/README.md label for superglue_record
+
+SuperGLUE Reading Comprehension with Commonsense Reasoning task
+(ReCoRD.zip), Zhang et al. 2018; CNN/Daily Mail articles.
+Various upstream licenses per the SuperGLUE collection terms.

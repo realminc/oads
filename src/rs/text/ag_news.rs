@@ -2,7 +2,7 @@
 //! [`oa::data::Dataset`].
 //!
 //! The CSV tarball is materialized through
-//! [`ensure_pack`](crate::pack::ensure_pack) under `ag_news/1.0.0`. Each row
+//! [`ensure_pack`](crate::core::pack::ensure_pack) under `ag_news/1.0.0`. Each row
 //! encodes as a `[text_len]` F32 UTF-8 byte window over `title` + newline +
 //! `description`, truncated or zero-padded; `labels()` is `[N]` F32 class
 //! indices `0..=3` (World, Sports, Business, Sci/Tech — raw CSV labels
@@ -11,13 +11,13 @@
 
 use oa::data::{Dataset, MatrixDataset, Sample};
 use oa::matrix::Matrix;
-use oa::{Engine, Result};
+use oa::{Engine, Error, Result};
 
-use crate::csv;
-use crate::decode::Decoded;
-use crate::extract;
-use crate::idx::IdxSplit;
-use crate::pack::{self, FetchProgress};
+use crate::core::csv;
+use crate::core::decode::Decoded;
+use crate::core::extract;
+use crate::core::idx::IdxSplit;
+use crate::core::pack::{self, FetchProgress};
 use crate::text::document;
 
 #[path = "ag_news.gen.rs"]
@@ -66,6 +66,11 @@ impl AgNews {
 		let member = match config.split {
 			IdxSplit::Train => "train.csv",
 			IdxSplit::Test => "test.csv",
+			IdxSplit::Validation => {
+				return Err(Error::invalid_argument(
+					"ag_news carries no validation split",
+				));
+			}
 		};
 		let records = csv::parse("ag_news", extract::tar_member(&tar, member)?)?;
 		let mut documents = Vec::with_capacity(records.len());

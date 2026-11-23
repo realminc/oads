@@ -1,0 +1,7 @@
+Multi-Genre NLI (GLUE MNLI)
+
+Source: MNLI.zip via https://dl.fbaipublicfiles.com/glue/data/MNLI.zip
+License: Dataset-specific; most portions CC BY-SA 3.0
+Citation: Williams, Nangia & Bowman, "A Broad-Coverage Challenge Corpus for Sentence Understanding through Inference", NAACL 2018.
+
+Task TSVs only; premise/hypothesis pair + gold_label are indexed. This mirror carries 392,702 train rows; dev/test members are `dev_matched.tsv`/`dev_mismatched.tsv`/`test_*.tsv`.

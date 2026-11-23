@@ -1,0 +1,9 @@
+pack: gtzan
+source: GTZAN
+url: https://huggingface.co/datasets/marsyas/gtzan/resolve/main/data/genres.tar.gz
+fetched: 2026-11-23
+license: see license/README.md label for gtzan
+
+GTZAN genre collection (genres.tar.gz), Tzanetakis & Cook 2002,
+via the marsyas/gtzan Hugging Face mirror. Research-use only;
+1,000 members; `jazz.00054.wav` is corrupt upstream and skipped (999 clips).

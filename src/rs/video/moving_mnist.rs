@@ -1,6 +1,6 @@
 //! Moving MNIST frame sequences as a device-resident [`oa::data::Dataset`].
 //!
-//! `mnist_test_seq.npy` is materialized through [`ensure_pack`](crate::pack::ensure_pack) under
+//! `mnist_test_seq.npy` is materialized through [`ensure_pack`](crate::core::pack::ensure_pack) under
 //! `moving_mnist/1.0.0` and uploaded once as a `[N*T, 1, 64, 64]` F32
 //! matrix: 10,000 sequences of 20 grayscale frames laid out sequence-major.
 //! A sample is one whole sequence `[T, 1, 64, 64]`; `get_sample` pairs
@@ -13,9 +13,9 @@ use oa::data::{Dataset, Sample};
 use oa::matrix::{self, Matrix};
 use oa::{Engine, Error, Result};
 
-use crate::decode::{Decoded, MatrixData};
-use crate::npy;
-use crate::pack::{self, FetchProgress};
+use crate::core::decode::{Decoded, MatrixData};
+use crate::core::npy;
+use crate::core::pack::{self, FetchProgress};
 
 #[path = "moving_mnist.gen.rs"]
 mod generated;

@@ -2,7 +2,7 @@
 //! [`oa::data::Dataset`].
 //!
 //! The single upstream zip carries all six published variants as IDX gzip
-//! members under `gzip/`; [`ensure_pack`](crate::pack::ensure_pack)
+//! members under `gzip/`; [`ensure_pack`](crate::core::pack::ensure_pack)
 //! materializes it under `emnist/1.0.0`. The selected variant's split members
 //! are inflated, IDX-decoded on the host, and uploaded once as a
 //! `[N, 1, 28, 28]` F32 image matrix and a `[N]` F32 label matrix.
@@ -15,10 +15,10 @@ use oa::data::{Dataset, MatrixDataset, Sample};
 use oa::matrix::Matrix;
 use oa::{Engine, Error, Result};
 
-use crate::decode::{Decoded, MatrixData};
-use crate::extract;
-use crate::idx::{self, IdxSplit};
-use crate::pack::{self, FetchProgress};
+use crate::core::decode::{Decoded, MatrixData};
+use crate::core::extract;
+use crate::core::idx::{self, IdxSplit};
+use crate::core::pack::{self, FetchProgress};
 
 #[path = "emnist.gen.rs"]
 mod generated;
@@ -117,6 +117,11 @@ impl Emnist {
 		let split = match config.split {
 			IdxSplit::Train => "train",
 			IdxSplit::Test => "test",
+			IdxSplit::Validation => {
+				return Err(Error::invalid_argument(
+					"emnist carries no validation split",
+				));
+			}
 		};
 		let prefix = config.variant.member();
 		let wanted = [

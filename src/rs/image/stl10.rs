@@ -2,7 +2,7 @@
 //! [`oa::data::Dataset`].
 //!
 //! `stl10_binary.tar.gz` is materialized through
-//! [`ensure_pack`](crate::pack::ensure_pack) under `stl10/1.0.0`; the
+//! [`ensure_pack`](crate::core::pack::ensure_pack) under `stl10/1.0.0`; the
 //! `stl10_binary/*_X.bin` members decode from column-major `3 x 96 x 96`
 //! u8 records into a `[N, 3, 96, 96]` F32 NCHW image matrix and `*_y.bin`
 //! labels `1..=10` into `[N]` F32 class indices `0..=9` into [`CLASSES`].
@@ -13,9 +13,9 @@ use oa::data::{Dataset, MatrixDataset, Sample};
 use oa::matrix::Matrix;
 use oa::{Engine, Error, Result};
 
-use crate::decode::{Decoded, MatrixData};
-use crate::extract;
-use crate::pack::{self, FetchProgress};
+use crate::core::decode::{Decoded, MatrixData};
+use crate::core::extract;
+use crate::core::pack::{self, FetchProgress};
 
 #[path = "stl10.gen.rs"]
 mod generated;
@@ -69,6 +69,9 @@ impl Stl10 {
 		let tag = match config.split {
 			Stl10Split::Train => "train",
 			Stl10Split::Test => "test",
+			Stl10Split::Validation => {
+				return Err(Error::invalid_argument("stl10 carries no validation split"));
+			}
 		};
 		let x = extract::tar_member(&tar, &format!("stl10_binary/{tag}_X.bin"))?;
 		let y = extract::tar_member(&tar, &format!("stl10_binary/{tag}_y.bin"))?;

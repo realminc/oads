@@ -1,0 +1,9 @@
+pack: xnli
+source: XNLI
+url: https://dl.fbaipublicfiles.com/XNLI/XNLI-1.0.zip
+fetched: 2026-11-23
+license: see license/README.md label for xnli
+
+XNLI cross-lingual NLI dev/test (XNLI-1.0.zip), Conneau et al. 2018,
+Facebook AI Research. Corpus licenses vary by source language
+(OANC and others per the XNLI license terms).

@@ -1,0 +1,7 @@
+Street View House Numbers (SVHN)
+
+Source: train_32x32.mat, test_32x32.mat, extra_32x32.mat via http://ufldl.stanford.edu/housenumbers/
+License: Non-commercial research use (Google Street View imagery)
+Citation: Netzer et al., "Reading Digits in Natural Images with Unsupervised Feature Learning", NIPS 2011.
+
+MATLAB v5 `[32, 32, 3, N]` uint8 arrays are transposed to `[N, 3, 32, 32]`; label 10 maps to digit 0. The `extra` split is Rust-only for now.

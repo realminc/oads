@@ -1,0 +1,9 @@
+pack: superglue_copa
+source: COPA (SuperGLUE)
+url: https://dl.fbaipublicfiles.com/glue/superglue/data/v2/COPA.zip
+fetched: 2026-11-23
+license: see license/README.md label for superglue_copa
+
+SuperGLUE Choice of Plausible Alternatives task (COPA.zip),
+Roemmele et al. 2011 / Wang et al. 2019.
+Various upstream licenses per the SuperGLUE collection terms.

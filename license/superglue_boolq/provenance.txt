@@ -1,0 +1,9 @@
+pack: superglue_boolq
+source: BoolQ (SuperGLUE)
+url: https://dl.fbaipublicfiles.com/glue/superglue/data/v2/BoolQ.zip
+fetched: 2026-11-23
+license: see license/README.md label for superglue_boolq
+
+SuperGLUE benchmark BoolQ task (BoolQ.zip), Wang et al. 2019.
+Questions sourced from Natural Questions (Google); yes/no labels.
+Various upstream licenses per the SuperGLUE collection terms.

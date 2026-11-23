@@ -1,0 +1,7 @@
+Semantic Textual Similarity Benchmark (GLUE STS-B)
+
+Source: STS-B.zip via https://dl.fbaipublicfiles.com/glue/data/STS-B.zip
+License: Dataset-specific
+Citation: Cer et al., "SemEval-2017 Task 1: Semantic Textual Similarity", 2017.
+
+Task TSVs only; the `original/` raw STS files in the archive are not indexed. Score column is the last field (0-5 similarity).

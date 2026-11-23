@@ -1,5 +1,5 @@
 {
- "comment": "oads dataset pack schema \u2014 tool/gen/ds/generate.py emits manifests, configs, dispatch, facades, Python wrappers, and license/doc tables from this file. Decode bodies and custom Dataset impls stay handwritten in src/rs/<domain>/<name>.rs.",
+ "comment": "oads dataset pack schema — tool/gen/ds/generate.py emits manifests, configs, dispatch, facades, Python wrappers, and license/doc tables from this file. Decode bodies and custom Dataset impls stay handwritten in src/rs/<domain>/<name>.rs.",
  "domains": {
   "audio": {
    "doc": "Audio datasets: clip archives decoded to PCM sample matrices and MIDI\n//! performances decoded to `(pitch, step, duration)` event matrices.\n//!\n//! Waveform loaders upload a `[N, 1, S]` F32 sample matrix and a `[N]` F32\n//! label matrix, so per-sample slices collate through [`oa::data`] the same\n//! way image batches do. Sequence loaders expose fixed-length event windows\n//! as device slices, so batches collate without padding.",
@@ -7,13 +7,18 @@
   },
   "image": {
    "doc": "Image datasets: IDX-digit packs and archive-decoded photographic corpora.\n//!\n//! Every loader uploads a `[N, C, H, W]` F32 image matrix and a `[N]` F32\n//! label matrix, so per-sample slices collate to NCHW batches through\n//! [`oa::data`].",
-   "py_doc": "Image datasets: IDX-digit packs and archive-decoded photographic corpora.\n\nEvery loader uploads a [N, C, H, W] f32 image matrix and a [N] f32 label\nmatrix, so per-sample slices collate to NCHW batches through `oa.data`."
+   "py_doc": "Image datasets: IDX-digit packs and archive-decoded photographic corpora.\n\nEvery loader uploads a [N, C, H, W] f32 image matrix and a [N] f32 label\nmatrix, so per-sample slices collate to NCHW batches through `oa.data`.",
+   "internal_modules": [
+    "folder"
+   ]
   },
   "text": {
    "doc": "Text datasets: character and document corpora.",
    "py_doc": "Text datasets: character and document corpora.",
    "internal_modules": [
-    "document"
+    "document",
+    "gluetsv",
+    "recordl"
    ]
   },
   "video": {
@@ -406,7 +411,7 @@
     "consts": [
      "COMMANDS"
     ],
-    "doc": "Google mini Speech Commands; see `oads.dataset.MatrixDataset`.\n\nsamples is [N, 1, 16000] f32 mono PCM at 16 kHz \u2014 shorter clips are\nzero-padded \u2014 and labels is [N] f32 class indices into COMMANDS. The pack\nhas no official split; shuffle and partition through oa.data."
+    "doc": "Google mini Speech Commands; see `oads.dataset.MatrixDataset`.\n\nsamples is [N, 1, 16000] f32 mono PCM at 16 kHz — shorter clips are\nzero-padded — and labels is [N] f32 class indices into COMMANDS. The pack\nhas no official split; shuffle and partition through oa.data."
    },
    "doc": {
     "samples": "8,000 clips",
@@ -1034,7 +1039,7 @@
    "python": {
     "contract": "matrix",
     "feature": "samples",
-    "doc": "Google Speech Commands v0.02; see `oads.dataset.MatrixDataset`.\n\nsamples is [N, 1, 16000] f32 mono PCM at 16 kHz \u2014 shorter clips are\nzero-padded \u2014 and labels is [N] f32 class indices into COMMANDS.",
+    "doc": "Google Speech Commands v0.02; see `oads.dataset.MatrixDataset`.\n\nsamples is [N, 1, 16000] f32 mono PCM at 16 kHz — shorter clips are\nzero-padded — and labels is [N] f32 class indices into COMMANDS.",
     "feature_doc": "Full [N, 1, 16000] f32 waveform matrix; alias of `x`.",
     "consts": [
      "COMMANDS"
@@ -1252,7 +1257,7 @@
     "contract": "matrix",
     "feature": "features",
     "unsplit": true,
-    "doc": "Titanic passenger survival table; see `oads.dataset.MatrixDataset`.\n\nfeatures is [891, 9] f32 \u2014 pclass, sex, age, sibsp, parch, fare, and\none-hot embarked \u2014 and labels is [891] f32 survival flags. Missing age\nfills with the column median; missing embarked fills S. The pack carries\nall 891 rows unsplit; partition with oa.data.random_split.",
+    "doc": "Titanic passenger survival table; see `oads.dataset.MatrixDataset`.\n\nfeatures is [891, 9] f32 — pclass, sex, age, sibsp, parch, fare, and\none-hot embarked — and labels is [891] f32 survival flags. Missing age\nfills with the column median; missing embarked fills S. The pack carries\nall 891 rows unsplit; partition with oa.data.random_split.",
     "feature_doc": "Full [891, 9] f32 feature matrix; alias of `x`.",
     "load_doc": "Fetch, verify, decode, and upload all 891 rows.\n\nnormalize=True scales each column to [0, 1] by its min-max range;\nnormalize=False keeps encoded units. progress=True renders the\ndownload bar."
    },
@@ -1539,6 +1544,7 @@
     ],
     "dispatch": {
      "Train": "Train",
+     "Validation": "Validation",
      "Test": "Test"
     }
    },
@@ -1647,6 +1653,3290 @@
      "shake256": "c19bf0fe7668604ce2b590e63fc52f54b63645f59b2f83600cce812da0a7c0a9",
      "urls": [
       "https://datashare.ed.ac.uk/download/DS_10283_3443.zip"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "cats_vs_dogs",
+   "domain": "image",
+   "class": "CatsVsDogs",
+   "version": "1.0.0",
+   "license": "unspecified",
+   "license_label": "unspecified",
+   "license_file": "provenance.txt",
+   "upstream": "Microsoft Kaggle cats and dogs (Asirra)",
+   "upstream_short": "microsoft.com",
+   "progress": true,
+   "split": null,
+   "imagefolder": {
+    "labels": "classdirs",
+    "roots": {
+     "_": "PetImages"
+    }
+   },
+   "config": [
+    {
+     "name": "size",
+     "type": "Option<(u32, u32)>",
+     "generic": null,
+     "dispatch": "None",
+     "default": "None",
+     "doc": "Resize each decoded image to `(width, height)` via bilinear\nsampling; `None` keeps the native extent per sample."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "imagefolder",
+    "consts": [
+     "CLASSES"
+    ],
+    "doc": "Microsoft Kaggle cats vs dogs — 25,000 pet photos under `PetImages/{Cat,Dog}`.\n\nA few upstream members are corrupt JPEGs (documented Kaggle issue); the\nindex includes them and decode errors surface lazily on access. No\nofficial split — partition with `oa.data.random_split`."
+   },
+   "consts": [
+    {
+     "name": "CLASSES",
+     "type": "[&str; 2]",
+     "value": "[\"Cat\", \"Dog\"]",
+     "export": false,
+     "doc": "Class names in label order; label `0` is `Cat`, `1` is `Dog`."
+    }
+   ],
+   "doc": {
+    "samples": "25,000 photos (12,500 per class)",
+    "shape": "lazy `[1, 3, H, W]` F32 NCHW + `[N]` labels"
+   },
+   "files": [
+    {
+     "name": "kagglecatsanddogs_5340.zip",
+     "size": 824887076,
+     "shake256": "d91c620dd7d2012251df4a50ac5f56a5dade1680a41b79331a6f3c5281ee0c23",
+     "urls": [
+      "https://download.microsoft.com/download/3/E/1/3E1C3F21-ECDB-4869-8368-6DEBA77B919F/kagglecatsanddogs_5340.zip"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "rock_paper_scissors",
+   "domain": "image",
+   "class": "RockPaperScissors",
+   "version": "1.0.0",
+   "license": "unspecified",
+   "license_label": "unspecified",
+   "license_file": "provenance.txt",
+   "upstream": "Laurence Moroney (laurencemoroney.com)",
+   "upstream_short": "tensorflow.org",
+   "progress": true,
+   "split": {
+    "kind": "enum",
+    "doc": "Official rock-paper-scissors split selection.",
+    "variants": [
+     {
+      "name": "Train",
+      "doc": "`rps.zip` members (2,520 images).",
+      "default": true
+     },
+     {
+      "name": "Test",
+      "doc": "`rps-test-set.zip` members (372 images)."
+     }
+    ],
+    "dispatch": {
+     "Train": "Train",
+     "Test": "Test"
+    }
+   },
+   "imagefolder": {
+    "labels": "classdirs",
+    "roots": {
+     "Train": "train/rps",
+     "Test": "test/rps-test-set"
+    },
+    "files": {
+     "Train": [
+      "rps.zip"
+     ],
+     "Test": [
+      "rps-test-set.zip"
+     ]
+    }
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "RockPaperScissorsSplit",
+     "generic": "split",
+     "default": "RockPaperScissorsSplit::Train",
+     "doc": "Which official split to materialize."
+    },
+    {
+     "name": "size",
+     "type": "Option<(u32, u32)>",
+     "generic": null,
+     "dispatch": "None",
+     "default": "None",
+     "doc": "Resize each decoded image to `(width, height)` via bilinear\nsampling; `None` keeps the native extent per sample."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "imagefolder",
+    "consts": [],
+    "doc": "Rock-paper-scissors hand gestures — 2,520 train + 372 test 300x300 PNGs."
+   },
+   "consts": [],
+   "doc": {
+    "samples": "2,520 train / 372 test",
+    "shape": "lazy `[1, 3, 300, 300]` F32 NCHW + `[N]` labels"
+   },
+   "files": [
+    {
+     "name": "rps.zip",
+     "size": 200682221,
+     "shake256": "b07c00df6ffc0e76130c9cc56a0fb88bd15c89432eb3f7f68fc1a67224056558",
+     "urls": [
+      "https://storage.googleapis.com/download.tensorflow.org/data/rps.zip"
+     ]
+    },
+    {
+     "name": "rps-test-set.zip",
+     "size": 29516758,
+     "shake256": "345f7182a40148959b4d2796930c99af61b040927353dcac8cba016e336c334b",
+     "urls": [
+      "https://storage.googleapis.com/download.tensorflow.org/data/rps-test-set.zip"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "horses_or_humans",
+   "domain": "image",
+   "class": "HorsesOrHumans",
+   "version": "1.0.0",
+   "license": "unspecified",
+   "license_label": "unspecified",
+   "license_file": "provenance.txt",
+   "upstream": "Laurence Moroney (laurencemoroney.com)",
+   "upstream_short": "tensorflow.org",
+   "progress": true,
+   "split": {
+    "kind": "enum",
+    "doc": "Official horses-or-humans split selection.",
+    "variants": [
+     {
+      "name": "Train",
+      "doc": "`horse-or-human.zip` members (1,027 images).",
+      "default": true
+     },
+     {
+      "name": "Validation",
+      "doc": "`validation-horse-or-human.zip` members\n(256 images)."
+     }
+    ],
+    "dispatch": {
+     "Train": "Train",
+     "Validation": "Validation"
+    }
+   },
+   "imagefolder": {
+    "labels": "classdirs",
+    "roots": {
+     "Train": "train",
+     "Validation": "validation"
+    },
+    "files": {
+     "Train": [
+      "horse-or-human.zip"
+     ],
+     "Validation": [
+      "validation-horse-or-human.zip"
+     ]
+    }
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "HorsesOrHumansSplit",
+     "generic": "split",
+     "default": "HorsesOrHumansSplit::Train",
+     "doc": "Which official split to materialize."
+    },
+    {
+     "name": "size",
+     "type": "Option<(u32, u32)>",
+     "generic": null,
+     "dispatch": "None",
+     "default": "None",
+     "doc": "Resize each decoded image to `(width, height)` via bilinear\nsampling; `None` keeps the native extent per sample."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "imagefolder",
+    "consts": [],
+    "doc": "Horses or humans — 1,027 train + 256 validation 300x300 PNGs."
+   },
+   "consts": [],
+   "doc": {
+    "samples": "1,027 train / 256 validation",
+    "shape": "lazy `[1, 3, 300, 300]` F32 NCHW + `[N]` labels"
+   },
+   "files": [
+    {
+     "name": "horse-or-human.zip",
+     "size": 149574867,
+     "shake256": "73e4db5f2ccd0542d8187ae105768f4e71b64dde0b900e82e5dea22991324cec",
+     "urls": [
+      "https://storage.googleapis.com/download.tensorflow.org/data/horse-or-human.zip"
+     ]
+    },
+    {
+     "name": "validation-horse-or-human.zip",
+     "size": 11480187,
+     "shake256": "06d7f2acf0b2e9261ab5551921a4c5de0b23575c1236116f8a38d0bc230a5e14",
+     "urls": [
+      "https://storage.googleapis.com/download.tensorflow.org/data/validation-horse-or-human.zip"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "oxford_iiit_pet",
+   "domain": "image",
+   "class": "OxfordIiitPet",
+   "version": "3.2.0",
+   "license": "unspecified",
+   "license_label": "unspecified",
+   "license_file": "provenance.txt",
+   "upstream": "University of Oxford VGG (Parkhi et al.)",
+   "upstream_short": "robots.ox.ac.uk",
+   "progress": true,
+   "split": null,
+   "imagefolder": {
+    "labels": "custom",
+    "roots": {
+     "_": "images"
+    }
+   },
+   "config": [
+    {
+     "name": "size",
+     "type": "Option<(u32, u32)>",
+     "generic": null,
+     "dispatch": "None",
+     "default": "None",
+     "doc": "Resize each decoded image to `(width, height)` via bilinear\nsampling; `None` keeps the native extent per sample."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "imagefolder",
+    "doc": "Oxford-IIIT pet breeds — 7,390 images over 37 cat/dog breeds.\n\nBreed labels derive from the `<Breed>_<n>.jpg` filename stem. The\nupstream trainval/test lists live in `annotations.tar.gz`, which this\npack does not carry — partition with `oa.data.random_split`."
+   },
+   "consts": [],
+   "doc": {
+    "samples": "7,390 images over 37 breeds",
+    "shape": "lazy `[1, 3, H, W]` F32 NCHW + `[N]` labels"
+   },
+   "files": [
+    {
+     "name": "images.tar.gz",
+     "size": 791918971,
+     "shake256": "f2c0d057c6bcd11402b7ce07921857b2205ae1e29fd0602d7afe3ca256950440",
+     "urls": [
+      "https://www.robots.ox.ac.uk/~vgg/data/pets/data/images.tar.gz"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "stanford_dogs",
+   "domain": "image",
+   "class": "StanfordDogs",
+   "version": "0.2.0",
+   "license": "unspecified",
+   "license_label": "unspecified",
+   "license_file": "provenance.txt",
+   "upstream": "Stanford Vision Lab (Khosla et al.)",
+   "upstream_short": "stanford.edu",
+   "progress": true,
+   "split": null,
+   "imagefolder": {
+    "labels": "classdirs",
+    "roots": {
+     "_": "Images"
+    }
+   },
+   "config": [
+    {
+     "name": "size",
+     "type": "Option<(u32, u32)>",
+     "generic": null,
+     "dispatch": "None",
+     "default": "None",
+     "doc": "Resize each decoded image to `(width, height)` via bilinear\nsampling; `None` keeps the native extent per sample."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "imagefolder",
+    "doc": "Stanford dogs — 20,580 images over 120 ImageNet synset directories.\n\nLabels are the `n<wnid>-<breed>` directory names. The upstream split\nlives in the annotation tar, which this pack does not carry —\npartition with `oa.data.random_split`."
+   },
+   "consts": [],
+   "doc": {
+    "samples": "20,580 images over 120 breeds",
+    "shape": "lazy `[1, 3, H, W]` F32 NCHW + `[N]` labels"
+   },
+   "files": [
+    {
+     "name": "images.tar",
+     "size": 793579520,
+     "shake256": "c13a67362536ef85a58cc4527863f4df1e1c1869f6e589ed622d4cbf3772fbab",
+     "urls": [
+      "http://vision.stanford.edu/aditya86/ImageNetDogs/images.tar"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "imagenette",
+   "domain": "image",
+   "class": "Imagenette",
+   "version": "1.0.0",
+   "license": "unspecified",
+   "license_label": "unspecified",
+   "license_file": "provenance.txt",
+   "upstream": "fast.ai (Imagenette 320px)",
+   "upstream_short": "fast.ai",
+   "progress": true,
+   "split": {
+    "kind": "enum",
+    "doc": "Official Imagenette split selection.",
+    "variants": [
+     {
+      "name": "Train",
+      "doc": "`imagenette2-320/train` members (9,469 images).",
+      "default": true
+     },
+     {
+      "name": "Validation",
+      "doc": "`imagenette2-320/val` members\n(3,925 images)."
+     }
+    ],
+    "dispatch": {
+     "Train": "Train",
+     "Validation": "Validation"
+    }
+   },
+   "imagefolder": {
+    "labels": "classdirs",
+    "roots": {
+     "Train": "imagenette2-320/train",
+     "Validation": "imagenette2-320/val"
+    }
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "ImagenetteSplit",
+     "generic": "split",
+     "default": "ImagenetteSplit::Train",
+     "doc": "Which official split to materialize."
+    },
+    {
+     "name": "size",
+     "type": "Option<(u32, u32)>",
+     "generic": null,
+     "dispatch": "None",
+     "default": "None",
+     "doc": "Resize each decoded image to `(width, height)` via bilinear\nsampling; `None` keeps the native extent per sample."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "imagefolder",
+    "doc": "Imagenette 320px — 9,469 train + 3,925 validation JPEGs over\n10 ImageNet synset directories."
+   },
+   "consts": [],
+   "doc": {
+    "samples": "9,469 train / 3,925 validation",
+    "shape": "lazy `[1, 3, H, W]` F32 NCHW + `[N]` labels"
+   },
+   "files": [
+    {
+     "name": "imagenette2-320.tgz",
+     "size": 341663724,
+     "shake256": "aaf7c83b93824f9153db46ab839527e657d2f696ca4a9a4a5013fb35ea1b12b9",
+     "urls": [
+      "https://s3.amazonaws.com/fast-ai-imageclas/imagenette2-320.tgz"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "imagewang",
+   "domain": "image",
+   "class": "Imagewang",
+   "version": "1.0.0",
+   "license": "unspecified",
+   "license_label": "unspecified",
+   "license_file": "provenance.txt",
+   "upstream": "fast.ai (Imagewang 320px)",
+   "upstream_short": "fast.ai",
+   "progress": true,
+   "split": {
+    "kind": "enum",
+    "doc": "Official Imagewang split selection.",
+    "variants": [
+     {
+      "name": "Train",
+      "doc": "`imagewang-320/train` members (14,669 images).",
+      "default": true
+     },
+     {
+      "name": "Validation",
+      "doc": "`imagewang-320/val` members\n(3,929 images)."
+     }
+    ],
+    "dispatch": {
+     "Train": "Train",
+     "Validation": "Validation"
+    }
+   },
+   "imagefolder": {
+    "labels": "classdirs",
+    "roots": {
+     "Train": "imagewang-320/train",
+     "Validation": "imagewang-320/val"
+    }
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "ImagewangSplit",
+     "generic": "split",
+     "default": "ImagewangSplit::Train",
+     "doc": "Which official split to materialize."
+    },
+    {
+     "name": "size",
+     "type": "Option<(u32, u32)>",
+     "generic": null,
+     "dispatch": "None",
+     "default": "None",
+     "doc": "Resize each decoded image to `(width, height)` via bilinear\nsampling; `None` keeps the native extent per sample."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "imagefolder",
+    "doc": "Imagewang 320px — 14,669 train + 3,929 validation JPEGs over\n20 synset directories. The upstream `unsup/` member tree is not\nindexed."
+   },
+   "consts": [],
+   "doc": {
+    "samples": "14,669 train / 3,929 validation",
+    "shape": "lazy `[1, 3, H, W]` F32 NCHW + `[N]` labels"
+   },
+   "files": [
+    {
+     "name": "imagewang-320.tgz",
+     "size": 669826647,
+     "shake256": "8635c5ad7e0b557e1ac19cb911b8eb5a87d35a7f7f4f557f9cdaada0b2de5edc",
+     "urls": [
+      "https://s3.amazonaws.com/fast-ai-imageclas/imagewang-320.tgz"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "cub200",
+   "domain": "image",
+   "class": "Cub200",
+   "version": "1.0.0",
+   "license": "unspecified",
+   "license_label": "unspecified",
+   "license_file": "provenance.txt",
+   "upstream": "Caltech-UCSD (CUB-200-2011)",
+   "upstream_short": "caltech.edu",
+   "progress": true,
+   "split": null,
+   "imagefolder": {
+    "labels": "custom",
+    "roots": {
+     "_": "."
+    }
+   },
+   "config": [
+    {
+     "name": "size",
+     "type": "Option<(u32, u32)>",
+     "generic": null,
+     "dispatch": "None",
+     "default": "None",
+     "doc": "Resize each decoded image to `(width, height)` via bilinear\nsampling; `None` keeps the native extent per sample."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "imagefolder",
+    "doc": "CUB-200-2011 — 11,788 bird images over 200 `NNN.Name`\nspecies directories. The upstream tar scatters class 187\nunder a top-level `images/` tree; the index covers both\nroots. `train_test_split.txt` is not applied — partition\nwith `oa.data.random_split`."
+   },
+   "consts": [],
+   "doc": {
+    "samples": "11,788 images over 200 species",
+    "shape": "lazy `[1, 3, H, W]` F32 NCHW + `[N]` labels"
+   },
+   "files": [
+    {
+     "name": "CUB_200_2011.tgz",
+     "size": 1150585339,
+     "shake256": "e1862c1d4e4b15fbf08a620c74ed33fc50d1cc317be771ddf9fe32259244ee78",
+     "urls": [
+      "https://data.caltech.edu/records/65de6-vp158/files/CUB_200_2011.tgz"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "eurosat",
+   "domain": "image",
+   "class": "Eurosat",
+   "version": "2.0.0",
+   "license": "unspecified",
+   "license_label": "unspecified",
+   "license_file": "provenance.txt",
+   "upstream": "DLR/ESA Sentinel-2 (Helber et al.); torchgeo mirror",
+   "upstream_short": "huggingface.co/torchgeo",
+   "progress": true,
+   "split": null,
+   "imagefolder": {
+    "labels": "classdirs",
+    "roots": {
+     "_": "2750"
+    }
+   },
+   "config": [
+    {
+     "name": "size",
+     "type": "Option<(u32, u32)>",
+     "generic": null,
+     "dispatch": "None",
+     "default": "None",
+     "doc": "Resize each decoded image to `(width, height)` via bilinear\nsampling; `None` keeps the native extent per sample."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "imagefolder",
+    "doc": "EuroSAT Sentinel-2 land use — 27,000 64x64 JPEGs over 10\nclasses. The upstream dataset ships no official split —\npartition with `oa.data.random_split`."
+   },
+   "consts": [],
+   "doc": {
+    "samples": "27,000 images over 10 classes",
+    "shape": "lazy `[1, 3, 64, 64]` F32 NCHW + `[N]` labels"
+   },
+   "files": [
+    {
+     "name": "EuroSAT.zip",
+     "size": 94280567,
+     "shake256": "f5de71ab8ac0daa31ce263897fa79ede9071d555a167015621f8653ad294048c",
+     "urls": [
+      "https://huggingface.co/datasets/torchgeo/eurosat/resolve/main/EuroSAT.zip"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "food101",
+   "domain": "image",
+   "class": "Food101",
+   "version": "3.0.0",
+   "license": "unspecified",
+   "license_label": "unspecified",
+   "license_file": "provenance.txt",
+   "upstream": "ETH Zurich CVL (Bossard et al.)",
+   "upstream_short": "vision.ee.ethz.ch",
+   "progress": true,
+   "split": {
+    "kind": "enum",
+    "doc": "Official Food-101 split selection.",
+    "variants": [
+     {
+      "name": "Train",
+      "doc": "`meta/train.txt` members (75,750 images).",
+      "default": true
+     },
+     {
+      "name": "Test",
+      "doc": "`meta/test.txt` members (25,250 images)."
+     }
+    ],
+    "dispatch": {
+     "Train": "Train",
+     "Test": "Test"
+    }
+   },
+   "imagefolder": {
+    "labels": "custom",
+    "roots": {
+     "Train": "food-101",
+     "Test": "food-101"
+    }
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "Food101Split",
+     "generic": "split",
+     "default": "Food101Split::Train",
+     "doc": "Which official split to materialize."
+    },
+    {
+     "name": "size",
+     "type": "Option<(u32, u32)>",
+     "generic": null,
+     "dispatch": "None",
+     "default": "None",
+     "doc": "Resize each decoded image to `(width, height)` via bilinear\nsampling; `None` keeps the native extent per sample."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "imagefolder",
+    "doc": "Food-101 — 75,750 train + 25,250 test JPEGs over 101 dish\nclasses. The official split is assigned by `meta/{train,test}.txt`."
+   },
+   "consts": [],
+   "doc": {
+    "samples": "75,750 train / 25,250 test",
+    "shape": "lazy `[1, 3, H, W]` F32 NCHW + `[N]` labels"
+   },
+   "files": [
+    {
+     "name": "food-101.tar.gz",
+     "size": 4996278331,
+     "shake256": "2e94194bc2e149f6a8827a70269bae032d300bbdf4353fe2e2a5170db68cf90e",
+     "urls": [
+      "https://data.vision.ee.ethz.ch/cvl/food-101.tar.gz"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "beans",
+   "domain": "image",
+   "class": "Beans",
+   "version": "0.1.0",
+   "license": "unspecified",
+   "license_label": "unspecified",
+   "license_file": "provenance.txt",
+   "upstream": "AI-Lab-Makerere (Uganda bean disease)",
+   "upstream_short": "huggingface.co/AI-Lab-Makerere",
+   "progress": true,
+   "split": {
+    "kind": "enum",
+    "doc": "Official beans split selection.",
+    "variants": [
+     {
+      "name": "Train",
+      "doc": "`train.zip` members (1,034 images).",
+      "default": true
+     },
+     {
+      "name": "Validation",
+      "doc": "`validation.zip` members\n(133 images)."
+     },
+     {
+      "name": "Test",
+      "doc": "`test.zip` members (128 images)."
+     }
+    ],
+    "dispatch": {
+     "Train": "Train",
+     "Validation": "Validation",
+     "Test": "Test"
+    }
+   },
+   "imagefolder": {
+    "labels": "classdirs",
+    "roots": {
+     "Train": "train/train",
+     "Validation": "validation/validation",
+     "Test": "test/test"
+    },
+    "files": {
+     "Train": [
+      "train.zip"
+     ],
+     "Validation": [
+      "validation.zip"
+     ],
+     "Test": [
+      "test.zip"
+     ]
+    }
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "BeansSplit",
+     "generic": "split",
+     "default": "BeansSplit::Train",
+     "doc": "Which official split to materialize."
+    },
+    {
+     "name": "size",
+     "type": "Option<(u32, u32)>",
+     "generic": null,
+     "dispatch": "None",
+     "default": "None",
+     "doc": "Resize each decoded image to `(width, height)` via bilinear\nsampling; `None` keeps the native extent per sample."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "imagefolder",
+    "doc": "Beans leaf disease — 1,034 train + 133 validation + 128 test\nJPEGs over 3 classes (`angular_leaf_spot`, `bean_rust`, `healthy`)."
+   },
+   "consts": [],
+   "doc": {
+    "samples": "1,034 train / 133 validation / 128 test",
+    "shape": "lazy `[1, 3, H, W]` F32 NCHW + `[N]` labels"
+   },
+   "files": [
+    {
+     "name": "train.zip",
+     "size": 166352440,
+     "shake256": "c2cda93f585478876226d52339aa460968a40662bcc7d785a2562c3a3d6c890a",
+     "urls": [
+      "https://huggingface.co/datasets/AI-Lab-Makerere/beans/resolve/main/data/train.zip"
+     ]
+    },
+    {
+     "name": "validation.zip",
+     "size": 18504213,
+     "shake256": "7f8fe3c66775cced0e1f7db2f89adf2bffded7b63409f11f87cefe3b73056eb7",
+     "urls": [
+      "https://huggingface.co/datasets/AI-Lab-Makerere/beans/resolve/main/data/validation.zip"
+     ]
+    },
+    {
+     "name": "test.zip",
+     "size": 26283002,
+     "shake256": "cc8b46078242e11094700f0479db7de38b648ab6968ce07fdb7822e342f33ce8",
+     "urls": [
+      "https://huggingface.co/datasets/AI-Lab-Makerere/beans/resolve/main/data/test.zip"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "dtd",
+   "domain": "image",
+   "class": "Dtd",
+   "version": "3.0.1",
+   "license": "unspecified",
+   "license_label": "unspecified",
+   "license_file": "provenance.txt",
+   "upstream": "University of Oxford VGG (Cimpoi et al.)",
+   "upstream_short": "robots.ox.ac.uk",
+   "progress": true,
+   "split": {
+    "kind": "enum",
+    "doc": "Official DTD fold-1 split selection.",
+    "variants": [
+     {
+      "name": "Train",
+      "doc": "`labels/train1.txt` members (1,880 images).",
+      "default": true
+     },
+     {
+      "name": "Validation",
+      "doc": "`labels/val1.txt` members\n(1,880 images)."
+     },
+     {
+      "name": "Test",
+      "doc": "`labels/test1.txt` members\n(1,880 images)."
+     }
+    ],
+    "dispatch": {
+     "Train": "Train",
+     "Validation": "Validation",
+     "Test": "Test"
+    }
+   },
+   "imagefolder": {
+    "labels": "custom",
+    "roots": {
+     "Train": "dtd",
+     "Validation": "dtd",
+     "Test": "dtd"
+    }
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "DtdSplit",
+     "generic": "split",
+     "default": "DtdSplit::Train",
+     "doc": "Which official split to materialize."
+    },
+    {
+     "name": "size",
+     "type": "Option<(u32, u32)>",
+     "generic": null,
+     "dispatch": "None",
+     "default": "None",
+     "doc": "Resize each decoded image to `(width, height)` via bilinear\nsampling; `None` keeps the native extent per sample."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "imagefolder",
+    "doc": "Describable Textures Dataset — 5,640 JPEGs over 47 texture\nclasses. Splits follow the upstream fold-1 lists\n(`labels/{train,val,test}1.txt`)."
+   },
+   "consts": [],
+   "doc": {
+    "samples": "1,880 train / 1,880 validation / 1,880 test (fold 1)",
+    "shape": "lazy `[1, 3, H, W]` F32 NCHW + `[N]` labels"
+   },
+   "files": [
+    {
+     "name": "dtd-r1.0.1.tar.gz",
+     "size": 625239812,
+     "shake256": "c05c7979757057d80016b74c5926df4ac3bd5e0e09042767d4388b139d346f51",
+     "urls": [
+      "https://thor.robots.ox.ac.uk/dtd/dtd-r1.0.1.tar.gz",
+      "https://www.robots.ox.ac.uk/~vgg/data/dtd/download/dtd-r1.0.1.tar.gz"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "lfw",
+   "domain": "image",
+   "class": "Lfw",
+   "version": "0.4.0",
+   "license": "unspecified",
+   "license_label": "unspecified",
+   "license_file": "provenance.txt",
+   "upstream": "UMass LFW (Huang et al., funneled variant)",
+   "upstream_short": "figshare",
+   "progress": true,
+   "split": null,
+   "imagefolder": {
+    "labels": "classdirs",
+    "roots": {
+     "_": "lfw_funneled"
+    }
+   },
+   "config": [
+    {
+     "name": "size",
+     "type": "Option<(u32, u32)>",
+     "generic": null,
+     "dispatch": "None",
+     "default": "None",
+     "doc": "Resize each decoded image to `(width, height)` via bilinear\nsampling; `None` keeps the native extent per sample."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "imagefolder",
+    "doc": "Labeled Faces in the Wild (funneled) — 13,233 JPEGs over\n5,749 identity directories. Upstream ships no official\nclassification split — partition with `oa.data.random_split`."
+   },
+   "consts": [],
+   "doc": {
+    "samples": "13,233 images over 5,749 identities",
+    "shape": "lazy `[1, 3, 250, 250]` F32 NCHW + `[N]` labels"
+   },
+   "files": [
+    {
+     "name": "lfw-funneled.tgz",
+     "size": 243346528,
+     "shake256": "564aa87a6cdd9a2d27bc31b7938c6454ca8bdade1b3cb38fc6d92e9dda942bbf",
+     "urls": [
+      "https://ndownloader.figshare.com/files/5976015"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "uc_merced",
+   "domain": "image",
+   "class": "UcMerced",
+   "version": "1.0.0",
+   "license": "unspecified",
+   "license_label": "unspecified",
+   "license_file": "provenance.txt",
+   "upstream": "UC Merced (Yang & Newsam); torchgeo mirror",
+   "upstream_short": "huggingface.co/torchgeo",
+   "progress": true,
+   "split": null,
+   "imagefolder": {
+    "labels": "classdirs",
+    "roots": {
+     "_": "UCMerced_LandUse/Images"
+    }
+   },
+   "config": [
+    {
+     "name": "size",
+     "type": "Option<(u32, u32)>",
+     "generic": null,
+     "dispatch": "None",
+     "default": "None",
+     "doc": "Resize each decoded image to `(width, height)` via bilinear\nsampling; `None` keeps the native extent per sample."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "imagefolder",
+    "doc": "UC Merced land use — 2,100 256x256 aerial TIFFs over 21\nclasses. Upstream ships no official split — partition with\n`oa.data.random_split`."
+   },
+   "consts": [],
+   "doc": {
+    "samples": "2,100 images over 21 classes",
+    "shape": "lazy `[1, 3, 256, 256]` F32 NCHW + `[N]` labels"
+   },
+   "files": [
+    {
+     "name": "UCMerced_LandUse.zip",
+     "size": 332468434,
+     "shake256": "500bce342a9cd50612326a701a75d7f0783e4f91355a49b7d2ce1f0c416579b6",
+     "urls": [
+      "https://huggingface.co/datasets/torchgeo/ucmerced/resolve/main/UCMerced_LandUse.zip"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "oxford_flowers102",
+   "domain": "image",
+   "class": "OxfordFlowers102",
+   "version": "2.0.0",
+   "license": "unspecified",
+   "license_label": "unspecified",
+   "license_file": "provenance.txt",
+   "upstream": "Oxford VGG 102-category flowers (Nilsback & Zisserman)",
+   "upstream_short": "robots.ox.ac.uk",
+   "progress": true,
+   "split": {
+    "kind": "enum",
+    "doc": "Official Oxford-102 split selection via `setid.mat`.",
+    "variants": [
+     {
+      "name": "Train",
+      "doc": "`trnid` members (1,020 images).",
+      "default": true
+     },
+     {
+      "name": "Validation",
+      "doc": "`valid` members (1,020 images)."
+     },
+     {
+      "name": "Test",
+      "doc": "`tstid` members (6,149 images)."
+     }
+    ],
+    "dispatch": {
+     "Train": "Train",
+     "Validation": "Validation",
+     "Test": "Test"
+    }
+   },
+   "imagefolder": {
+    "labels": "custom",
+    "roots": {
+     "_": "jpg"
+    },
+    "files": {
+     "_": [
+      "102flowers.tgz"
+     ]
+    }
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "OxfordFlowers102Split",
+     "generic": "split",
+     "default": "OxfordFlowers102Split::Train",
+     "doc": "Which official split to materialize."
+    },
+    {
+     "name": "size",
+     "type": "Option<(u32, u32)>",
+     "generic": null,
+     "dispatch": "None",
+     "default": "None",
+     "doc": "Resize each decoded image to `(width, height)` via bilinear\nsampling; `None` keeps the native extent per sample."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "imagefolder",
+    "doc": "Oxford 102-category flowers — 8,189 photos, official\n`setid.mat` train/validation/test split (1,020/1,020/6,149).\nClass names follow the published Oxford VGG ordering."
+   },
+   "consts": [],
+   "doc": {
+    "samples": "8,189 images over 102 classes",
+    "shape": "lazy `[1, 3, H, W]` F32 NCHW + `[N]` labels"
+   },
+   "files": [
+    {
+     "name": "102flowers.tgz",
+     "size": 344862509,
+     "shake256": "0a61d14cf90a5fd624614f712486b50c2f6fae35c4a978df35c760f994e2ed85",
+     "urls": [
+      "https://thor.robots.ox.ac.uk/flowers/102/102flowers.tgz"
+     ]
+    },
+    {
+     "name": "imagelabels.mat",
+     "size": 502,
+     "shake256": "910a7201cff39a946020ddae2391fb76b613465fa4b709ce4351e8ef67db0a8e",
+     "urls": [
+      "https://thor.robots.ox.ac.uk/flowers/102/imagelabels.mat"
+     ]
+    },
+    {
+     "name": "setid.mat",
+     "size": 14989,
+     "shake256": "6a4a3e0beb57d7e0b66c6e7b183760be5231964f1aa89644e4fc243e8b45b3f7",
+     "urls": [
+      "https://thor.robots.ox.ac.uk/flowers/102/setid.mat"
+     ]
+    }
+   ],
+   "extra_exports": [
+    "NAMES"
+   ]
+  },
+  {
+   "name": "places365_small",
+   "domain": "image",
+   "class": "Places365Small",
+   "version": "1.0.0",
+   "license": "MIT",
+   "license_label": "MIT",
+   "license_file": "provenance.txt",
+   "upstream": "MIT CSAIL Places365 standard, 256x256 easy format (Zhou et al.)",
+   "upstream_short": "csail.mit.edu",
+   "progress": true,
+   "split": {
+    "kind": "enum",
+    "doc": "Official Places365 split selection.",
+    "variants": [
+     {
+      "name": "Train",
+      "doc": "`places365_standard/train` members (1,803,460 images).",
+      "default": true
+     },
+     {
+      "name": "Validation",
+      "doc": "`places365_standard/val` members (36,500 images,\n100 per class)."
+     }
+    ],
+    "dispatch": {
+     "Train": "Train",
+     "Validation": "Validation"
+    }
+   },
+   "imagefolder": {
+    "labels": "classdirs",
+    "roots": {
+     "Train": "places365_standard/train",
+     "Validation": "places365_standard/val"
+    },
+    "files": {
+     "_": [
+      "places365standard_easyformat.tar"
+     ]
+    }
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "Places365SmallSplit",
+     "generic": "split",
+     "default": "Places365SmallSplit::Train",
+     "doc": "Which official split to materialize."
+    },
+    {
+     "name": "size",
+     "type": "Option<(u32, u32)>",
+     "generic": null,
+     "dispatch": "None",
+     "default": "None",
+     "doc": "Resize each decoded image to `(width, height)` via bilinear\nsampling; `None` keeps the native 256x256 extent."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "imagefolder",
+    "doc": "Places365-standard small (256x256) — 1,821,710 scene photos\nover 365 classes, official train/validation split. The 25 GB\ntar extracts ~1.8M members; indexing stays lazy over the\nextracted paths."
+   },
+   "consts": [],
+   "doc": {
+    "samples": "1,839,960 images over 365 classes",
+    "shape": "lazy `[1, 3, 256, 256]` F32 NCHW + `[N]` labels"
+   },
+   "files": [
+    {
+     "name": "places365standard_easyformat.tar",
+     "size": 26686689280,
+     "shake256": "72f2962b8df80ae77996da795176d7e125d6546d785774f05f0fa141cf80a1b1",
+     "urls": [
+      "https://data.csail.mit.edu/places/places365/places365standard_easyformat.tar"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "cars196",
+   "domain": "image",
+   "class": "Cars196",
+   "version": "1.0.0",
+   "license": "unspecified",
+   "license_label": "unspecified",
+   "license_file": "provenance.txt",
+   "upstream": "Stanford Cars-196 (Krause et al.); cars196-img mirror",
+   "upstream_short": "huggingface.co/cars196-img",
+   "progress": true,
+   "split": {
+    "kind": "enum",
+    "doc": "Official Cars-196 split selection.",
+    "variants": [
+     {
+      "name": "Train",
+      "doc": "`cars196_train.zip` members (8,144 images).",
+      "default": true
+     },
+     {
+      "name": "Test",
+      "doc": "`cars196_test.zip` members (8,041 images)."
+     }
+    ],
+    "dispatch": {
+     "Train": "Train",
+     "Test": "Test"
+    }
+   },
+   "imagefolder": {
+    "labels": "custom",
+    "roots": {
+     "Train": "train/cars196_train",
+     "Test": "test/cars196_test"
+    },
+    "files": {
+     "Train": [
+      "cars196_train.zip"
+     ],
+     "Test": [
+      "cars196_test.zip"
+     ]
+    }
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "Cars196Split",
+     "generic": "split",
+     "default": "Cars196Split::Train",
+     "doc": "Which official split to materialize."
+    },
+    {
+     "name": "size",
+     "type": "Option<(u32, u32)>",
+     "generic": null,
+     "dispatch": "None",
+     "default": "None",
+     "doc": "Resize each decoded image to `(width, height)` via bilinear\nsampling; `None` keeps the native extent per sample."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "imagefolder",
+    "doc": "Stanford Cars-196 — 16,185 car photos over 196 make/model\nclasses, official train/test split. Classes derive from\n`NNNNN_<Make>_<Model>_<Year>.jpg` filename stems."
+   },
+   "consts": [],
+   "doc": {
+    "samples": "16,185 images over 196 classes",
+    "shape": "lazy `[1, 3, H, W]` F32 NCHW + `[N]` labels"
+   },
+   "files": [
+    {
+     "name": "cars196_train.zip",
+     "size": 980441497,
+     "shake256": "877a4094a8c776221aa06392d91e49f552dba314a5de04a7ef8f15a681988b92",
+     "urls": [
+      "https://huggingface.co/datasets/haodoz0118/cars196-img/resolve/main/cars196_train.zip"
+     ]
+    },
+    {
+     "name": "cars196_test.zip",
+     "size": 978487588,
+     "shake256": "d333fb077e31ef8d3407b93c820a21b552457eb0ca0f7bf0d0a82b88f1630f55",
+     "urls": [
+      "https://huggingface.co/datasets/haodoz0118/cars196-img/resolve/main/cars196_test.zip"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "librispeech",
+   "domain": "audio",
+   "class": "Librispeech",
+   "version": "1.0.0",
+   "license": "CC-BY-4.0",
+   "license_label": "CC BY 4.0",
+   "license_file": "provenance.txt",
+   "upstream": "OpenSLR LibriSpeech dev-clean (Panayotov et al., LibriVox)",
+   "upstream_short": "openslr.org/12",
+   "progress": true,
+   "split": null,
+   "config": [
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "custom"
+   },
+   "consts": [
+    {
+     "name": "SAMPLE_RATE",
+     "type": "usize",
+     "value": "16000",
+     "export": false,
+     "doc": "PCM samples per second; every clip is 16,000 Hz mono FLAC."
+    }
+   ],
+   "doc": {
+    "samples": "2,703 utterances from 40 speakers (dev-clean)",
+    "shape": "lazy `[1, T]` F32 FLAC waveforms + `[N]` speaker ids/lengths"
+   },
+   "files": [
+    {
+     "name": "dev-clean.tar.gz",
+     "size": 337926286,
+     "shake256": "13fa72654cc584ac2f3c11ffaad5e6be1cdb876cbe69ecdadf4a68d21f061678",
+     "urls": [
+      "https://www.openslr.org/resources/12/dev-clean.tar.gz"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "libritts",
+   "domain": "audio",
+   "class": "Libritts",
+   "version": "1.0.0",
+   "license": "CC-BY-4.0",
+   "license_label": "CC BY 4.0",
+   "license_file": "provenance.txt",
+   "upstream": "OpenSLR LibriTTS dev-clean (Zen et al., LibriVox)",
+   "upstream_short": "openslr.org/60",
+   "progress": true,
+   "split": null,
+   "config": [
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "custom"
+   },
+   "consts": [],
+   "doc": {
+    "samples": "5,736 utterances from 40 speakers (dev-clean)",
+    "shape": "lazy `[1, T]` F32 WAV waveforms + `[N]` speaker ids/lengths"
+   },
+   "files": [
+    {
+     "name": "dev-clean.tar.gz",
+     "size": 1291469655,
+     "shake256": "753dac60f3f9da61cdd8293b1169cc16c11cb46d33f87b516b3459e51a19b0bd",
+     "urls": [
+      "https://www.openslr.org/resources/60/dev-clean.tar.gz"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "nsynth",
+   "domain": "audio",
+   "class": "Nsynth",
+   "version": "1.0.0",
+   "license": "CC-BY-4.0",
+   "license_label": "CC BY 4.0",
+   "license_file": "provenance.txt",
+   "upstream": "Google Magenta NSynth test split",
+   "upstream_short": "storage.googleapis.com/magentadata",
+   "progress": true,
+   "split": null,
+   "config": [
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "custom"
+   },
+   "consts": [],
+   "extra_exports": [
+    "FAMILIES"
+   ],
+   "doc": {
+    "samples": "4,096 four-second notes, 11 instrument families (test)",
+    "shape": "lazy `[1, T]` F32 WAV waveforms + `[N]` family/pitch/velocity"
+   },
+   "files": [
+    {
+     "name": "nsynth-test.jsonwav.tar.gz",
+     "size": 349501546,
+     "shake256": "3358a545895ee86d46700e9b5e17a8b9b18fa2bee1eb3e308f17066e2443c5dd",
+     "urls": [
+      "https://storage.googleapis.com/magentadata/datasets/nsynth/nsynth-test.jsonwav.tar.gz"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "glue_sst2",
+   "domain": "text",
+   "class": "GlueSst2",
+   "version": "1.0.0",
+   "license": "various (GLUE collection)",
+   "license_label": "GLUE/custom",
+   "license_file": "provenance.txt",
+   "upstream": "GLUE benchmark SST-2 (Wang et al.)",
+   "upstream_short": "dl.fbaipublicfiles.com/glue",
+   "progress": true,
+   "split": {
+    "kind": "enum",
+    "doc": "GLUE split member selection.",
+    "variants": [
+     {
+      "name": "Train",
+      "doc": "`train.tsv` member.",
+      "default": true
+     },
+     {
+      "name": "Validation",
+      "doc": "`dev.tsv` member."
+     }
+    ],
+    "dispatch": {
+     "Train": "Train",
+     "Validation": "Validation"
+    }
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "GlueSst2Split",
+     "generic": "split",
+     "default": "GlueSst2Split::Train",
+     "doc": "Which split member to decode."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "custom"
+   },
+   "consts": [],
+   "doc": {
+    "samples": "Stanford Sentiment Treebank binary sentiment task",
+    "shape": "`[N, K]` sentence bytes + `[N]` labels"
+   },
+   "files": [
+    {
+     "name": "SST-2.zip",
+     "size": 7439277,
+     "shake256": "574299991e3dbb09e6a6e97c5c72430d68ee6171cbb43d59777dc8610e5db16a",
+     "urls": [
+      "https://dl.fbaipublicfiles.com/glue/data/SST-2.zip"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "glue_cola",
+   "domain": "text",
+   "class": "GlueCola",
+   "version": "1.0.0",
+   "license": "various (GLUE collection)",
+   "license_label": "GLUE/custom",
+   "license_file": "provenance.txt",
+   "upstream": "GLUE benchmark CoLA (Wang et al.)",
+   "upstream_short": "dl.fbaipublicfiles.com/glue",
+   "progress": true,
+   "split": {
+    "kind": "enum",
+    "doc": "GLUE split member selection.",
+    "variants": [
+     {
+      "name": "Train",
+      "doc": "`train.tsv` member.",
+      "default": true
+     },
+     {
+      "name": "Validation",
+      "doc": "`dev.tsv` member."
+     }
+    ],
+    "dispatch": {
+     "Train": "Train",
+     "Validation": "Validation"
+    }
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "GlueColaSplit",
+     "generic": "split",
+     "default": "GlueColaSplit::Train",
+     "doc": "Which split member to decode."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "custom"
+   },
+   "consts": [],
+   "doc": {
+    "samples": "Corpus of Linguistic Acceptability binary judgment task",
+    "shape": "`[N, K]` sentence bytes + `[N]` labels"
+   },
+   "files": [
+    {
+     "name": "CoLA.zip",
+     "size": 376971,
+     "shake256": "880852aae56d290bf7ece84fdf0a46425066493ffc413cea85d48f6914bd0a19",
+     "urls": [
+      "https://dl.fbaipublicfiles.com/glue/data/CoLA.zip"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "glue_qqp",
+   "domain": "text",
+   "class": "GlueQqp",
+   "version": "1.0.0",
+   "license": "various (GLUE collection)",
+   "license_label": "GLUE/custom",
+   "license_file": "provenance.txt",
+   "upstream": "GLUE benchmark QQP (Wang et al.)",
+   "upstream_short": "dl.fbaipublicfiles.com/glue",
+   "progress": true,
+   "split": {
+    "kind": "enum",
+    "doc": "GLUE split member selection.",
+    "variants": [
+     {
+      "name": "Train",
+      "doc": "`train.tsv` member.",
+      "default": true
+     },
+     {
+      "name": "Validation",
+      "doc": "`dev.tsv` member."
+     }
+    ],
+    "dispatch": {
+     "Train": "Train",
+     "Validation": "Validation"
+    }
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "GlueQqpSplit",
+     "generic": "split",
+     "default": "GlueQqpSplit::Train",
+     "doc": "Which split member to decode."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "custom"
+   },
+   "consts": [],
+   "doc": {
+    "samples": "Quora Question Pairs duplicate-detection task",
+    "shape": "`[N, K]` question-pair bytes + `[N]` labels"
+   },
+   "files": [
+    {
+     "name": "QQP.zip",
+     "size": 41696084,
+     "shake256": "06dd9ffb81cada2085b998104c5c7b174654d14978d8a34f3fb76d6800c1b613",
+     "urls": [
+      "https://dl.fbaipublicfiles.com/glue/data/QQP.zip"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "glue_qnli",
+   "domain": "text",
+   "class": "GlueQnli",
+   "version": "1.0.0",
+   "license": "various (GLUE collection)",
+   "license_label": "GLUE/custom",
+   "license_file": "provenance.txt",
+   "upstream": "GLUE benchmark QNLI (Wang et al.)",
+   "upstream_short": "dl.fbaipublicfiles.com/glue",
+   "progress": true,
+   "split": {
+    "kind": "enum",
+    "doc": "GLUE split member selection.",
+    "variants": [
+     {
+      "name": "Train",
+      "doc": "`train.tsv` member.",
+      "default": true
+     },
+     {
+      "name": "Validation",
+      "doc": "`dev.tsv` member."
+     }
+    ],
+    "dispatch": {
+     "Train": "Train",
+     "Validation": "Validation"
+    }
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "GlueQnliSplit",
+     "generic": "split",
+     "default": "GlueQnliSplit::Train",
+     "doc": "Which split member to decode."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "custom"
+   },
+   "consts": [],
+   "doc": {
+    "samples": "Question-answering NLI task derived from SQuAD",
+    "shape": "`[N, K]` question/sentence bytes + `[N]` labels"
+   },
+   "files": [
+    {
+     "name": "QNLI.zip",
+     "size": 10627589,
+     "shake256": "c4f68106bbeaa9fabb5a5b4b4ebbf11f29270ede042218f8abb242339000adb4",
+     "urls": [
+      "https://dl.fbaipublicfiles.com/glue/data/QNLI.zip"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "glue_rte",
+   "domain": "text",
+   "class": "GlueRte",
+   "version": "1.0.0",
+   "license": "various (GLUE collection)",
+   "license_label": "GLUE/custom",
+   "license_file": "provenance.txt",
+   "upstream": "GLUE benchmark RTE (Wang et al.)",
+   "upstream_short": "dl.fbaipublicfiles.com/glue",
+   "progress": true,
+   "split": {
+    "kind": "enum",
+    "doc": "GLUE split member selection.",
+    "variants": [
+     {
+      "name": "Train",
+      "doc": "`train.tsv` member.",
+      "default": true
+     },
+     {
+      "name": "Validation",
+      "doc": "`dev.tsv` member."
+     }
+    ],
+    "dispatch": {
+     "Train": "Train",
+     "Validation": "Validation"
+    }
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "GlueRteSplit",
+     "generic": "split",
+     "default": "GlueRteSplit::Train",
+     "doc": "Which split member to decode."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "custom"
+   },
+   "consts": [],
+   "doc": {
+    "samples": "Recognizing Textual Entailment task",
+    "shape": "`[N, K]` sentence-pair bytes + `[N]` labels"
+   },
+   "files": [
+    {
+     "name": "RTE.zip",
+     "size": 697150,
+     "shake256": "6a0276f3cc59a10c775d4568fded1214ac623cd2a61f8a2c36f8133ff38a5286",
+     "urls": [
+      "https://dl.fbaipublicfiles.com/glue/data/RTE.zip"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "glue_wnli",
+   "domain": "text",
+   "class": "GlueWnli",
+   "version": "1.0.0",
+   "license": "various (GLUE collection)",
+   "license_label": "GLUE/custom",
+   "license_file": "provenance.txt",
+   "upstream": "GLUE benchmark WNLI (Wang et al.)",
+   "upstream_short": "dl.fbaipublicfiles.com/glue",
+   "progress": true,
+   "split": {
+    "kind": "enum",
+    "doc": "GLUE split member selection.",
+    "variants": [
+     {
+      "name": "Train",
+      "doc": "`train.tsv` member.",
+      "default": true
+     },
+     {
+      "name": "Validation",
+      "doc": "`dev.tsv` member."
+     }
+    ],
+    "dispatch": {
+     "Train": "Train",
+     "Validation": "Validation"
+    }
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "GlueWnliSplit",
+     "generic": "split",
+     "default": "GlueWnliSplit::Train",
+     "doc": "Which split member to decode."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "custom"
+   },
+   "consts": [],
+   "doc": {
+    "samples": "Winograd Schema NLI coreference task",
+    "shape": "`[N, K]` sentence-pair bytes + `[N]` labels"
+   },
+   "files": [
+    {
+     "name": "WNLI.zip",
+     "size": 28999,
+     "shake256": "d491ad3b8394cb55ca7adda2d164c8ad901c3cf654a6cae7d4f8381dc806affb",
+     "urls": [
+      "https://dl.fbaipublicfiles.com/glue/data/WNLI.zip"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "glue_mnli",
+   "domain": "text",
+   "class": "GlueMnli",
+   "version": "1.0.0",
+   "license": "various (GLUE collection)",
+   "license_label": "GLUE/custom",
+   "license_file": "provenance.txt",
+   "upstream": "GLUE benchmark MNLI (Wang et al.)",
+   "upstream_short": "dl.fbaipublicfiles.com/glue",
+   "progress": true,
+   "split": {
+    "kind": "enum",
+    "doc": "GLUE split member selection.",
+    "variants": [
+     {
+      "name": "Train",
+      "doc": "`train.tsv` member.",
+      "default": true
+     },
+     {
+      "name": "Validation",
+      "doc": "`dev_matched.tsv` member."
+     },
+     {
+      "name": "Test",
+      "doc": "`dev_mismatched.tsv` member."
+     }
+    ],
+    "dispatch": {
+     "Train": "Train",
+     "Validation": "Validation",
+     "Test": "Test"
+    }
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "GlueMnliSplit",
+     "generic": "split",
+     "default": "GlueMnliSplit::Train",
+     "doc": "Which split member to decode."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "custom"
+   },
+   "consts": [],
+   "doc": {
+    "samples": "Multi-Genre Natural Language Inference task",
+    "shape": "`[N, K]` sentence-pair bytes + `[N]` labels"
+   },
+   "files": [
+    {
+     "name": "MNLI.zip",
+     "size": 312783507,
+     "shake256": "bc90afe60d9bbb6b28189ec402c74e8cbe4166b4570bf8a4341995c5ffed2a6d",
+     "urls": [
+      "https://dl.fbaipublicfiles.com/glue/data/MNLI.zip"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "glue_stsb",
+   "domain": "text",
+   "class": "GlueStsb",
+   "version": "1.0.0",
+   "license": "various (GLUE collection)",
+   "license_label": "GLUE/custom",
+   "license_file": "provenance.txt",
+   "upstream": "GLUE benchmark STS-B (Wang et al.)",
+   "upstream_short": "dl.fbaipublicfiles.com/glue",
+   "progress": true,
+   "split": {
+    "kind": "enum",
+    "doc": "GLUE split member selection.",
+    "variants": [
+     {
+      "name": "Train",
+      "doc": "`train.tsv` member.",
+      "default": true
+     },
+     {
+      "name": "Validation",
+      "doc": "`dev.tsv` member."
+     }
+    ],
+    "dispatch": {
+     "Train": "Train",
+     "Validation": "Validation"
+    }
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "GlueStsbSplit",
+     "generic": "split",
+     "default": "GlueStsbSplit::Train",
+     "doc": "Which split member to decode."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "custom"
+   },
+   "consts": [],
+   "doc": {
+    "samples": "Semantic Textual Similarity regression task",
+    "shape": "`[N, K]` sentence-pair bytes + `[N]` scores"
+   },
+   "files": [
+    {
+     "name": "STS-B.zip",
+     "size": 802872,
+     "shake256": "858174e53414e48adfdd21ed22337eda9470beca954cfd33691526eb59280be5",
+     "urls": [
+      "https://dl.fbaipublicfiles.com/glue/data/STS-B.zip"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "svhn",
+   "domain": "image",
+   "class": "Svhn",
+   "version": "1.0.0",
+   "license": "non-commercial (Google Street View)",
+   "license_label": "non-commercial",
+   "license_file": "provenance.txt",
+   "upstream": "Stanford UFLDL SVHN (Netzer et al.)",
+   "upstream_short": "ufldl.stanford.edu",
+   "progress": true,
+   "split": {
+    "kind": "enum",
+    "doc": "Official SVHN split selection.",
+    "variants": [
+     {
+      "name": "Train",
+      "doc": "`train_32x32.mat` (73,257 images).",
+      "default": true
+     },
+     {
+      "name": "Extra",
+      "doc": "`extra_32x32.mat` (531,131 easier images)."
+     },
+     {
+      "name": "Test",
+      "doc": "`test_32x32.mat` (26,032 images)."
+     }
+    ],
+    "dispatch": {
+     "Train": "Train",
+     "Test": "Test"
+    }
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "SvhnSplit",
+     "generic": "split",
+     "default": "SvhnSplit::Train",
+     "doc": "Which official split to materialize."
+    },
+    {
+     "name": "normalize",
+     "type": "bool",
+     "generic": null,
+     "dispatch": "true",
+     "default": "true",
+     "doc": "Scale image pixels into `[0, 1]`; `false` keeps raw `0..=255`."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "custom"
+   },
+   "consts": [],
+   "doc": {
+    "samples": "73,257 train + 531,131 extra + 26,032 test cropped digits",
+    "shape": "`[N, 3, 32, 32]` F32 NCHW + `[N]` labels"
+   },
+   "files": [
+    {
+     "name": "train_32x32.mat",
+     "size": 182040794,
+     "shake256": "85a5006cc57bdd6bb3de6653fe3c2301bc5824e526643d267d2f63fc152c8743",
+     "urls": [
+      "http://ufldl.stanford.edu/housenumbers/train_32x32.mat"
+     ]
+    },
+    {
+     "name": "test_32x32.mat",
+     "size": 64275384,
+     "shake256": "96b67044770279d716be97ca364a50d371ef3581ed53035bfb4522184088e075",
+     "urls": [
+      "http://ufldl.stanford.edu/housenumbers/test_32x32.mat"
+     ]
+    },
+    {
+     "name": "extra_32x32.mat",
+     "size": 1329278602,
+     "shake256": "bb347c619406b9624ec0722bd8195612548cf2b117b45ee041dc25847f43bbc2",
+     "urls": [
+      "http://ufldl.stanford.edu/housenumbers/extra_32x32.mat"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "smallnorb",
+   "domain": "image",
+   "class": "Smallnorb",
+   "version": "1.0.0",
+   "license": "CC BY-SA 3.0 (attribution, NYU)",
+   "license_label": "CC BY-SA 3.0",
+   "license_file": "provenance.txt",
+   "upstream": "NYU small NORB (LeCun et al.)",
+   "upstream_short": "cs.nyu.edu/~ylclab",
+   "progress": true,
+   "split": {
+    "kind": "enum",
+    "doc": "Official small NORB split selection.",
+    "variants": [
+     {
+      "name": "Train",
+      "doc": "`training-*.gz` members (24,300 pairs).",
+      "default": true
+     },
+     {
+      "name": "Test",
+      "doc": "`testing-*.gz` members (24,300 pairs)."
+     }
+    ],
+    "dispatch": {
+     "Train": "Train",
+     "Test": "Test"
+    }
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "SmallnorbSplit",
+     "generic": "split",
+     "default": "SmallnorbSplit::Train",
+     "doc": "Which official split to materialize."
+    },
+    {
+     "name": "normalize",
+     "type": "bool",
+     "generic": null,
+     "dispatch": "true",
+     "default": "true",
+     "doc": "Scale pixels into `[0, 1]`; `false` keeps raw `0..=255`."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "custom"
+   },
+   "consts": [],
+   "extra_exports": [],
+   "doc": {
+    "samples": "24,300 train + 24,300 test stereo pairs",
+    "shape": "`[N, 2, 96, 96]` F32 + `[N]` labels + `[N, 4]` info"
+   },
+   "files": [
+    {
+     "name": "training-dat.gz",
+     "size": 131896188,
+     "shake256": "737be6afab2463d95611421444cf7707d34f72bc8f0cec8d9ebd4ce0f050fe16",
+     "urls": [
+      "https://cs.nyu.edu/~ylclab/data/norb-v1.0-small/smallnorb-5x46789x9x18x6x2x96x96-training-dat.mat.gz"
+     ]
+    },
+    {
+     "name": "training-cat.gz",
+     "size": 348,
+     "shake256": "3f1e94930ea384b2ecef08cca9b43af1e7e9757526bf0b10b6ee0f7a91b503d3",
+     "urls": [
+      "https://cs.nyu.edu/~ylclab/data/norb-v1.0-small/smallnorb-5x46789x9x18x6x2x96x96-training-cat.mat.gz"
+     ]
+    },
+    {
+     "name": "training-info.gz",
+     "size": 71052,
+     "shake256": "f95711c2fb6381f566c771d1cf7f69580f7b81aca31c7513de9dcdb47c947bb1",
+     "urls": [
+      "https://cs.nyu.edu/~ylclab/data/norb-v1.0-small/smallnorb-5x46789x9x18x6x2x96x96-training-info.mat.gz"
+     ]
+    },
+    {
+     "name": "testing-dat.gz",
+     "size": 130799817,
+     "shake256": "5cac160c412103ae38a810c92729ea2423428db36cf48e0f9498a37285d016f3",
+     "urls": [
+      "https://cs.nyu.edu/~ylclab/data/norb-v1.0-small/smallnorb-5x01235x9x18x6x2x96x96-testing-dat.mat.gz"
+     ]
+    },
+    {
+     "name": "testing-cat.gz",
+     "size": 347,
+     "shake256": "2b71364067b90bac7cc5604f6093e294698bb17cbce6300d37734f73f9606077",
+     "urls": [
+      "https://cs.nyu.edu/~ylclab/data/norb-v1.0-small/smallnorb-5x01235x9x18x6x2x96x96-testing-cat.mat.gz"
+     ]
+    },
+    {
+     "name": "testing-info.gz",
+     "size": 10428,
+     "shake256": "1e1d0aaa0a3bcf1fc871e8aeb518da679c76b3e130ca43dd02497426cfd75257",
+     "urls": [
+      "https://cs.nyu.edu/~ylclab/data/norb-v1.0-small/smallnorb-5x01235x9x18x6x2x96x96-testing-info.mat.gz"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "waves_yesno",
+   "domain": "audio",
+   "class": "WavesYesno",
+   "version": "1.0.0",
+   "license": "CC-BY-3.0",
+   "license_label": "CC BY 3.0",
+   "license_file": "provenance.txt",
+   "upstream": "OpenSLR yes/no utterances",
+   "upstream_short": "openslr.org/1",
+   "progress": true,
+   "split": null,
+   "config": [
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "custom"
+   },
+   "consts": [],
+   "doc": {
+    "samples": "60 recordings x 8 yes/no labels",
+    "shape": "`[N, 1, T]` F32 padded waveforms + `[N, 8]` labels"
+   },
+   "files": [
+    {
+     "name": "waves_yesno.tar.gz",
+     "size": 4703754,
+     "shake256": "9a0033a9f4618d9d0eae85ab5ee5909018fa1abdcd0ccfcc0db64fdd1022daaf",
+     "urls": [
+      "https://www.openslr.org/resources/1/waves_yesno.tar.gz"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "squad_v2",
+   "domain": "text",
+   "class": "SquadV2",
+   "version": "1.0.0",
+   "license": "CC-BY-SA-4.0",
+   "license_label": "CC BY-SA 4.0",
+   "license_file": "provenance.txt",
+   "upstream": "Stanford Question Answering Dataset 2.0",
+   "upstream_short": "rajpurkar.github.io/SQuAD-explorer",
+   "progress": true,
+   "split": {
+    "kind": "enum",
+    "doc": "Official SQuAD v2 split selection.",
+    "variants": [
+     {
+      "name": "Train",
+      "doc": "`train-v2.0.json` (130,319 questions).",
+      "default": true
+     },
+     {
+      "name": "Validation",
+      "doc": "`dev-v2.0.json` (11,873 questions)."
+     }
+    ],
+    "dispatch": {
+     "Train": "Train",
+     "Validation": "Validation"
+    }
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "SquadV2Split",
+     "generic": "split",
+     "default": "SquadV2Split::Train",
+     "doc": "Official split to load."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "custom"
+   },
+   "consts": [],
+   "doc": {
+    "samples": "130,319 train / 11,873 validation questions",
+    "shape": "question/context/answer byte matrices + answer_start + is_impossible"
+   },
+   "files": [
+    {
+     "name": "train-v2.0.json",
+     "size": 42123633,
+     "shake256": "09a7f77787cb89923d0311fc33e592a128ca59edba7dbdf474ef1ec9f18d6720",
+     "urls": [
+      "https://rajpurkar.github.io/SQuAD-explorer/dataset/train-v2.0.json"
+     ]
+    },
+    {
+     "name": "dev-v2.0.json",
+     "size": 4370528,
+     "shake256": "0ac893b888f2ccb20bdc8de0c3a52793d1c697c9f7a32e7e533a82661a7d9f18",
+     "urls": [
+      "https://rajpurkar.github.io/SQuAD-explorer/dataset/dev-v2.0.json"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "omniglot",
+   "domain": "image",
+   "class": "Omniglot",
+   "version": "1.0.0",
+   "license": "MIT",
+   "license_label": "MIT",
+   "license_file": "provenance.txt",
+   "upstream": "Brenden Lake omniglot repository",
+   "upstream_short": "github.com/brendenlake/omniglot",
+   "progress": true,
+   "split": {
+    "kind": "enum",
+    "doc": "Official Omniglot split selection.",
+    "variants": [
+     {
+      "name": "Train",
+      "doc": "`images_background` (19,280 images, 964 classes).",
+      "default": true
+     },
+     {
+      "name": "Test",
+      "doc": "`images_evaluation` (13,180 images, 659 classes)."
+     }
+    ],
+    "dispatch": {
+     "Train": "Train",
+     "Test": "Test"
+    }
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "OmniglotSplit",
+     "generic": "split",
+     "default": "OmniglotSplit::Train",
+     "doc": "Which official split to materialize."
+    },
+    {
+     "name": "size",
+     "type": "Option<(u32, u32)>",
+     "generic": null,
+     "dispatch": "None",
+     "default": "None",
+     "doc": "Resize each decoded image to `(width, height)` via bilinear\nsampling; `None` keeps the native extent per sample."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "imagefolder",
+    "doc": "Omniglot handwritten characters — 19,280 background +\n13,180 evaluation images over 1,623 classes.\n\nClasses are `<Alphabet>/<character>` pairs; the alphabet name is\nthe prefix of each class name."
+   },
+   "doc": {
+    "samples": "19,280 train / 13,180 test images",
+    "shape": "lazy `[1, C, H, W]` F32 PNG decode"
+   },
+   "files": [
+    {
+     "name": "images_background.zip",
+     "size": 9464212,
+     "shake256": "f4abef3efa9e4e9982f8ad5e8f6da251e8fd3ac811194e163e524976a06a5b33",
+     "urls": [
+      "https://github.com/brendenlake/omniglot/raw/master/python/images_background.zip"
+     ]
+    },
+    {
+     "name": "images_evaluation.zip",
+     "size": 6462886,
+     "shake256": "e62622ff1d8d0c9bf7e8c565b03e9070ea42c778d8cac00b07d03ddaa3d74a51",
+     "urls": [
+      "https://github.com/brendenlake/omniglot/raw/master/python/images_evaluation.zip"
+     ]
+    }
+   ],
+   "imagefolder": {
+    "labels": "custom",
+    "roots": {
+     "Train": "train/images_background",
+     "Test": "test/images_evaluation"
+    },
+    "files": {
+     "Train": [
+      "images_background.zip"
+     ],
+     "Test": [
+      "images_evaluation.zip"
+     ]
+    }
+   }
+  },
+  {
+   "name": "superglue_boolq",
+   "domain": "text",
+   "class": "SuperglueBoolq",
+   "version": "1.0.0",
+   "license": "various (SuperGLUE collection)",
+   "license_label": "SuperGLUE/custom",
+   "license_file": "provenance.txt",
+   "upstream": "SuperGLUE benchmark BoolQ (Wang et al.)",
+   "upstream_short": "dl.fbaipublicfiles.com/glue/superglue",
+   "progress": true,
+   "split": {
+    "kind": "enum",
+    "doc": "Split member selection.",
+    "variants": [
+     {
+      "name": "Train",
+      "doc": "`train.jsonl` member.",
+      "default": true
+     },
+     {
+      "name": "Validation",
+      "doc": "`val.jsonl` member."
+     },
+     {
+      "name": "Test",
+      "doc": "`test.jsonl` member (unlabeled)."
+     }
+    ],
+    "dispatch": {
+     "Train": "Train",
+     "Validation": "Validation",
+     "Test": "Test"
+    }
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "SuperglueBoolqSplit",
+     "generic": "split",
+     "default": "SuperglueBoolqSplit::Train",
+     "doc": "Which split member to decode."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "custom"
+   },
+   "consts": [],
+   "doc": {
+    "samples": "Boolean Questions yes/no reading-comprehension task",
+    "shape": "`passage`/`question` `[N, K_i]` byte matrices + `[N]` bool labels"
+   },
+   "files": [
+    {
+     "name": "BoolQ.zip",
+     "size": 4118001,
+     "shake256": "c3e444984ce80227a4ee1c6036818a8508520dc4e5bcfcffd7d084c459ddbf6b",
+     "urls": [
+      "https://dl.fbaipublicfiles.com/glue/superglue/data/v2/BoolQ.zip"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "superglue_cb",
+   "domain": "text",
+   "class": "SuperglueCb",
+   "version": "1.0.0",
+   "license": "various (SuperGLUE collection)",
+   "license_label": "SuperGLUE/custom",
+   "license_file": "provenance.txt",
+   "upstream": "SuperGLUE benchmark CB (Wang et al.)",
+   "upstream_short": "dl.fbaipublicfiles.com/glue/superglue",
+   "progress": true,
+   "split": {
+    "kind": "enum",
+    "doc": "Split member selection.",
+    "variants": [
+     {
+      "name": "Train",
+      "doc": "`train.jsonl` member.",
+      "default": true
+     },
+     {
+      "name": "Validation",
+      "doc": "`val.jsonl` member."
+     },
+     {
+      "name": "Test",
+      "doc": "`test.jsonl` member (unlabeled)."
+     }
+    ],
+    "dispatch": {
+     "Train": "Train",
+     "Validation": "Validation",
+     "Test": "Test"
+    }
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "SuperglueCbSplit",
+     "generic": "split",
+     "default": "SuperglueCbSplit::Train",
+     "doc": "Which split member to decode."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "custom"
+   },
+   "consts": [],
+   "doc": {
+    "samples": "CommitmentBank three-class NLI task",
+    "shape": "`premise`/`hypothesis` `[N, K_i]` byte matrices + `[N]` labels"
+   },
+   "files": [
+    {
+     "name": "CB.zip",
+     "size": 75482,
+     "shake256": "11ebabb13312c467a866beaeca9d6acfb3c06bde2e9f57001d7e335dc4d36d7e",
+     "urls": [
+      "https://dl.fbaipublicfiles.com/glue/superglue/data/v2/CB.zip"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "superglue_copa",
+   "domain": "text",
+   "class": "SuperglueCopa",
+   "version": "1.0.0",
+   "license": "various (SuperGLUE collection)",
+   "license_label": "SuperGLUE/custom",
+   "license_file": "provenance.txt",
+   "upstream": "SuperGLUE benchmark COPA (Wang et al.)",
+   "upstream_short": "dl.fbaipublicfiles.com/glue/superglue",
+   "progress": true,
+   "split": {
+    "kind": "enum",
+    "doc": "Split member selection.",
+    "variants": [
+     {
+      "name": "Train",
+      "doc": "`train.jsonl` member.",
+      "default": true
+     },
+     {
+      "name": "Validation",
+      "doc": "`val.jsonl` member."
+     },
+     {
+      "name": "Test",
+      "doc": "`test.jsonl` member (unlabeled)."
+     }
+    ],
+    "dispatch": {
+     "Train": "Train",
+     "Validation": "Validation",
+     "Test": "Test"
+    }
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "SuperglueCopaSplit",
+     "generic": "split",
+     "default": "SuperglueCopaSplit::Train",
+     "doc": "Which split member to decode."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "custom"
+   },
+   "consts": [],
+   "doc": {
+    "samples": "Choice of Plausible Alternatives causal-reasoning task",
+    "shape": "`premise`/`choice1`/`choice2`/`question` `[N, K_i]` byte matrices + `[N]` labels"
+   },
+   "files": [
+    {
+     "name": "COPA.zip",
+     "size": 43986,
+     "shake256": "eb8f24445af71f9595ce76f33b7f949cc56efec26928f4ceed96cd609d10ff0a",
+     "urls": [
+      "https://dl.fbaipublicfiles.com/glue/superglue/data/v2/COPA.zip"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "superglue_multirc",
+   "domain": "text",
+   "class": "SuperglueMultirc",
+   "version": "1.0.0",
+   "license": "various (SuperGLUE collection)",
+   "license_label": "SuperGLUE/custom",
+   "license_file": "provenance.txt",
+   "upstream": "SuperGLUE benchmark MultiRC (Wang et al.)",
+   "upstream_short": "dl.fbaipublicfiles.com/glue/superglue",
+   "progress": true,
+   "split": {
+    "kind": "enum",
+    "doc": "Split member selection.",
+    "variants": [
+     {
+      "name": "Train",
+      "doc": "`train.jsonl` member.",
+      "default": true
+     },
+     {
+      "name": "Validation",
+      "doc": "`val.jsonl` member."
+     },
+     {
+      "name": "Test",
+      "doc": "`test.jsonl` member (unlabeled)."
+     }
+    ],
+    "dispatch": {
+     "Train": "Train",
+     "Validation": "Validation",
+     "Test": "Test"
+    }
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "SuperglueMultircSplit",
+     "generic": "split",
+     "default": "SuperglueMultircSplit::Train",
+     "doc": "Which split member to decode."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "custom"
+   },
+   "consts": [],
+   "doc": {
+    "samples": "Multi-Sentence Reading Comprehension answer-validation task",
+    "shape": "`passage`/`question`/`answer` `[N, K_i]` byte matrices + `[N]` labels"
+   },
+   "files": [
+    {
+     "name": "MultiRC.zip",
+     "size": 1116225,
+     "shake256": "932c2a2e2d0b6e5f33c86ca95096f9ed0b063b07d449c981ae46061ad6902f37",
+     "urls": [
+      "https://dl.fbaipublicfiles.com/glue/superglue/data/v2/MultiRC.zip"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "superglue_record",
+   "domain": "text",
+   "class": "SuperglueRecord",
+   "version": "1.0.0",
+   "license": "various (SuperGLUE collection)",
+   "license_label": "SuperGLUE/custom",
+   "license_file": "provenance.txt",
+   "upstream": "SuperGLUE benchmark ReCoRD (Wang et al.)",
+   "upstream_short": "dl.fbaipublicfiles.com/glue/superglue",
+   "progress": true,
+   "split": {
+    "kind": "enum",
+    "doc": "Split member selection.",
+    "variants": [
+     {
+      "name": "Train",
+      "doc": "`train.jsonl` member.",
+      "default": true
+     },
+     {
+      "name": "Validation",
+      "doc": "`val.jsonl` member."
+     },
+     {
+      "name": "Test",
+      "doc": "`test.jsonl` member (unlabeled)."
+     }
+    ],
+    "dispatch": {
+     "Train": "Train",
+     "Validation": "Validation",
+     "Test": "Test"
+    }
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "SuperglueRecordSplit",
+     "generic": "split",
+     "default": "SuperglueRecordSplit::Train",
+     "doc": "Which split member to decode."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "custom"
+   },
+   "consts": [],
+   "doc": {
+    "samples": "Reading Comprehension with Commonsense Reasoning cloze task",
+    "shape": "`passage`/`query`/`answer` `[N, K_i]` byte matrices (no labels; answer is a field)"
+   },
+   "files": [
+    {
+     "name": "ReCoRD.zip",
+     "size": 51757880,
+     "shake256": "0f3407b52b11b9ffccd0e2de745e4c9b10a0f9ce6d15abf22f6e48d00dbe2687",
+     "urls": [
+      "https://dl.fbaipublicfiles.com/glue/superglue/data/v2/ReCoRD.zip"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "superglue_rte",
+   "domain": "text",
+   "class": "SuperglueRte",
+   "version": "1.0.0",
+   "license": "various (SuperGLUE collection)",
+   "license_label": "SuperGLUE/custom",
+   "license_file": "provenance.txt",
+   "upstream": "SuperGLUE benchmark RTE (Wang et al.)",
+   "upstream_short": "dl.fbaipublicfiles.com/glue/superglue",
+   "progress": true,
+   "split": {
+    "kind": "enum",
+    "doc": "Split member selection.",
+    "variants": [
+     {
+      "name": "Train",
+      "doc": "`train.jsonl` member.",
+      "default": true
+     },
+     {
+      "name": "Validation",
+      "doc": "`val.jsonl` member."
+     },
+     {
+      "name": "Test",
+      "doc": "`test.jsonl` member (unlabeled)."
+     }
+    ],
+    "dispatch": {
+     "Train": "Train",
+     "Validation": "Validation",
+     "Test": "Test"
+    }
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "SuperglueRteSplit",
+     "generic": "split",
+     "default": "SuperglueRteSplit::Train",
+     "doc": "Which split member to decode."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "custom"
+   },
+   "consts": [],
+   "doc": {
+    "samples": "Recognizing Textual Entailment (SuperGLUE merge) task",
+    "shape": "`premise`/`hypothesis` `[N, K_i]` byte matrices + `[N]` labels"
+   },
+   "files": [
+    {
+     "name": "RTE.zip",
+     "size": 750920,
+     "shake256": "2626dd3d855495a3b58e020bc0b5f73eec61434889d87ac0343cc83fc52475e2",
+     "urls": [
+      "https://dl.fbaipublicfiles.com/glue/superglue/data/v2/RTE.zip"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "superglue_wic",
+   "domain": "text",
+   "class": "SuperglueWic",
+   "version": "1.0.0",
+   "license": "various (SuperGLUE collection)",
+   "license_label": "SuperGLUE/custom",
+   "license_file": "provenance.txt",
+   "upstream": "SuperGLUE benchmark WiC (Wang et al.)",
+   "upstream_short": "dl.fbaipublicfiles.com/glue/superglue",
+   "progress": true,
+   "split": {
+    "kind": "enum",
+    "doc": "Split member selection.",
+    "variants": [
+     {
+      "name": "Train",
+      "doc": "`train.jsonl` member.",
+      "default": true
+     },
+     {
+      "name": "Validation",
+      "doc": "`val.jsonl` member."
+     },
+     {
+      "name": "Test",
+      "doc": "`test.jsonl` member (unlabeled)."
+     }
+    ],
+    "dispatch": {
+     "Train": "Train",
+     "Validation": "Validation",
+     "Test": "Test"
+    }
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "SuperglueWicSplit",
+     "generic": "split",
+     "default": "SuperglueWicSplit::Train",
+     "doc": "Which split member to decode."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "custom"
+   },
+   "consts": [],
+   "doc": {
+    "samples": "Word-in-Context word-sense disambiguation task",
+    "shape": "`word`/`sentence1`/`sentence2` `[N, K_i]` byte matrices + `[N]` bool labels"
+   },
+   "files": [
+    {
+     "name": "WiC.zip",
+     "size": 396213,
+     "shake256": "e96945cab4791290b8eaeb33cc02b4771850be6bf073d89f6c1637ba1f714737",
+     "urls": [
+      "https://dl.fbaipublicfiles.com/glue/superglue/data/v2/WiC.zip"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "superglue_wsc",
+   "domain": "text",
+   "class": "SuperglueWsc",
+   "version": "1.0.0",
+   "license": "various (SuperGLUE collection)",
+   "license_label": "SuperGLUE/custom",
+   "license_file": "provenance.txt",
+   "upstream": "SuperGLUE benchmark WSC (Wang et al.)",
+   "upstream_short": "dl.fbaipublicfiles.com/glue/superglue",
+   "progress": true,
+   "split": {
+    "kind": "enum",
+    "doc": "Split member selection.",
+    "variants": [
+     {
+      "name": "Train",
+      "doc": "`train.jsonl` member.",
+      "default": true
+     },
+     {
+      "name": "Validation",
+      "doc": "`val.jsonl` member."
+     },
+     {
+      "name": "Test",
+      "doc": "`test.jsonl` member (unlabeled)."
+     }
+    ],
+    "dispatch": {
+     "Train": "Train",
+     "Validation": "Validation",
+     "Test": "Test"
+    }
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "SuperglueWscSplit",
+     "generic": "split",
+     "default": "SuperglueWscSplit::Train",
+     "doc": "Which split member to decode."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "custom"
+   },
+   "consts": [],
+   "doc": {
+    "samples": "Winograd Schema Challenge coreference task",
+    "shape": "`text`/`span1`/`span2` `[N, K_i]` byte matrices + `[N]` bool labels"
+   },
+   "files": [
+    {
+     "name": "WSC.zip",
+     "size": 32751,
+     "shake256": "207c8d7e77d55afdf1eac6b79314d49060a86ca5d874f7ee3adb575556bd2e2c",
+     "urls": [
+      "https://dl.fbaipublicfiles.com/glue/superglue/data/v2/WSC.zip"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "anli_r1",
+   "domain": "text",
+   "class": "AnliR1",
+   "version": "1.0.0",
+   "license": "CC BY-NC-SA 4.0",
+   "license_label": "CC BY-NC-SA 4.0",
+   "license_file": "provenance.txt",
+   "upstream": "Adversarial NLI round 1 (Nie et al., Facebook AI)",
+   "upstream_short": "dl.fbaipublicfiles.com/anli",
+   "progress": true,
+   "split": {
+    "kind": "enum",
+    "doc": "Split member selection.",
+    "variants": [
+     {
+      "name": "Train",
+      "doc": "`R1/train.jsonl` member.",
+      "default": true
+     },
+     {
+      "name": "Validation",
+      "doc": "`R1/dev.jsonl` member."
+     },
+     {
+      "name": "Test",
+      "doc": "`R1/test.jsonl` member."
+     }
+    ],
+    "dispatch": {
+     "Train": "Train",
+     "Validation": "Validation",
+     "Test": "Test"
+    }
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "AnliR1Split",
+     "generic": "split",
+     "default": "AnliR1Split::Train",
+     "doc": "Which split member to decode."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "custom"
+   },
+   "consts": [],
+   "doc": {
+    "samples": "Adversarial NLI round 1 context-hypothesis pairs",
+    "shape": "`context`/`hypothesis` `[N, K_i]` byte matrices + `[N]` labels"
+   },
+   "files": [
+    {
+     "name": "anli_v1.0.zip",
+     "size": 18708061,
+     "shake256": "6f5c3a18039e4a58ee0bb2b4a7baeabf76297d596f4b3bd773dad89aa51a555a",
+     "urls": [
+      "https://dl.fbaipublicfiles.com/anli/anli_v1.0.zip"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "anli_r2",
+   "domain": "text",
+   "class": "AnliR2",
+   "version": "1.0.0",
+   "license": "CC BY-NC-SA 4.0",
+   "license_label": "CC BY-NC-SA 4.0",
+   "license_file": "provenance.txt",
+   "upstream": "Adversarial NLI round 2 (Nie et al., Facebook AI)",
+   "upstream_short": "dl.fbaipublicfiles.com/anli",
+   "progress": true,
+   "split": {
+    "kind": "enum",
+    "doc": "Split member selection.",
+    "variants": [
+     {
+      "name": "Train",
+      "doc": "`R2/train.jsonl` member.",
+      "default": true
+     },
+     {
+      "name": "Validation",
+      "doc": "`R2/dev.jsonl` member."
+     },
+     {
+      "name": "Test",
+      "doc": "`R2/test.jsonl` member."
+     }
+    ],
+    "dispatch": {
+     "Train": "Train",
+     "Validation": "Validation",
+     "Test": "Test"
+    }
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "AnliR2Split",
+     "generic": "split",
+     "default": "AnliR2Split::Train",
+     "doc": "Which split member to decode."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "custom"
+   },
+   "consts": [],
+   "doc": {
+    "samples": "Adversarial NLI round 2 context-hypothesis pairs",
+    "shape": "`context`/`hypothesis` `[N, K_i]` byte matrices + `[N]` labels"
+   },
+   "files": [
+    {
+     "name": "anli_v1.0.zip",
+     "size": 18708061,
+     "shake256": "6f5c3a18039e4a58ee0bb2b4a7baeabf76297d596f4b3bd773dad89aa51a555a",
+     "urls": [
+      "https://dl.fbaipublicfiles.com/anli/anli_v1.0.zip"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "anli_r3",
+   "domain": "text",
+   "class": "AnliR3",
+   "version": "1.0.0",
+   "license": "CC BY-NC-SA 4.0",
+   "license_label": "CC BY-NC-SA 4.0",
+   "license_file": "provenance.txt",
+   "upstream": "Adversarial NLI round 3 (Nie et al., Facebook AI)",
+   "upstream_short": "dl.fbaipublicfiles.com/anli",
+   "progress": true,
+   "split": {
+    "kind": "enum",
+    "doc": "Split member selection.",
+    "variants": [
+     {
+      "name": "Train",
+      "doc": "`R3/train.jsonl` member.",
+      "default": true
+     },
+     {
+      "name": "Validation",
+      "doc": "`R3/dev.jsonl` member."
+     },
+     {
+      "name": "Test",
+      "doc": "`R3/test.jsonl` member."
+     }
+    ],
+    "dispatch": {
+     "Train": "Train",
+     "Validation": "Validation",
+     "Test": "Test"
+    }
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "AnliR3Split",
+     "generic": "split",
+     "default": "AnliR3Split::Train",
+     "doc": "Which split member to decode."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "custom"
+   },
+   "consts": [],
+   "doc": {
+    "samples": "Adversarial NLI round 3 context-hypothesis pairs",
+    "shape": "`context`/`hypothesis` `[N, K_i]` byte matrices + `[N]` labels"
+   },
+   "files": [
+    {
+     "name": "anli_v1.0.zip",
+     "size": 18708061,
+     "shake256": "6f5c3a18039e4a58ee0bb2b4a7baeabf76297d596f4b3bd773dad89aa51a555a",
+     "urls": [
+      "https://dl.fbaipublicfiles.com/anli/anli_v1.0.zip"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "xnli",
+   "domain": "text",
+   "class": "Xnli",
+   "version": "1.0.0",
+   "license": "CC BY-NC-SA 4.0 (corpus varies by language)",
+   "license_label": "OANC/CC",
+   "license_file": "provenance.txt",
+   "upstream": "XNLI cross-lingual NLI dev/test (Conneau et al., Facebook AI)",
+   "upstream_short": "dl.fbaipublicfiles.com/XNLI",
+   "progress": true,
+   "split": {
+    "kind": "enum",
+    "doc": "Split member selection.",
+    "variants": [
+     {
+      "name": "Validation",
+      "doc": "`xnli.dev.tsv` member.",
+      "default": true
+     },
+     {
+      "name": "Test",
+      "doc": "`xnli.test.tsv` member."
+     }
+    ],
+    "dispatch": {
+     "Validation": "Validation",
+     "Test": "Test"
+    }
+   },
+   "config": [
+    {
+     "name": "split",
+     "type": "XnliSplit",
+     "generic": "split",
+     "default": "XnliSplit::Validation",
+     "doc": "Which split member to decode."
+    },
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "custom"
+   },
+   "consts": [],
+   "doc": {
+    "samples": "15-language NLI dev/test pairs",
+    "shape": "`premise`/`hypothesis` `[N, K_i]` byte matrices + `[N]` labels + `[N]` language ids"
+   },
+   "files": [
+    {
+     "name": "XNLI-1.0.zip",
+     "size": 17865352,
+     "shake256": "97878dfe9112d14692b8aae487affd26cdc81f2ce1cd7ebc65faa2da8703b275",
+     "urls": [
+      "https://dl.fbaipublicfiles.com/XNLI/XNLI-1.0.zip"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "gtzan",
+   "domain": "audio",
+   "class": "Gtzan",
+   "version": "1.0.0",
+   "license": "research-use only (Tzanetakis collection)",
+   "license_label": "research-only",
+   "license_file": "provenance.txt",
+   "upstream": "GTZAN genre collection (marsyas mirror, Hugging Face)",
+   "upstream_short": "hf.co/datasets/marsyas/gtzan",
+   "progress": true,
+   "split": null,
+   "config": [
+    {
+     "name": "cache_dir",
+     "type": "Option<PathBuf>",
+     "generic": "cache_dir",
+     "default": "None",
+     "doc": "Cache root override. `None` resolves `OA_DATA_DIR`, then the platform\ncache directory; see [`data_root`](crate::pack::data_root)."
+    }
+   ],
+   "python": {
+    "contract": "custom"
+   },
+   "consts": [
+    {
+     "name": "SAMPLE_RATE",
+     "type": "usize",
+     "value": "22050",
+     "export": false,
+     "doc": "PCM samples per second; every clip is 22,050 Hz mono WAV."
+    }
+   ],
+   "doc": {
+    "samples": "999 genre clips (corrupt `jazz.00054.wav` skipped upstream)",
+    "shape": "lazy `[1, T_i]` F32 waveform per clip + genre index"
+   },
+   "files": [
+    {
+     "name": "genres.tar.gz",
+     "size": 1226192050,
+     "shake256": "de384e99b665f543625a752841e5fc824310477c062182fbdf4fadb7193e04c1",
+     "urls": [
+      "https://huggingface.co/datasets/marsyas/gtzan/resolve/main/data/genres.tar.gz"
      ]
     }
    ]

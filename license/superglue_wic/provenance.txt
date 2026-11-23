@@ -1,0 +1,8 @@
+pack: superglue_wic
+source: WiC (SuperGLUE)
+url: https://dl.fbaipublicfiles.com/glue/superglue/data/v2/WiC.zip
+fetched: 2026-11-23
+license: see license/README.md label for superglue_wic
+
+SuperGLUE Word-in-Context task (WiC.zip), Pilehvar & Camacho-Collados
+2019. Various upstream licenses per the SuperGLUE collection terms.

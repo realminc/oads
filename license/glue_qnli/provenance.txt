@@ -1,0 +1,7 @@
+Question-answering NLI (GLUE QNLI)
+
+Source: QNLI.zip via https://dl.fbaipublicfiles.com/glue/data/QNLI.zip
+License: Dataset-specific; derived from SQuAD (CC BY-SA 4.0)
+Citation: Rajpurkar et al., "SQuAD: 100,000+ Questions for Machine Comprehension of Text", EMNLP 2016.
+
+Task TSVs only; question/sentence pair + entailment labels are indexed.

@@ -88,9 +88,10 @@ fn load(
 	let split = match split {
 		"train" => oads::IdxSplit::Train,
 		"test" => oads::IdxSplit::Test,
+		"validation" => oads::IdxSplit::Validation,
 		other => {
 			return Err(PyValueError::new_err(format!(
-				"unknown split '{other}'; expected 'train' or 'test'"
+				"unknown split '{other}'; expected 'train', 'test', or 'validation'"
 			)));
 		}
 	};

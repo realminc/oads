@@ -1,6 +1,6 @@
 //! Fisher's Iris flower data as a device-resident [`oa::data::Dataset`].
 //!
-//! `iris.zip` is materialized through [`ensure_pack`](crate::pack::ensure_pack)
+//! `iris.zip` is materialized through [`ensure_pack`](crate::core::pack::ensure_pack)
 //! under `iris/1.0.0`; the `iris.data` member decodes to a `[150, 4]` F32
 //! feature matrix (sepal/petal length and width in centimetres) and a `[150]`
 //! F32 label matrix of species indices `0..=2` into [`CLASSES`]. The pack
@@ -12,10 +12,10 @@ use oa::data::{Dataset, MatrixDataset, Sample};
 use oa::matrix::Matrix;
 use oa::{Engine, Error, Result};
 
-use crate::csv;
-use crate::decode::{Decoded, MatrixData};
-use crate::extract;
-use crate::pack::{self, FetchProgress};
+use crate::core::csv;
+use crate::core::decode::{Decoded, MatrixData};
+use crate::core::extract;
+use crate::core::pack::{self, FetchProgress};
 use crate::tabular::scale::normalize_columns;
 
 #[path = "iris.gen.rs"]

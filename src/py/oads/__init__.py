@@ -9,23 +9,48 @@ matrix upload.
 """
 
 from . import audio, dataset, image, pack, tabular, text, video
-from .audio import CremaD, Groove, LjSpeech, Maestro, MiniSpeechCommands, SpeechCommands, Vctk
-from .image import Cifar10, Cifar100, Emnist, FashionMnist, KMnist, Mnist, Stl10
+from .audio import CremaD, Groove, Gtzan, Librispeech, Libritts, LjSpeech, Maestro, MiniSpeechCommands, Nsynth, SpeechCommands, Vctk, WavesYesno
+from .image import Beans, Cars196, CatsVsDogs, Cifar10, Cifar100, Cub200, Dtd, Emnist, Eurosat, FashionMnist, Food101, HorsesOrHumans, Imagenette, Imagewang, KMnist, Lfw, Mnist, Omniglot, OxfordFlowers102, OxfordIiitPet, Places365Small, RockPaperScissors, Smallnorb, StanfordDogs, Stl10, Svhn, UcMerced
 from .tabular import Iris, Movielens100k, Movielens1m, Titanic
-from .text import AgNews, Imdb, TinyShakespeare, YelpPolarity
+from .text import AgNews, AnliR1, AnliR2, AnliR3, GlueCola, GlueMnli, GlueQnli, GlueQqp, GlueRte, GlueSst2, GlueStsb, GlueWnli, Imdb, SquadV2, SuperglueBoolq, SuperglueCb, SuperglueCopa, SuperglueMultirc, SuperglueRecord, SuperglueRte, SuperglueWic, SuperglueWsc, TinyShakespeare, Xnli, YelpPolarity
 from .video import MovingMnist
 
 __all__ = [
 	"AgNews",
+	"AnliR1",
+	"AnliR2",
+	"AnliR3",
+	"Beans",
+	"Cars196",
+	"CatsVsDogs",
 	"Cifar10",
 	"Cifar100",
 	"CremaD",
+	"Cub200",
+	"Dtd",
 	"Emnist",
+	"Eurosat",
 	"FashionMnist",
+	"Food101",
+	"GlueCola",
+	"GlueMnli",
+	"GlueQnli",
+	"GlueQqp",
+	"GlueRte",
+	"GlueSst2",
+	"GlueStsb",
+	"GlueWnli",
 	"Groove",
+	"Gtzan",
+	"HorsesOrHumans",
+	"Imagenette",
+	"Imagewang",
 	"Imdb",
 	"Iris",
 	"KMnist",
+	"Lfw",
+	"Librispeech",
+	"Libritts",
 	"LjSpeech",
 	"Maestro",
 	"MiniSpeechCommands",
@@ -33,11 +58,32 @@ __all__ = [
 	"Movielens100k",
 	"Movielens1m",
 	"MovingMnist",
+	"Nsynth",
+	"Omniglot",
+	"OxfordFlowers102",
+	"OxfordIiitPet",
+	"Places365Small",
+	"RockPaperScissors",
+	"Smallnorb",
 	"SpeechCommands",
+	"SquadV2",
+	"StanfordDogs",
 	"Stl10",
+	"SuperglueBoolq",
+	"SuperglueCb",
+	"SuperglueCopa",
+	"SuperglueMultirc",
+	"SuperglueRecord",
+	"SuperglueRte",
+	"SuperglueWic",
+	"SuperglueWsc",
+	"Svhn",
 	"TinyShakespeare",
 	"Titanic",
+	"UcMerced",
 	"Vctk",
+	"WavesYesno",
+	"Xnli",
 	"YelpPolarity",
 	"audio",
 	"dataset",
@@ -47,4 +93,4 @@ __all__ = [
 	"text",
 	"video",
 ]
-__version__ = "0.2.0"
+__version__ = "0.3.0"

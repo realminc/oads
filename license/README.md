@@ -34,6 +34,52 @@ itself.
 | `ljspeech` | Keith Ito (LibriVox public-domain narration) | public domain | [ljspeech/provenance.txt](ljspeech/provenance.txt) |
 | `crema_d` | Cheyney Computer Science / Cooper Lab (CREMA-D) | ODbL/custom | [crema_d/provenance.txt](crema_d/provenance.txt) |
 | `vctk` | University of Edinburgh CSTR (Yamagishi et al.) | CC BY 4.0 | [vctk/CC-BY-4.0.txt](vctk/CC-BY-4.0.txt) |
+| `cats_vs_dogs` | Microsoft Kaggle cats and dogs (Asirra) | unspecified | [cats_vs_dogs/provenance.txt](cats_vs_dogs/provenance.txt) |
+| `rock_paper_scissors` | Laurence Moroney (laurencemoroney.com) | unspecified | [rock_paper_scissors/provenance.txt](rock_paper_scissors/provenance.txt) |
+| `horses_or_humans` | Laurence Moroney (laurencemoroney.com) | unspecified | [horses_or_humans/provenance.txt](horses_or_humans/provenance.txt) |
+| `oxford_iiit_pet` | University of Oxford VGG (Parkhi et al.) | unspecified | [oxford_iiit_pet/provenance.txt](oxford_iiit_pet/provenance.txt) |
+| `stanford_dogs` | Stanford Vision Lab (Khosla et al.) | unspecified | [stanford_dogs/provenance.txt](stanford_dogs/provenance.txt) |
+| `imagenette` | fast.ai (Imagenette 320px) | unspecified | [imagenette/provenance.txt](imagenette/provenance.txt) |
+| `imagewang` | fast.ai (Imagewang 320px) | unspecified | [imagewang/provenance.txt](imagewang/provenance.txt) |
+| `cub200` | Caltech-UCSD (CUB-200-2011) | unspecified | [cub200/provenance.txt](cub200/provenance.txt) |
+| `eurosat` | DLR/ESA Sentinel-2 (Helber et al.); torchgeo mirror | unspecified | [eurosat/provenance.txt](eurosat/provenance.txt) |
+| `food101` | ETH Zurich CVL (Bossard et al.) | unspecified | [food101/provenance.txt](food101/provenance.txt) |
+| `beans` | AI-Lab-Makerere (Uganda bean disease) | unspecified | [beans/provenance.txt](beans/provenance.txt) |
+| `dtd` | University of Oxford VGG (Cimpoi et al.) | unspecified | [dtd/provenance.txt](dtd/provenance.txt) |
+| `lfw` | UMass LFW (Huang et al., funneled variant) | unspecified | [lfw/provenance.txt](lfw/provenance.txt) |
+| `uc_merced` | UC Merced (Yang & Newsam); torchgeo mirror | unspecified | [uc_merced/provenance.txt](uc_merced/provenance.txt) |
+| `oxford_flowers102` | Oxford VGG 102-category flowers (Nilsback & Zisserman) | unspecified | [oxford_flowers102/provenance.txt](oxford_flowers102/provenance.txt) |
+| `places365_small` | MIT CSAIL Places365 standard, 256x256 easy format (Zhou et al.) | MIT | [places365_small/provenance.txt](places365_small/provenance.txt) |
+| `cars196` | Stanford Cars-196 (Krause et al.); cars196-img mirror | unspecified | [cars196/provenance.txt](cars196/provenance.txt) |
+| `librispeech` | OpenSLR LibriSpeech dev-clean (Panayotov et al., LibriVox) | CC BY 4.0 | [librispeech/provenance.txt](librispeech/provenance.txt) |
+| `libritts` | OpenSLR LibriTTS dev-clean (Zen et al., LibriVox) | CC BY 4.0 | [libritts/provenance.txt](libritts/provenance.txt) |
+| `nsynth` | Google Magenta NSynth test split | CC BY 4.0 | [nsynth/provenance.txt](nsynth/provenance.txt) |
+| `glue_sst2` | GLUE benchmark SST-2 (Wang et al.) | GLUE/custom | [glue_sst2/provenance.txt](glue_sst2/provenance.txt) |
+| `glue_cola` | GLUE benchmark CoLA (Wang et al.) | GLUE/custom | [glue_cola/provenance.txt](glue_cola/provenance.txt) |
+| `glue_qqp` | GLUE benchmark QQP (Wang et al.) | GLUE/custom | [glue_qqp/provenance.txt](glue_qqp/provenance.txt) |
+| `glue_qnli` | GLUE benchmark QNLI (Wang et al.) | GLUE/custom | [glue_qnli/provenance.txt](glue_qnli/provenance.txt) |
+| `glue_rte` | GLUE benchmark RTE (Wang et al.) | GLUE/custom | [glue_rte/provenance.txt](glue_rte/provenance.txt) |
+| `glue_wnli` | GLUE benchmark WNLI (Wang et al.) | GLUE/custom | [glue_wnli/provenance.txt](glue_wnli/provenance.txt) |
+| `glue_mnli` | GLUE benchmark MNLI (Wang et al.) | GLUE/custom | [glue_mnli/provenance.txt](glue_mnli/provenance.txt) |
+| `glue_stsb` | GLUE benchmark STS-B (Wang et al.) | GLUE/custom | [glue_stsb/provenance.txt](glue_stsb/provenance.txt) |
+| `svhn` | Stanford UFLDL SVHN (Netzer et al.) | non-commercial | [svhn/provenance.txt](svhn/provenance.txt) |
+| `smallnorb` | NYU small NORB (LeCun et al.) | CC BY-SA 3.0 | [smallnorb/provenance.txt](smallnorb/provenance.txt) |
+| `waves_yesno` | OpenSLR yes/no utterances | CC BY 3.0 | [waves_yesno/provenance.txt](waves_yesno/provenance.txt) |
+| `squad_v2` | Stanford Question Answering Dataset 2.0 | CC BY-SA 4.0 | [squad_v2/provenance.txt](squad_v2/provenance.txt) |
+| `omniglot` | Brenden Lake omniglot repository | MIT | [omniglot/provenance.txt](omniglot/provenance.txt) |
+| `superglue_boolq` | SuperGLUE benchmark BoolQ (Wang et al.) | SuperGLUE/custom | [superglue_boolq/provenance.txt](superglue_boolq/provenance.txt) |
+| `superglue_cb` | SuperGLUE benchmark CB (Wang et al.) | SuperGLUE/custom | [superglue_cb/provenance.txt](superglue_cb/provenance.txt) |
+| `superglue_copa` | SuperGLUE benchmark COPA (Wang et al.) | SuperGLUE/custom | [superglue_copa/provenance.txt](superglue_copa/provenance.txt) |
+| `superglue_multirc` | SuperGLUE benchmark MultiRC (Wang et al.) | SuperGLUE/custom | [superglue_multirc/provenance.txt](superglue_multirc/provenance.txt) |
+| `superglue_record` | SuperGLUE benchmark ReCoRD (Wang et al.) | SuperGLUE/custom | [superglue_record/provenance.txt](superglue_record/provenance.txt) |
+| `superglue_rte` | SuperGLUE benchmark RTE (Wang et al.) | SuperGLUE/custom | [superglue_rte/provenance.txt](superglue_rte/provenance.txt) |
+| `superglue_wic` | SuperGLUE benchmark WiC (Wang et al.) | SuperGLUE/custom | [superglue_wic/provenance.txt](superglue_wic/provenance.txt) |
+| `superglue_wsc` | SuperGLUE benchmark WSC (Wang et al.) | SuperGLUE/custom | [superglue_wsc/provenance.txt](superglue_wsc/provenance.txt) |
+| `anli_r1` | Adversarial NLI round 1 (Nie et al., Facebook AI) | CC BY-NC-SA 4.0 | [anli_r1/provenance.txt](anli_r1/provenance.txt) |
+| `anli_r2` | Adversarial NLI round 2 (Nie et al., Facebook AI) | CC BY-NC-SA 4.0 | [anli_r2/provenance.txt](anli_r2/provenance.txt) |
+| `anli_r3` | Adversarial NLI round 3 (Nie et al., Facebook AI) | CC BY-NC-SA 4.0 | [anli_r3/provenance.txt](anli_r3/provenance.txt) |
+| `xnli` | XNLI cross-lingual NLI dev/test (Conneau et al., Facebook AI) | OANC/CC | [xnli/provenance.txt](xnli/provenance.txt) |
+| `gtzan` | GTZAN genre collection (marsyas mirror, Hugging Face) | research-only | [gtzan/provenance.txt](gtzan/provenance.txt) |
 
 The `tensorflow_datasets/` entry below is code attribution, not a dataset pack.
 

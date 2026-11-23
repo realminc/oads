@@ -1,0 +1,7 @@
+Quora Question Pairs (GLUE QQP)
+
+Source: QQP.zip via https://dl.fbaipublicfiles.com/glue/data/QQP.zip
+License: Dataset-specific; Quora data terms apply
+Citation: Quora Question Pairs dataset, 2017.
+
+Task TSVs only; question pair + duplicate-label columns are indexed.

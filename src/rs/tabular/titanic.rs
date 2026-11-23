@@ -1,7 +1,7 @@
 //! Titanic passenger survival table as a device-resident
 //! [`oa::data::Dataset`].
 //!
-//! `titanic.csv` is materialized through [`ensure_pack`](crate::pack::ensure_pack)
+//! `titanic.csv` is materialized through [`ensure_pack`](crate::core::pack::ensure_pack)
 //! under `titanic/1.0.0` and decodes to a `[891, 9]` F32 feature matrix —
 //! pclass, sex, age, sibsp, parch, fare, and one-hot embarked — plus a `[891]`
 //! F32 survival-label matrix. Missing age fills with the column median and
@@ -13,9 +13,9 @@ use oa::data::{Dataset, MatrixDataset, Sample};
 use oa::matrix::Matrix;
 use oa::{Engine, Error, Result};
 
-use crate::csv;
-use crate::decode::{Decoded, MatrixData};
-use crate::pack::{self, FetchProgress};
+use crate::core::csv;
+use crate::core::decode::{Decoded, MatrixData};
+use crate::core::pack::{self, FetchProgress};
 use crate::tabular::scale::normalize_columns;
 
 #[path = "titanic.gen.rs"]

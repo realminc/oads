@@ -1,0 +1,7 @@
+small NORB stereo object recognition
+
+Source: smallnorb-{5x01235x9,5x46789x9}_{training,testing}-{dat,cat,info}.mat.gz via https://cs.nyu.edu/~ylclab/data/norb-v1.0-small/
+License: Dataset-specific; research use
+Citation: LeCun, Huang & Bottou, "Learning methods for generic object recognition with invariance to pose and lighting", CVPR 2004.
+
+Members are NORB's custom gzip matrix format (0x1E3D4C55/0x1E3D4C54 magic), not MATLAB. `[N, 2, 96, 96]` stereo pairs + `[N]` categories + `[N, 4]` pose info.
