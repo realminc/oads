@@ -77,5 +77,21 @@ mod test_smallnorb;
 #[path = "image/test_svhn.rs"]
 mod test_svhn;
 
+#[path = "image/test_coco.rs"]
+mod test_coco;
+#[path = "image/test_coco_captions.rs"]
+mod test_coco_captions;
+#[path = "image/test_kitti.rs"]
+mod test_kitti;
 #[path = "image/test_omniglot.rs"]
 mod test_omniglot;
+#[path = "image/test_patch_camelyon.rs"]
+mod test_patch_camelyon;
+#[path = "image/test_quickdraw.rs"]
+mod test_quickdraw;
+#[path = "image/test_voc2007.rs"]
+mod test_voc2007;
+#[path = "image/test_voc2012.rs"]
+mod test_voc2012;
+#[path = "image/test_wider_face.rs"]
+mod test_wider_face;

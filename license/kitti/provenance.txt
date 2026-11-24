@@ -1,0 +1,11 @@
+KITTI 2D Object Detection (data_object_image_2.zip +
+data_object_label_2.zip)
+
+Source: https://s3.eu-central-1.amazonaws.com/avg-kitti/ (the public
+mirror behind www.cvlibs.net/datasets/kitti/eval_object.php)
+Geiger, Lenz & Urtasun, "Are we ready for Autonomous Driving? The
+KITTI Vision Benchmark Suite", CVPR 2012. The dataset is licensed
+CC BY-NC-SA 3.0: non-commercial use with attribution and
+share-alike. Registration terms at cvlibs.net apply to the canonical
+portal; this pack uses the same files served from the public S3
+bucket.

@@ -1,0 +1,9 @@
+pack: forest_fires
+source: UCI forestfires
+url: https://archive.ics.uci.edu/static/public/162/forest+fires.zip
+fetched: 2026-11-24
+license: see license/README.md label for forest_fires
+
+Montesinho forest-fire burn-area data (Cortez & Morais 2007), UCI
+ML Repository dataset 162. CSV member forestfires.csv carries 517
+rows; month/weekday names recode to ordinals.

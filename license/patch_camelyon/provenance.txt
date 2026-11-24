@@ -1,0 +1,11 @@
+pack: patch_camelyon
+source: PatchCamelyon (Veeling et al. 2018), Zenodo record 2546921
+url: https://zenodo.org/records/2546921
+fetched: 2026-11-24
+license: MIT (see license/README.md label for patch_camelyon)
+
+PatchCamelyon benchmark: 327,680 color patches (96x96) extracted from
+Camelyon16 lymph-node histopathology scans, binary tumor-present labels.
+camelyonpatch_level_2_split_{train,valid,test}_{x,y}.h5.gz hold uint8
+HWC image datasets `/x` and label datasets `/y`; split meta CSVs record
+source-slide provenance and are redistributed unmodified.

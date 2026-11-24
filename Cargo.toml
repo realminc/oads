@@ -1,6 +1,6 @@
 [package]
 name = "oadsrust"
-version = "0.3.0"
+version = "0.4.0"
 edition = "2024"
 rust-version = "1.98"
 autotests = false
@@ -48,7 +48,8 @@ name = "tabular"
 path = "test/rs/test_tabular.rs"
 
 [dependencies]
-oarust = { version = "0.15" }
+oarust = { version = "0.16", default-features = false, features = ["bundled-sdl"] }
 flate2 = "1"
 bzip2 = "0.6.1"
-serde_json = "1.0.154"
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1.0.154", features = ["unbounded_depth"] }

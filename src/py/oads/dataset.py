@@ -43,6 +43,7 @@ class MatrixDataset:
 		split: str = "train",
 		cache_dir=None,
 		normalize: bool = True,
+		count=None,
 		progress=True,
 	) -> "MatrixDataset":
 		"""Fetch, verify, decode, and upload the selected split.
@@ -51,7 +52,9 @@ class MatrixDataset:
 		(oa.Engine.current()); pass an oa.Engine to pin one explicitly.
 		cache_dir=None resolves OA_DATA_DIR then the platform cache.
 		normalize=True scales features into the pack's canonical unit
-		range; normalize=False keeps raw f32 values. progress=True renders
+		range; normalize=False keeps raw f32 values. count caps decoded
+		rows at the first `count` entries for packs that declare the
+		option; None decodes the full split. progress=True renders
 		the download bar; a callable receives (file, fetched, total)
 		samples instead.
 		"""
@@ -59,6 +62,7 @@ class MatrixDataset:
 			cls.PACK["name"],
 			split=split,
 			normalize=normalize,
+			count=count,
 			cache_dir=str(Path(cache_dir)) if cache_dir else None,
 			progress=resolve(progress),
 		)

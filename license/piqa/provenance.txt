@@ -1,0 +1,6 @@
+PhysicalIQA (train/valid/tests jsonl + labels.lst)
+
+Source: https://yonatanbisk.com/piqa/
+Bisk et al., "PIQA: Reasoning about Physical Commonsense in Natural
+Language", AAAI 2020. Distributed under the Academic Free License 3.0.
+The unlabeled tests member ships without labels.

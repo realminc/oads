@@ -1,0 +1,8 @@
+MS COCO 2017 captions (shares the coco pack's
+train2017/val2017/annotations_trainval2017 archives)
+
+Source: http://images.cocodataset.org/ (cocodataset.org)
+Chen et al., "Microsoft COCO Captions: Data Collection and Evaluation
+Server", 2015. Annotations CC BY 4.0; images remain subject to the
+Flickr photographers' licenses under COCO terms of use. Each of five
+captions per image is one sample (index order is caption order).

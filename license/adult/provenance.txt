@@ -1,0 +1,7 @@
+Adult census income (adult.zip: adult.data + adult.test)
+
+Source: https://archive.ics.uci.edu/dataset/2/adult (UCI ML Repository)
+Becker & Kohavi, 1996 census extract. Distributed CC BY 4.0. Eight
+categorical fields one-hot encode over the union of train+test
+categories (`?` kept as a category; `education` dropped as redundant
+with `education-num`).

@@ -6,6 +6,10 @@
 //! [`oa::data`]. Packs arrive unsplit; partition with
 //! [`oa::data::random_split`].
 
+pub mod adult;
+pub mod covertype;
+pub mod forest_fires;
+pub mod german_credit;
 pub mod iris;
 pub mod movielens_100k;
 pub mod movielens_1m;
@@ -13,6 +17,10 @@ pub(crate) mod ratings;
 pub(crate) mod scale;
 pub mod titanic;
 
+pub use adult::{Adult, AdultConfig, AdultSplit};
+pub use covertype::{Covertype, CovertypeConfig};
+pub use forest_fires::{ForestFires, ForestFiresConfig};
+pub use german_credit::{GermanCredit, GermanCreditConfig};
 pub use iris::{CLASSES, Iris, IrisConfig};
 pub use movielens_1m::{Movielens1m, Movielens1mConfig};
 pub use movielens_100k::{Movielens100k, Movielens100kConfig, Movielens100kSplit};

@@ -1,0 +1,6 @@
+enwik8 (enwik8.zip)
+
+Source: http://mattmahoney.net/dc/textdata.html (Hutter Prize corpus)
+First 100,000,000 bytes of a Wikipedia XML dump prepared by Matt
+Mahoney. Wikipedia content is CC BY-SA; the conventional byte-range
+split applies (train 90M / validation 5M / test 5M).

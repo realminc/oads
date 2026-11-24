@@ -76,6 +76,37 @@ pub(crate) fn manifest_of(name: &str) -> Result<&'static Pack> {
 		"anli_r3" => Ok(&crate::text::anli_r3::ANLI_R3_PACK),
 		"xnli" => Ok(&crate::text::xnli::XNLI_PACK),
 		"gtzan" => Ok(&crate::audio::gtzan::GTZAN_PACK),
+		"arc_easy" => Ok(&crate::text::arc_easy::ARC_EASY_PACK),
+		"arc_challenge" => Ok(&crate::text::arc_challenge::ARC_CHALLENGE_PACK),
+		"cfq" => Ok(&crate::text::cfq::CFQ_PACK),
+		"scan" => Ok(&crate::text::scan::SCAN_PACK),
+		"flores101" => Ok(&crate::text::flores101::FLORES101_PACK),
+		"math_dataset" => Ok(&crate::text::math_dataset::MATH_DATASET_PACK),
+		"xsum" => Ok(&crate::text::xsum::XSUM_PACK),
+		"lm1b" => Ok(&crate::text::lm1b::LM1B_PACK),
+		"forest_fires" => Ok(&crate::tabular::forest_fires::FOREST_FIRES_PACK),
+		"german_credit" => Ok(&crate::tabular::german_credit::GERMAN_CREDIT_PACK),
+		"trivia_qa" => Ok(&crate::text::trivia_qa::TRIVIA_QA_PACK),
+		"patch_camelyon" => Ok(&crate::image::patch_camelyon::PATCH_CAMELYON_PACK),
+		"wiki40b" => Ok(&crate::text::wiki40b::WIKI40B_PACK),
+		"voc2007" => Ok(&crate::image::voc2007::VOC2007_PACK),
+		"voc2012" => Ok(&crate::image::voc2012::VOC2012_PACK),
+		"kitti" => Ok(&crate::image::kitti::KITTI_PACK),
+		"coco" => Ok(&crate::image::coco::COCO_PACK),
+		"wider_face" => Ok(&crate::image::wider_face::WIDER_FACE_PACK),
+		"squad_v1" => Ok(&crate::text::squad_v1::SQUAD_V1_PACK),
+		"multi_nli" => Ok(&crate::text::multi_nli::MULTI_NLI_PACK),
+		"winogrande" => Ok(&crate::text::winogrande::WINOGRANDE_PACK),
+		"piqa" => Ok(&crate::text::piqa::PIQA_PACK),
+		"openbookqa" => Ok(&crate::text::openbookqa::OPENBOOKQA_PACK),
+		"yelp_review_full" => Ok(&crate::text::yelp_review_full::YELP_REVIEW_FULL_PACK),
+		"dbpedia" => Ok(&crate::text::dbpedia::DBPEDIA_PACK),
+		"go_emotions" => Ok(&crate::text::go_emotions::GO_EMOTIONS_PACK),
+		"enwik8" => Ok(&crate::text::enwik8::ENWIK8_PACK),
+		"adult" => Ok(&crate::tabular::adult::ADULT_PACK),
+		"covertype" => Ok(&crate::tabular::covertype::COVERTYPE_PACK),
+		"quickdraw" => Ok(&crate::image::quickdraw::QUICKDRAW_PACK),
+		"coco_captions" => Ok(&crate::image::coco_captions::COCO_CAPTIONS_PACK),
 		_ => Err(Error::invalid_argument(format!(
 			"unknown dataset pack '{name}'"
 		))),
@@ -834,6 +865,375 @@ pub(crate) fn load_of(
 		),
 		"gtzan" => crate::audio::gtzan::Gtzan::decode_with_progress(
 			&crate::audio::gtzan::GtzanConfig {
+				cache_dir: config.cache_dir.clone(),
+			},
+			progress,
+		),
+		"arc_easy" => crate::text::arc_easy::ArcEasy::decode_with_progress(
+			&crate::text::arc_easy::ArcEasyConfig {
+				split: match config.split {
+					IdxSplit::Train => crate::text::arc_easy::ArcEasySplit::Train,
+					IdxSplit::Validation => crate::text::arc_easy::ArcEasySplit::Validation,
+					IdxSplit::Test => crate::text::arc_easy::ArcEasySplit::Test,
+				},
+				cache_dir: config.cache_dir.clone(),
+			},
+			progress,
+		),
+		"arc_challenge" => crate::text::arc_challenge::ArcChallenge::decode_with_progress(
+			&crate::text::arc_challenge::ArcChallengeConfig {
+				split: match config.split {
+					IdxSplit::Train => crate::text::arc_challenge::ArcChallengeSplit::Train,
+					IdxSplit::Validation => crate::text::arc_challenge::ArcChallengeSplit::Validation,
+					IdxSplit::Test => crate::text::arc_challenge::ArcChallengeSplit::Test,
+				},
+				cache_dir: config.cache_dir.clone(),
+			},
+			progress,
+		),
+		"cfq" => crate::text::cfq::Cfq::decode_with_progress(
+			&crate::text::cfq::CfqConfig {
+				split: match config.split {
+					IdxSplit::Train => crate::text::cfq::CfqSplit::Train,
+					IdxSplit::Validation => crate::text::cfq::CfqSplit::Validation,
+					IdxSplit::Test => crate::text::cfq::CfqSplit::Test,
+				},
+				cache_dir: config.cache_dir.clone(),
+			},
+			progress,
+		),
+		"scan" => crate::text::scan::Scan::decode_with_progress(
+			&crate::text::scan::ScanConfig {
+				split: match config.split {
+					IdxSplit::Train => crate::text::scan::ScanSplit::Train,
+					IdxSplit::Test => crate::text::scan::ScanSplit::Test,
+					_ => {
+						return Err(Error::invalid_argument(
+							"scan does not carry that IdxSplit variant",
+						));
+					}
+				},
+				cache_dir: config.cache_dir.clone(),
+			},
+			progress,
+		),
+		"flores101" => crate::text::flores101::Flores101::decode_with_progress(
+			&crate::text::flores101::Flores101Config {
+				split: match config.split {
+					IdxSplit::Validation => crate::text::flores101::Flores101Split::Validation,
+					IdxSplit::Test => crate::text::flores101::Flores101Split::Test,
+					_ => {
+						return Err(Error::invalid_argument(
+							"flores101 does not carry that IdxSplit variant",
+						));
+					}
+				},
+				cache_dir: config.cache_dir.clone(),
+			},
+			progress,
+		),
+		"math_dataset" => crate::text::math_dataset::MathDataset::decode_with_progress(
+			&crate::text::math_dataset::MathDatasetConfig {
+				count: config.count,
+				split: match config.split {
+					IdxSplit::Train => crate::text::math_dataset::MathDatasetSplit::Train,
+					IdxSplit::Validation => crate::text::math_dataset::MathDatasetSplit::Validation,
+					IdxSplit::Test => crate::text::math_dataset::MathDatasetSplit::Test,
+				},
+				cache_dir: config.cache_dir.clone(),
+			},
+			progress,
+		),
+		"xsum" => crate::text::xsum::Xsum::decode_with_progress(
+			&crate::text::xsum::XsumConfig {
+				count: config.count,
+				split: match config.split {
+					IdxSplit::Train => crate::text::xsum::XsumSplit::Train,
+					IdxSplit::Validation => crate::text::xsum::XsumSplit::Validation,
+					IdxSplit::Test => crate::text::xsum::XsumSplit::Test,
+				},
+				cache_dir: config.cache_dir.clone(),
+			},
+			progress,
+		),
+		"lm1b" => crate::text::lm1b::Lm1b::decode_with_progress(
+			&crate::text::lm1b::Lm1bConfig {
+				count: config.count,
+				split: match config.split {
+					IdxSplit::Train => crate::text::lm1b::Lm1bSplit::Train,
+					IdxSplit::Validation => crate::text::lm1b::Lm1bSplit::Validation,
+					_ => {
+						return Err(Error::invalid_argument(
+							"lm1b does not carry that IdxSplit variant",
+						));
+					}
+				},
+				cache_dir: config.cache_dir.clone(),
+			},
+			progress,
+		),
+		"forest_fires" => crate::tabular::forest_fires::ForestFires::decode_with_progress(
+			&crate::tabular::forest_fires::ForestFiresConfig {
+				normalize: config.normalize,
+				cache_dir: config.cache_dir.clone(),
+			},
+			progress,
+		),
+		"german_credit" => crate::tabular::german_credit::GermanCredit::decode_with_progress(
+			&crate::tabular::german_credit::GermanCreditConfig {
+				normalize: config.normalize,
+				cache_dir: config.cache_dir.clone(),
+			},
+			progress,
+		),
+		"trivia_qa" => crate::text::trivia_qa::TriviaQa::decode_with_progress(
+			&crate::text::trivia_qa::TriviaQaConfig {
+				split: match config.split {
+					IdxSplit::Train => crate::text::trivia_qa::TriviaQaSplit::Train,
+					IdxSplit::Validation => crate::text::trivia_qa::TriviaQaSplit::Validation,
+					IdxSplit::Test => crate::text::trivia_qa::TriviaQaSplit::Test,
+				},
+				cache_dir: config.cache_dir.clone(),
+			},
+			progress,
+		),
+		"patch_camelyon" => crate::image::patch_camelyon::PatchCamelyon::decode_with_progress(
+			&crate::image::patch_camelyon::PatchCamelyonConfig {
+				count: config.count,
+				split: match config.split {
+					IdxSplit::Train => crate::image::patch_camelyon::PatchCamelyonSplit::Train,
+					IdxSplit::Validation => crate::image::patch_camelyon::PatchCamelyonSplit::Validation,
+					IdxSplit::Test => crate::image::patch_camelyon::PatchCamelyonSplit::Test,
+				},
+				cache_dir: config.cache_dir.clone(),
+				normalize: config.normalize,
+			},
+			progress,
+		),
+		"wiki40b" => crate::text::wiki40b::Wiki40B::decode_with_progress(
+			&crate::text::wiki40b::Wiki40BConfig {
+				count: config.count,
+				split: match config.split {
+					IdxSplit::Train => crate::text::wiki40b::Wiki40BSplit::Train,
+					IdxSplit::Validation => crate::text::wiki40b::Wiki40BSplit::Validation,
+					IdxSplit::Test => crate::text::wiki40b::Wiki40BSplit::Test,
+				},
+				cache_dir: config.cache_dir.clone(),
+			},
+			progress,
+		),
+		"voc2007" => crate::image::voc2007::Voc2007::decode_with_progress(
+			&crate::image::voc2007::Voc2007Config {
+				split: match config.split {
+					IdxSplit::Train => crate::image::voc2007::Voc2007Split::Train,
+					IdxSplit::Validation => crate::image::voc2007::Voc2007Split::Validation,
+					IdxSplit::Test => crate::image::voc2007::Voc2007Split::Test,
+				},
+				cache_dir: config.cache_dir.clone(),
+			},
+			progress,
+		),
+		"voc2012" => crate::image::voc2012::Voc2012::decode_with_progress(
+			&crate::image::voc2012::Voc2012Config {
+				split: match config.split {
+					IdxSplit::Train => crate::image::voc2012::Voc2012Split::Train,
+					IdxSplit::Validation => crate::image::voc2012::Voc2012Split::Validation,
+					_ => {
+						return Err(Error::invalid_argument(
+							"voc2012 does not carry that IdxSplit variant",
+						));
+					}
+				},
+				cache_dir: config.cache_dir.clone(),
+			},
+			progress,
+		),
+		"kitti" => crate::image::kitti::Kitti::decode_with_progress(
+			&crate::image::kitti::KittiConfig {
+				split: match config.split {
+					IdxSplit::Train => crate::image::kitti::KittiSplit::Train,
+					IdxSplit::Test => crate::image::kitti::KittiSplit::Test,
+					_ => {
+						return Err(Error::invalid_argument(
+							"kitti does not carry that IdxSplit variant",
+						));
+					}
+				},
+				cache_dir: config.cache_dir.clone(),
+			},
+			progress,
+		),
+		"coco" => crate::image::coco::Coco::decode_with_progress(
+			&crate::image::coco::CocoConfig {
+				split: match config.split {
+					IdxSplit::Train => crate::image::coco::CocoSplit::Train,
+					IdxSplit::Validation => crate::image::coco::CocoSplit::Validation,
+					_ => {
+						return Err(Error::invalid_argument(
+							"coco does not carry that IdxSplit variant",
+						));
+					}
+				},
+				cache_dir: config.cache_dir.clone(),
+			},
+			progress,
+		),
+		"wider_face" => crate::image::wider_face::WiderFace::decode_with_progress(
+			&crate::image::wider_face::WiderFaceConfig {
+				split: match config.split {
+					IdxSplit::Train => crate::image::wider_face::WiderFaceSplit::Train,
+					IdxSplit::Validation => crate::image::wider_face::WiderFaceSplit::Validation,
+					IdxSplit::Test => crate::image::wider_face::WiderFaceSplit::Test,
+				},
+				cache_dir: config.cache_dir.clone(),
+			},
+			progress,
+		),
+		"squad_v1" => crate::text::squad_v1::SquadV1::decode_with_progress(
+			&crate::text::squad_v1::SquadV1Config {
+				split: match config.split {
+					IdxSplit::Train => crate::text::squad_v1::SquadV1Split::Train,
+					IdxSplit::Validation => crate::text::squad_v1::SquadV1Split::Validation,
+					_ => {
+						return Err(Error::invalid_argument(
+							"squad_v1 does not carry that IdxSplit variant",
+						));
+					}
+				},
+				cache_dir: config.cache_dir.clone(),
+			},
+			progress,
+		),
+		"multi_nli" => crate::text::multi_nli::MultiNli::decode_with_progress(
+			&crate::text::multi_nli::MultiNliConfig {
+				split: match config.split {
+					IdxSplit::Train => crate::text::multi_nli::MultiNliSplit::Train,
+					IdxSplit::Validation => crate::text::multi_nli::MultiNliSplit::Validation,
+					IdxSplit::Test => crate::text::multi_nli::MultiNliSplit::Test,
+				},
+				cache_dir: config.cache_dir.clone(),
+			},
+			progress,
+		),
+		"winogrande" => crate::text::winogrande::Winogrande::decode_with_progress(
+			&crate::text::winogrande::WinograndeConfig {
+				split: match config.split {
+					IdxSplit::Train => crate::text::winogrande::WinograndeSplit::Train,
+					IdxSplit::Validation => crate::text::winogrande::WinograndeSplit::Validation,
+					IdxSplit::Test => crate::text::winogrande::WinograndeSplit::Test,
+				},
+				cache_dir: config.cache_dir.clone(),
+			},
+			progress,
+		),
+		"piqa" => crate::text::piqa::Piqa::decode_with_progress(
+			&crate::text::piqa::PiqaConfig {
+				split: match config.split {
+					IdxSplit::Train => crate::text::piqa::PiqaSplit::Train,
+					IdxSplit::Validation => crate::text::piqa::PiqaSplit::Validation,
+					IdxSplit::Test => crate::text::piqa::PiqaSplit::Test,
+				},
+				cache_dir: config.cache_dir.clone(),
+			},
+			progress,
+		),
+		"openbookqa" => crate::text::openbookqa::Openbookqa::decode_with_progress(
+			&crate::text::openbookqa::OpenbookqaConfig {
+				split: match config.split {
+					IdxSplit::Train => crate::text::openbookqa::OpenbookqaSplit::Train,
+					IdxSplit::Validation => crate::text::openbookqa::OpenbookqaSplit::Validation,
+					IdxSplit::Test => crate::text::openbookqa::OpenbookqaSplit::Test,
+				},
+				cache_dir: config.cache_dir.clone(),
+			},
+			progress,
+		),
+		"yelp_review_full" => crate::text::yelp_review_full::YelpReviewFull::decode_with_progress(
+			&crate::text::yelp_review_full::YelpReviewFullConfig {
+				split: config.split,
+				text_len: 512,
+				cache_dir: config.cache_dir.clone(),
+				normalize: config.normalize,
+			},
+			progress,
+		),
+		"dbpedia" => crate::text::dbpedia::Dbpedia::decode_with_progress(
+			&crate::text::dbpedia::DbpediaConfig {
+				split: config.split,
+				text_len: 512,
+				cache_dir: config.cache_dir.clone(),
+				normalize: config.normalize,
+			},
+			progress,
+		),
+		"go_emotions" => crate::text::go_emotions::GoEmotions::decode_with_progress(
+			&crate::text::go_emotions::GoEmotionsConfig {
+				split: match config.split {
+					IdxSplit::Train => crate::text::go_emotions::GoEmotionsSplit::Train,
+					IdxSplit::Validation => crate::text::go_emotions::GoEmotionsSplit::Validation,
+					IdxSplit::Test => crate::text::go_emotions::GoEmotionsSplit::Test,
+				},
+				text_len: 512,
+				cache_dir: config.cache_dir.clone(),
+				normalize: config.normalize,
+			},
+			progress,
+		),
+		"enwik8" => crate::text::enwik8::Enwik8::decode_with_progress(
+			&crate::text::enwik8::Enwik8Config {
+				seq_len: 1,
+				split: match config.split {
+					IdxSplit::Train => crate::text::enwik8::Enwik8Split::Train,
+					IdxSplit::Validation => crate::text::enwik8::Enwik8Split::Validation,
+					IdxSplit::Test => crate::text::enwik8::Enwik8Split::Test,
+				},
+				cache_dir: config.cache_dir.clone(),
+			},
+			progress,
+		),
+		"adult" => crate::tabular::adult::Adult::decode_with_progress(
+			&crate::tabular::adult::AdultConfig {
+				split: match config.split {
+					IdxSplit::Train => crate::tabular::adult::AdultSplit::Train,
+					IdxSplit::Test => crate::tabular::adult::AdultSplit::Test,
+					_ => {
+						return Err(Error::invalid_argument(
+							"adult does not carry that IdxSplit variant",
+						));
+					}
+				},
+				cache_dir: config.cache_dir.clone(),
+				normalize: config.normalize,
+			},
+			progress,
+		),
+		"covertype" => crate::tabular::covertype::Covertype::decode_with_progress(
+			&crate::tabular::covertype::CovertypeConfig {
+				cache_dir: config.cache_dir.clone(),
+				normalize: config.normalize,
+			},
+			progress,
+		),
+		"quickdraw" => crate::image::quickdraw::Quickdraw::decode_with_progress(
+			&crate::image::quickdraw::QuickdrawConfig {
+				classes: None,
+				count: config.count,
+				cache_dir: config.cache_dir.clone(),
+				normalize: config.normalize,
+			},
+			progress,
+		),
+		"coco_captions" => crate::image::coco_captions::CocoCaptions::decode_with_progress(
+			&crate::image::coco_captions::CocoCaptionsConfig {
+				split: match config.split {
+					IdxSplit::Train => crate::image::coco_captions::CocoCaptionsSplit::Train,
+					IdxSplit::Validation => crate::image::coco_captions::CocoCaptionsSplit::Validation,
+					_ => {
+						return Err(Error::invalid_argument(
+							"coco_captions does not carry that IdxSplit variant",
+						));
+					}
+				},
 				cache_dir: config.cache_dir.clone(),
 			},
 			progress,

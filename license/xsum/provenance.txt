@@ -1,0 +1,11 @@
+pack: xsum
+source: XSum + EdinburghNLP split
+url: http://bollin.inf.ed.ac.uk/public/direct/XSUM-EMNLP18-Summary-Data-Original.tar.gz
+fetched: 2026-11-24
+license: see license/README.md label for xsum
+
+Extreme Summarization BBC corpus (Narayan et al. 2018). Each
+.summary member carries [SN]-delimited sections; FIRST-SENTENCE is
+the summary and RESTBODY the document. Split manifest is
+EdinburghNLP/XSum XSum-TRAINING-DEV-TEST-SPLIT-90-5-5.json
+(204,045/11,332/11,334). BBC content licensed for research use.

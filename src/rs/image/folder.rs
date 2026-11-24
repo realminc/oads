@@ -120,6 +120,81 @@ impl ImageIndex {
 	}
 }
 
+/// One indexed object-detection split: sorted image paths, the flat
+/// `[x1, y1, x2, y2, class]` box rows across all paths, the per-path box
+/// counts, and the class-name table box labels index into.
+///
+/// Box coordinates are native image pixels in the upstream's frame;
+/// `class` is a float-encoded index into `classes`.
+pub(crate) struct DetectionIndex {
+	pub paths: Vec<PathBuf>,
+	pub boxes: Vec<[f32; 5]>,
+	pub box_lengths: Vec<u32>,
+	pub classes: Vec<String>,
+}
+
+impl DetectionIndex {
+	/// `[T, 5]` F32 box matrix for [`Decoded`](crate::core::decode::Decoded).
+	pub(crate) fn boxes(&self) -> Result<MatrixData> {
+		if self.boxes.len() != self.box_lengths.iter().map(|&n| n as usize).sum::<usize>() {
+			return Err(Error::internal(
+				"detection box rows do not match box lengths",
+			));
+		}
+		let values = self
+			.boxes
+			.iter()
+			.flat_map(|row| row.iter().copied())
+			.collect::<Vec<_>>();
+		Ok(MatrixData {
+			name: "boxes",
+			shape: vec![self.boxes.len(), 5],
+			values,
+		})
+	}
+
+	/// `[N]` F32 per-path box counts for
+	/// [`Decoded`](crate::core::decode::Decoded).
+	pub(crate) fn box_lengths(&self) -> Result<MatrixData> {
+		let values = self
+			.box_lengths
+			.iter()
+			.map(|&count| count as f32)
+			.collect::<Vec<_>>();
+		Ok(MatrixData {
+			name: "box_lengths",
+			shape: vec![self.box_lengths.len()],
+			values,
+		})
+	}
+
+	/// `[N + 1]` host offsets: `offsets[i]..offsets[i + 1]` spans the
+	/// box rows of path `i`.
+	pub(crate) fn offsets(&self) -> Vec<i64> {
+		let mut offsets = Vec::with_capacity(self.box_lengths.len() + 1);
+		offsets.push(0);
+		for &count in &self.box_lengths {
+			offsets.push(offsets.last().copied().unwrap_or(0) + i64::from(count));
+		}
+		offsets
+	}
+
+	/// Newline-joined root-relative paths in index order for
+	/// `Decoded::text`, letting foreign bindings resolve members without
+	/// reimplementing the scan ordering.
+	pub(crate) fn paths_text(&self, root: &Path) -> Result<String> {
+		let mut text = String::new();
+		for path in &self.paths {
+			let relative = path
+				.strip_prefix(root)
+				.map_err(|_| Error::internal("image index path escapes its extracted root"))?;
+			text.push_str(&relative.to_string_lossy());
+			text.push('\n');
+		}
+		Ok(text)
+	}
+}
+
 /// Extract every regular member of `archive` — zip, tar.gz, tar.bz2, or
 /// plain tar, selected by magic bytes — into `dest`, flattening nothing
 /// and rejecting members that would escape `dest`.
@@ -169,7 +244,7 @@ pub(crate) fn decode(engine: &Engine, path: &Path) -> Result<Image> {
 }
 
 fn is_tar(path: &Path) -> Result<bool> {
-	use std::io::{Read, Seek};
+	use std::io::Read;
 	let mut file = std::fs::File::open(path).map_err(|error| Error::io("open archive", error))?;
 	let mut block = [0u8; 512];
 	if file
@@ -179,10 +254,36 @@ fn is_tar(path: &Path) -> Result<bool> {
 	{
 		return Ok(false);
 	}
-	file
-		.rewind()
-		.map_err(|error| Error::io("seek archive", error))?;
-	Ok(&block[257..262] == b"ustar")
+	if block.iter().all(|byte| *byte == 0) {
+		return Ok(false);
+	}
+	if &block[257..262] == b"ustar" {
+		return Ok(true);
+	}
+	// V7 headers carry no magic; validate the stored header checksum
+	// (bytes 148..156 read as spaces when summed).
+	let digits = block[148..156]
+		.iter()
+		.take_while(|byte| byte.is_ascii_digit() || **byte == b' ');
+	let stored = digits.fold(0u64, |sum, byte| {
+		if byte.is_ascii_digit() {
+			sum * 8 + u64::from(byte - b'0')
+		} else {
+			sum
+		}
+	});
+	let sum: u64 = block
+		.iter()
+		.enumerate()
+		.map(|(index, byte)| {
+			if (148..156).contains(&index) {
+				u64::from(b' ')
+			} else {
+				u64::from(*byte)
+			}
+		})
+		.sum();
+	Ok(stored == sum)
 }
 
 fn safe_member(dest: &Path, name: &str) -> Result<PathBuf> {

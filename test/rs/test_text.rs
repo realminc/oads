@@ -73,3 +73,50 @@ mod test_anli_r3;
 
 #[path = "text/test_xnli.rs"]
 mod test_xnli;
+
+#[path = "text/test_arc_easy.rs"]
+mod test_arc_easy;
+
+#[path = "text/test_arc_challenge.rs"]
+mod test_arc_challenge;
+
+#[path = "text/test_cfq.rs"]
+mod test_cfq;
+
+#[path = "text/test_scan.rs"]
+mod test_scan;
+
+#[path = "text/test_flores101.rs"]
+mod test_flores101;
+
+#[path = "text/test_math_dataset.rs"]
+mod test_math_dataset;
+
+#[path = "text/test_xsum.rs"]
+mod test_xsum;
+
+#[path = "text/test_lm1b.rs"]
+mod test_lm1b;
+
+#[path = "text/test_dbpedia.rs"]
+mod test_dbpedia;
+#[path = "text/test_enwik8.rs"]
+mod test_enwik8;
+#[path = "text/test_go_emotions.rs"]
+mod test_go_emotions;
+#[path = "text/test_multi_nli.rs"]
+mod test_multi_nli;
+#[path = "text/test_openbookqa.rs"]
+mod test_openbookqa;
+#[path = "text/test_piqa.rs"]
+mod test_piqa;
+#[path = "text/test_squad_v1.rs"]
+mod test_squad_v1;
+#[path = "text/test_trivia_qa.rs"]
+mod test_trivia_qa;
+#[path = "text/test_wiki40b.rs"]
+mod test_wiki40b;
+#[path = "text/test_winogrande.rs"]
+mod test_winogrande;
+#[path = "text/test_yelp_review_full.rs"]
+mod test_yelp_review_full;

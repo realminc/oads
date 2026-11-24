@@ -1,0 +1,9 @@
+pack: math_dataset
+source: Mathematics Dataset
+url: https://storage.googleapis.com/mathematics-dataset/mathematics_dataset-v1.0.tar.gz
+fetched: 2026-11-24
+license: see license/README.md label for math_dataset
+
+DeepMind Mathematics Dataset v1.0 (Saxton et al. 2019): alternating
+question/answer lines per module under train-easy/-medium/-hard,
+interpolate, and extrapolate trees.

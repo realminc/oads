@@ -1,0 +1,9 @@
+PASCAL VOC 2012 (VOCtrainval_11-May-2012.tar)
+
+Source: http://host.robots.ox.ac.uk/pascal/VOC/voc2012/
+Everingham et al., "The PASCAL Visual Object Classes Challenge 2012
+Results". Images were collected from Flickr under assorted
+photographer licenses; the VOC distribution grants use for research
+and evaluation under the PASCAL VOC terms published at
+host.robots.ox.ac.uk/pascal/VOC/voc2012/. Test-set annotations are
+withheld by the evaluation server and are not part of this pack.

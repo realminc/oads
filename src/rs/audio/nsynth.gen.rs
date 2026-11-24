@@ -11,9 +11,7 @@ pub(crate) const NSYNTH_PACK: Pack = Pack {
 		name: "nsynth-test.jsonwav.tar.gz",
 		size: 349_501_546,
 		shake256: "3358a545895ee86d46700e9b5e17a8b9b18fa2bee1eb3e308f17066e2443c5dd",
-		urls: &[
-			"https://storage.googleapis.com/magentadata/datasets/nsynth/nsynth-test.jsonwav.tar.gz",
-		],
+		urls: &["http://download.magenta.tensorflow.org/datasets/nsynth/nsynth-test.jsonwav.tar.gz"],
 	}],
 };
 

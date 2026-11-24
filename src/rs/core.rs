@@ -18,12 +18,14 @@ pub mod decode;
 mod decode_dispatch;
 pub(crate) mod extract;
 pub(crate) mod flac;
+pub(crate) mod h5;
 pub(crate) mod idx;
 pub(crate) mod jsonl;
 pub(crate) mod mat;
 pub(crate) mod midi;
 pub(crate) mod npy;
 pub mod pack;
+pub(crate) mod tfrecord;
 pub(crate) mod tsv;
 pub(crate) mod wav;
 

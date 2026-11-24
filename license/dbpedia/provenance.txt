@@ -1,0 +1,6 @@
+DBpedia ontology classes (dbpedia_csv.tgz)
+
+Source: https://s3.amazonaws.com/fast-ai-nlp/dbpedia_csv.tgz
+Zhang, Zhao, LeCun, "Character-level Convolutional Networks for Text
+Classification", NeurIPS 2015. 14 ontology classes from DBpedia 2014,
+distributed CC BY-SA 3.0.

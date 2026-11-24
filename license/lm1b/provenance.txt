@@ -1,0 +1,10 @@
+pack: lm1b
+source: One Billion Word Benchmark
+url: http://www.statmt.org/lm-benchmark/1-billion-word-language-modeling-benchmark-r13output.tar.gz
+fetched: 2026-11-24
+license: see license/README.md label for lm1b
+
+1-billion-word language modeling benchmark (Chelba et al. 2013,
+release r13): tokenized shuffled news sentences under
+training-monolingual.tokenized.shuffled/ and heldout shards under
+heldout-monolingual.tokenized.shuffled/.

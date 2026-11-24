@@ -1,0 +1,9 @@
+WIDER FACE (WIDER_{train,val,test}.zip + wider_face_split.zip)
+
+Source mirror: https://huggingface.co/datasets/CUHK-CSE/wider_face
+Original: Yang et al., "WIDER FACE: A Face Detection Benchmark",
+CVPR 2016, CUHK (wider-face.challenges). The dataset is distributed
+for non-commercial research purposes; images originate from the
+WIDER dataset (CUHK) and keep their upstream usage terms. The HF
+mirror carries identical zip payloads. Test ground truth is not
+public; the test split ships a filelist only.

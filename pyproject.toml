@@ -4,14 +4,14 @@ build-backend = "maturin"
 
 [project]
 name = "oadspython"
-version = "0.3.0"
+version = "0.4.0"
 description = "oads — Realm dataset packs and loaders for OA"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
 license-files = ["LICENSE"]
 authors = [{ name = "Realm" }]
-dependencies = ["oapython>=0.15.1"]
+dependencies = ["oapython>=0.16"]
 classifiers = [
 	"Development Status :: 3 - Alpha",
 	"Operating System :: POSIX :: Linux",

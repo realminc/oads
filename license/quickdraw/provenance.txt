@@ -1,0 +1,7 @@
+Quick, Draw! simplified bitmaps (345 .npy class files)
+
+Source: https://github.com/googlecreativelab/quickdraw-dataset
+(storage.googleapis.com/quickdraw_dataset/full/numpy_bitmap/)
+Google Creative Lab. Distributed CC BY 4.0. Each member is a [M, 784]
+u8 bitmap array; `count` caps decoded rows and `classes` caps the
+leading category count (the full 345-way decode is multi-GiB f32).

@@ -1,0 +1,9 @@
+pack: trivia_qa
+source: TriviaQA
+url: https://nlp.cs.washington.edu/triviaqa/data/triviaqa-rc.tar.gz
+fetched: 2026-11-24
+license: see license/README.md label for trivia_qa
+
+TriviaQA reading comprehension corpus (Joshi et al. 2017), rc
+release. This pack decodes the wikipedia domain qa/ members
+(61,888/7,993/7,701); the evidence/ member tree is not decoded.

@@ -1,0 +1,6 @@
+OpenBookQA V1 Sep 2018 (OpenBookQA-V1-Sep2018.zip)
+
+Source: https://allenai.org/data/open-book-qa (AI2)
+Mihaylov et al., "Can a Suit of Armor Conduct Electricity? A New
+Dataset for Open Book Question Answering", EMNLP 2018. Distributed
+Apache-2.0. The pack decodes the Main split members.

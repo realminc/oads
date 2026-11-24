@@ -1,0 +1,9 @@
+pack: cfq
+source: Compositional Freebase Questions
+url: https://storage.googleapis.com/cfq_dataset/cfq.tar.gz
+fetched: 2026-11-24
+license: see license/README.md label for cfq
+
+CFQ dataset (Google, Keysers et al. 2020): question/SPARQL pairs in
+cfq/dataset.json with maximum-compound-divergence splits under
+cfq/splits/; this pack decodes the MCD1 split.

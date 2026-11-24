@@ -1,0 +1,9 @@
+MS COCO 2017 detection (train2017.zip + val2017.zip +
+annotations_trainval2017.zip)
+
+Source: http://images.cocodataset.org/ (cocodataset.org)
+Lin et al., "Microsoft COCO: Common Objects in Context", ECCV 2014.
+Annotations are distributed CC BY 4.0. Images come from Flickr and
+remain subject to the photographers' licenses; COCO terms of use at
+cocodataset.org grant research and evaluation use. Test annotations
+are withheld by the evaluation server and are not part of this pack.

@@ -1,0 +1,8 @@
+MultiNLI 1.0 (multinli_1.0.zip)
+
+Source: https://cims.nyu.edu/~sbowman/multinli/
+Williams, Nangia, Bowman, "A Broad-Coverage Challenge Corpus for
+Sentence Understanding through Inference", NAACL 2018. The corpus mixes
+per-genre terms (OANC, various Creative Commons, and others); the zip
+bundles its per-genre license notices. Rows whose annotators could not
+agree drop out of this pack.

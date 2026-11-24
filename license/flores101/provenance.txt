@@ -1,0 +1,9 @@
+pack: flores101
+source: FLORES-101
+url: https://dl.fbaipublicfiles.com/flores101/dataset/flores101_dataset.tar.gz
+fetched: 2026-11-24
+license: see license/README.md label for flores101
+
+FLORES-101 evaluation benchmark (Meta AI): 997 dev and 1,012 devtest
+dev/devtest sentences across 102 member languages (zho counts twice); this pack pairs each non-English
+dev/devtest member with English.

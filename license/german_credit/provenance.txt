@@ -1,0 +1,9 @@
+pack: german_credit
+source: UCI Statlog German Credit
+url: https://archive.ics.uci.edu/static/public/144/statlog+german+credit+data.zip
+fetched: 2026-11-24
+license: see license/README.md label for german_credit
+
+Statlog German credit risk data, UCI ML Repository dataset 144.
+Space-separated numeric member german.data-numeric carries 1,000
+rows x 24 attributes; class 1 = good, 2 = bad.

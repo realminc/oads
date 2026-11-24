@@ -1,0 +1,6 @@
+Covertype forest cover (covertype.zip: covtype.data.gz)
+
+Source: https://archive.ics.uci.edu/dataset/31/covertype (UCI ML
+Repository) Blackard & Dean, 1998 Roosevelt National Forest inventory.
+Distributed CC BY 4.0. 54 features (10 numeric + 44 binary indicators),
+7 cover-type classes, 581,012 rows unsplit.

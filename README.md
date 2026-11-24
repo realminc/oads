@@ -107,6 +107,14 @@ windows and the window shifted one byte ahead. `Maestro` stores one
 `[seq_len, 3]` device slices paired with the one-event-shifted target —
 the next-event prediction contract.
 
+Detection packs (`Voc2007`, `Voc2012`, `Kitti`, `Coco`, `WiderFace`)
+trade the resident `[N]` label matrix for a resident `[T, 5]` box
+matrix — one `[x1, y1, x2, y2, class]` F32 row per object plus a
+`[N + 1]` offsets vector. Images stay on disk and decode lazily;
+`get_sample(i)` returns the `[3, H, W]` image and a `[K, 5]` device
+slice of the shared box storage. Unlabeled splits (KITTI test, WIDER
+test) index normally and slice to `[0, 5]` boxes.
+
 ## Pack transport
 
 Every manifest member records its exact byte size, SHAKE256-256 digest,
@@ -124,6 +132,36 @@ the cache root — `OA_DATA_DIR`, then `~/.oads`, then the platform cache:
   the default on `load(progress=...)`.
 - A callback abort keeps the partial; the digest gates publication, so a
   corrupt or truncated member never reaches the pack directory.
+
+## Streaming decode
+
+The corpora are larger than workstation memory by design, so decoders
+stream archive members instead of materializing them:
+
+- `walk_tar_gz_reader` hands each tar member to the decode callback as a
+  bounded `Read`. Members the loader does not select cost no allocation;
+  members it does select are consumed line-by-line or through typed
+  `serde` records rather than whole-document `Value` trees.
+- A `Cancelled` callback error stops the walk early and is swallowed, so
+  a `count`-bounded decode does not decompress the rest of the archive.
+- Packs whose split materializes GiB-scale F32 (`lm1b`, `xsum`,
+  `math_dataset`) expose `count: Option<usize>`; constrained hosts pass
+  `Some(n)`.
+
+Measured on an Intel Iris Xe host with 15 GiB RAM, device-test loads
+(November 2026):
+
+| Pack | Buffered decode | Streaming decode |
+| --- | --- | --- |
+| cfq (4.8 GiB member) | member buffer + copy + `Value` tree ≥ 9.5 GiB, OOM-killed | 1.0 GiB peak RSS, 262 s |
+| math_dataset (2.3 GiB, ~10M rows) | three archive passes + all-row materialization | single pass, `count` early stop: 8 192 rows in 0.43 s |
+| lm1b (1.8 GiB → ~17 GiB F32) | full-blob F32 materialization OOM | `count` early stop: 100 000 sentences in 0.94 s |
+| xsum (1.8 GiB, 226k members) | every member buffered before name check | name-filtered member read + `count`: 4 096 documents in 1.21 s |
+| trivia_qa (2.5 GiB, 438k members) | every member buffered before name check | zero-allocation skips: 137.65 s |
+
+All loaders follow this contract: archive members stream through the
+decoder without full-buffer copies, and `count`-bounded decodes stop
+the archive walk early.
 
 ## Repository layout
 

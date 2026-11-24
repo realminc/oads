@@ -986,7 +986,7 @@ dependencies = [
 
 [[package]]
 name = "oads-python"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "oadsrust",
  "oarust",
@@ -995,19 +995,20 @@ dependencies = [
 
 [[package]]
 name = "oadsrust"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "bzip2",
  "flate2",
  "oarust",
+ "serde",
  "serde_json",
 ]
 
 [[package]]
 name = "oarust"
-version = "0.15.3"
+version = "0.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "679591693c4ce161b987832e38d8b1534c0027c644440006b3bd816e1d0b4674"
+checksum = "fbab0f1e90cbec23ba0ba0349644d7d15cf8ef9576c86d65f962f2c4c49053ba"
 dependencies = [
  "bitflags",
  "chrono",
@@ -1522,6 +1523,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4148590afebada386688f18773da617792bf2ef03ffc1e4cbd2b1d45b023e0ba"
 dependencies = [
  "serde_core",
+ "serde_derive",
 ]
 
 [[package]]

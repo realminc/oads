@@ -1,0 +1,9 @@
+pack: arc_challenge
+source: AI2 ARC
+url: https://ai2-public-datasets.s3.amazonaws.com/arc/ARC-V1-Feb2018.zip
+fetched: 2026-11-24
+license: see license/README.md label for arc_challenge
+
+ARC-Challenge subset of the AI2 Reasoning Challenge (Clark et al.
+2018). JSONL members under ARC-V1-Feb2018-2/ARC-Challenge/ carry
+question stems, choice lists, and answer keys.

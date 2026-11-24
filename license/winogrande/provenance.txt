@@ -1,0 +1,6 @@
+Winogrande 1.1 (winogrande_1.1.zip)
+
+Source: https://winogrande.allenai.org/ (AI2 Mosaic)
+Sakaguchi et al., "WINOGRANDE: An Adversarial Winograd Schema
+Challenge at Scale", AAAI 2020. Distributed CC BY 4.0. The pack decodes
+the train_xl/dev/test members.

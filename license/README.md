@@ -80,6 +80,37 @@ itself.
 | `anli_r3` | Adversarial NLI round 3 (Nie et al., Facebook AI) | CC BY-NC-SA 4.0 | [anli_r3/provenance.txt](anli_r3/provenance.txt) |
 | `xnli` | XNLI cross-lingual NLI dev/test (Conneau et al., Facebook AI) | OANC/CC | [xnli/provenance.txt](xnli/provenance.txt) |
 | `gtzan` | GTZAN genre collection (marsyas mirror, Hugging Face) | research-only | [gtzan/provenance.txt](gtzan/provenance.txt) |
+| `arc_easy` | AI2 ARC Easy set (Clark et al. 2018) | CC BY-SA 4.0 | [arc_easy/provenance.txt](arc_easy/provenance.txt) |
+| `arc_challenge` | AI2 ARC Challenge set (Clark et al. 2018) | CC BY-SA 4.0 | [arc_challenge/provenance.txt](arc_challenge/provenance.txt) |
+| `cfq` | Compositional Freebase Questions (Google, Keysers et al. 2020), MCD1 split | Apache 2.0 | [cfq/provenance.txt](cfq/provenance.txt) |
+| `scan` | SCAN simple split (Lake & Baroni 2018) | MIT | [scan/provenance.txt](scan/provenance.txt) |
+| `flores101` | FLORES-101 evaluation benchmark (Meta AI) | CC BY-SA 4.0 | [flores101/provenance.txt](flores101/provenance.txt) |
+| `math_dataset` | DeepMind Mathematics Dataset v1.0 (Saxton et al. 2019) | Apache 2.0 | [math_dataset/provenance.txt](math_dataset/provenance.txt) |
+| `xsum` | Extreme Summarization BBC corpus (Narayan et al. 2018) + EdinburghNLP split | custom/research | [xsum/provenance.txt](xsum/provenance.txt) |
+| `lm1b` | One Billion Word Benchmark (Chelba et al. 2013, r13) | custom/research | [lm1b/provenance.txt](lm1b/provenance.txt) |
+| `forest_fires` | UCI ML Repository forestfires.csv (Cortez & Morais 2007) | CC BY 4.0 | [forest_fires/provenance.txt](forest_fires/provenance.txt) |
+| `german_credit` | UCI ML Repository Statlog German Credit (german.data-numeric) | CC BY 4.0 | [german_credit/provenance.txt](german_credit/provenance.txt) |
+| `trivia_qa` | TriviaQA reading comprehension corpus, wikipedia domain (Joshi et al. 2017) | Apache 2.0 | [trivia_qa/provenance.txt](trivia_qa/provenance.txt) |
+| `patch_camelyon` | PatchCamelyon (Veeling et al. 2018), Zenodo record 2546921 | MIT | [patch_camelyon/MIT.txt](patch_camelyon/MIT.txt) |
+| `wiki40b` | Wiki-40B (Guo et al. 2020), TFDS prepared records on GCS | CC BY-SA 3.0 | [wiki40b/CC-BY-SA-3.0.txt](wiki40b/CC-BY-SA-3.0.txt) |
+| `voc2007` | PASCAL VOC 2007 (Everingham et al.) | VOC terms | [voc2007/provenance.txt](voc2007/provenance.txt) |
+| `voc2012` | PASCAL VOC 2012 (Everingham et al.) | VOC terms | [voc2012/provenance.txt](voc2012/provenance.txt) |
+| `kitti` | KITTI 2D Object Detection (Geiger, Lenz & Urtasun, CVPR 2012) | CC BY-NC-SA 3.0 | [kitti/provenance.txt](kitti/provenance.txt) |
+| `coco` | MS COCO 2017 detection (Lin et al., ECCV 2014) | COCO terms | [coco/provenance.txt](coco/provenance.txt) |
+| `wider_face` | WIDER FACE (Yang et al., CVPR 2016, CUHK) | WIDER terms | [wider_face/provenance.txt](wider_face/provenance.txt) |
+| `squad_v1` | Stanford Question Answering Dataset 1.1 | CC BY-SA 4.0 | [squad_v1/provenance.txt](squad_v1/provenance.txt) |
+| `multi_nli` | Multi-Genre NLI corpus (Williams et al. 2018) | see provenance | [multi_nli/provenance.txt](multi_nli/provenance.txt) |
+| `winogrande` | Winogrande 1.1 (Sakaguchi et al., AI2) | CC BY | [winogrande/provenance.txt](winogrande/provenance.txt) |
+| `piqa` | PhysicalIQA (Bisk et al. 2019) | AFL 3.0 | [piqa/provenance.txt](piqa/provenance.txt) |
+| `openbookqa` | OpenBookQA (Mihaylov et al. 2018, AI2) | Apache 2.0 | [openbookqa/provenance.txt](openbookqa/provenance.txt) |
+| `yelp_review_full` | Zhang et al., Yelp full review stars (fast-ai distribution) | unspecified | [yelp_review_full/provenance.txt](yelp_review_full/provenance.txt) |
+| `dbpedia` | Zhang et al., DBpedia ontology classes (fast-ai distribution) | CC BY-SA 3.0 | [dbpedia/provenance.txt](dbpedia/provenance.txt) |
+| `go_emotions` | GoEmotions (Demszky et al. 2020, Google) | Apache 2.0 | [go_emotions/provenance.txt](go_emotions/provenance.txt) |
+| `enwik8` | Hutter Prize enwik8 (first 100 MB of enwiki) | CC BY-SA | [enwik8/provenance.txt](enwik8/provenance.txt) |
+| `adult` | UCI Adult census income (Kohavi 1996) | CC BY 4.0 | [adult/provenance.txt](adult/provenance.txt) |
+| `covertype` | UCI Covertype forest cover (Blackard & Dean) | CC BY 4.0 | [covertype/provenance.txt](covertype/provenance.txt) |
+| `quickdraw` | Quick, Draw! 28x28 grayscale bitmaps (Google Creative Lab) | CC BY 4.0 | [quickdraw/provenance.txt](quickdraw/provenance.txt) |
+| `coco_captions` | MS COCO 2017 captions (Lin et al.) | COCO terms | [coco_captions/provenance.txt](coco_captions/provenance.txt) |
 
 The `tensorflow_datasets/` entry below is code attribution, not a dataset pack.
 

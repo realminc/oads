@@ -214,6 +214,85 @@ pub(crate) fn walk_tar_gz(
 	walk_tar_stream(GzDecoder::new(file), &mut visit)
 }
 
+/// Invoke `visit` once per regular-file member of a gzip-compressed tar
+/// archive, in archive order. Unlike [`walk_tar_gz`], `visit` receives a
+/// bounded reader over the member bytes instead of a materialized slice, so
+/// members larger than host memory still decode. A partially consumed reader
+/// is drained before the next member. A `Cancelled` error from `visit` stops
+/// the walk early and is swallowed; every other error propagates.
+///
+/// # Errors
+///
+/// Returns I/O errors opening or reading `path`, `data_loss` for truncated
+/// or malformed headers, plus any non-`Cancelled` error `visit` returns.
+pub(crate) fn walk_tar_gz_reader(
+	path: &Path,
+	mut visit: impl FnMut(&str, &mut dyn Read) -> Result<()>,
+) -> Result<()> {
+	let file = File::open(path).map_err(|error| Error::io("open pack member", error))?;
+	let mut reader = GzDecoder::new(file);
+	let mut header = [0u8; TAR_BLOCK];
+	let mut long_name: Option<String> = None;
+	loop {
+		match reader
+			.read_exact(&mut header)
+			.map_err(|error| Error::io("read tar member", error))
+		{
+			Ok(()) => {}
+			Err(_) => break,
+		}
+		if header.iter().all(|&b| b == 0) {
+			break;
+		}
+		let size = parse_octal(&header[124..136])
+			.ok_or_else(|| Error::data_loss("tar member size is not a valid octal field"))?;
+		let typeflag = header[156];
+		let name = match long_name.take() {
+			Some(long) => long,
+			None => member_name(&header)?.to_string(),
+		};
+		if typeflag == b'0' || typeflag == 0 {
+			let mut member = (&mut reader).take(size as u64);
+			match visit(&name, &mut member) {
+				Err(error) if error.kind() == oa::ErrorKind::Cancelled => return Ok(()),
+				result => result?,
+			}
+			let mut remaining = size.div_ceil(TAR_BLOCK) * TAR_BLOCK - (size - member.limit() as usize);
+			let mut chunk = [0u8; 64 * 1024];
+			while remaining > 0 {
+				let take = remaining.min(chunk.len());
+				reader
+					.read_exact(&mut chunk[..take])
+					.map_err(|error| Error::io("read tar member", error))?;
+				remaining -= take;
+			}
+		} else {
+			let mut consumed = 0;
+			if typeflag == b'L' {
+				let mut data = vec![0u8; size];
+				reader
+					.read_exact(&mut data)
+					.map_err(|error| Error::io("read tar long-name member", error))?;
+				consumed = size;
+				let len = data.iter().position(|&b| b == 0).unwrap_or(data.len());
+				let long = std::str::from_utf8(&data[..len])
+					.map_err(|_| Error::data_loss("tar long name is not valid UTF-8"))?;
+				long_name = Some(long.to_string());
+			}
+			let mut remaining = size.div_ceil(TAR_BLOCK) * TAR_BLOCK - consumed;
+			let mut chunk = [0u8; 64 * 1024];
+			while remaining > 0 {
+				let take = remaining.min(chunk.len());
+				reader
+					.read_exact(&mut chunk[..take])
+					.map_err(|error| Error::io("read tar member", error))?;
+				remaining -= take;
+			}
+		}
+	}
+	Ok(())
+}
+
 /// Invoke `visit` once per regular-file member of a bzip2-compressed tar
 /// archive, in archive order. Streaming equivalent of [`walk_tar_gz`] for
 /// `.tar.bz2` packs.
@@ -250,6 +329,7 @@ fn walk_tar_stream(
 	visit: &mut impl FnMut(&str, &[u8]) -> Result<()>,
 ) -> Result<()> {
 	let mut header = [0u8; TAR_BLOCK];
+	let mut long_name: Option<String> = None;
 	let mut read_exact = |buf: &mut [u8]| {
 		reader
 			.read_exact(buf)
@@ -266,7 +346,24 @@ fn walk_tar_stream(
 		let size = parse_octal(&header[124..136])
 			.ok_or_else(|| Error::data_loss("tar member size is not a valid octal field"))?;
 		let typeflag = header[156];
-		let name = member_name(&header)?.to_string();
+		let name = match long_name.take() {
+			Some(long) => long,
+			None => member_name(&header)?.to_string(),
+		};
+		if typeflag == b'L' {
+			let mut data = vec![0u8; size];
+			read_exact(&mut data)?;
+			let len = data.iter().position(|&b| b == 0).unwrap_or(data.len());
+			let long = std::str::from_utf8(&data[..len])
+				.map_err(|_| Error::data_loss("tar long name is not valid UTF-8"))?;
+			long_name = Some(long.to_string());
+			let padding = size.div_ceil(TAR_BLOCK) * TAR_BLOCK - size;
+			if padding > 0 {
+				let mut skip = vec![0u8; padding];
+				read_exact(&mut skip)?;
+			}
+			continue;
+		}
 		if typeflag == b'0' || typeflag == 0 {
 			let mut data = vec![0u8; size];
 			read_exact(&mut data)?;

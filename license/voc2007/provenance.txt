@@ -1,0 +1,9 @@
+PASCAL VOC 2007 (VOCtrainval_06-Nov-2007.tar + VOCtest_06-Nov-2007.tar)
+
+Source: http://host.robots.ox.ac.uk/pascal/VOC/voc2007/
+Everingham et al., "The PASCAL Visual Object Classes Challenge 2007
+Results". Images were collected from Flickr under assorted
+photographer licenses; the VOC distribution grants use for research
+and evaluation under the PASCAL VOC terms published at
+host.robots.ox.ac.uk/pascal/VOC/voc2007/, including the test-set
+usage restrictions stated there.

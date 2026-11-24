@@ -73,6 +73,37 @@
 | text | `AnliR3` | Adversarial NLI round 3 context-hypothesis pairs | `context`/`hypothesis` `[N, K_i]` byte matrices + `[N]` labels | [CC BY-NC-SA 4.0](../../license/anli_r3) |
 | text | `Xnli` | 15-language NLI dev/test pairs | `premise`/`hypothesis` `[N, K_i]` byte matrices + `[N]` labels + `[N]` language ids | [OANC/CC](../../license/xnli) |
 | audio | `Gtzan` | 999 genre clips (corrupt `jazz.00054.wav` skipped upstream) | lazy `[1, T_i]` F32 waveform per clip + genre index | [research-only](../../license/gtzan) |
+| text | `ArcEasy` | 2,251 train / 570 dev / 2,376 test questions | `question`/`choices` `[N, K_i]` byte matrices + `[N]` answer-key labels | [CC BY-SA 4.0](../../license/arc_easy) |
+| text | `ArcChallenge` | 1,119 train / 299 dev / 1,172 test questions | `question`/`choices` `[N, K_i]` byte matrices + `[N]` answer-key labels | [CC BY-SA 4.0](../../license/arc_challenge) |
+| text | `Cfq` | 95,743 train / 11,968 dev / 11,968 test pairs (MCD1) | `question`/`sparql` `[N, K_i]` byte matrices, unlabeled | [Apache 2.0](../../license/cfq) |
+| text | `Scan` | 16,728 train / 4,182 test commands (simple split) | `command`/`actions` `[N, K_i]` byte matrices, unlabeled | [MIT](../../license/scan) |
+| text | `Flores101` | 997 dev / 1,012 devtest sentence pairs x 101 target languages | `english`/`target` `[N, K_i]` byte matrices + `[N]` language labels | [CC BY-SA 4.0](../../license/flores101) |
+| text | `MathDataset` | module-labelled question/answer pairs; train merges three difficulty trees | `question`/`answer`/`difficulty` `[N, K_i]` byte matrices + `[N]` module labels | [Apache 2.0](../../license/math_dataset) |
+| text | `Xsum` | 204,045 train / 11,332 validation / 11,334 test pairs | flat `document` byte blob + `[N]` `document_lengths` + `[N, K]` padded `summary` | [custom/research](../../license/xsum) |
+| text | `Lm1b` | ~30.3M train / ~0.3M heldout tokenized sentences | flat `sentence` byte blob + `[N]` `sentence_lengths` | [custom/research](../../license/lm1b) |
+| tabular | `ForestFires` | 517 rows | `[517, 12]` F32 features + `[517]` F32 burned hectares | [CC BY 4.0](../../license/forest_fires) |
+| tabular | `GermanCredit` | 1,000 rows | `[1000, 24]` F32 features + `[1000]` F32 good/bad labels | [CC BY 4.0](../../license/german_credit) |
+| text | `TriviaQa` | 61,888 train / 7,993 dev / 7,701 test questions (wikipedia domain) | `question`/`answer`/`aliases` `[N, K_i]` byte matrices; test emits `question` only | [Apache 2.0](../../license/trivia_qa) |
+| image | `PatchCamelyon` | 262,144 train / 32,768 validation / 32,768 test | `[N, 3, 96, 96]` F32 NCHW + `[N]` labels | [MIT](../../license/patch_camelyon) |
+| text | `Wiki40B` | ~2.9M train / 128k validation / 162k test articles (en) | flat `article` byte blob + `[N]` `article_lengths` | [CC BY-SA 3.0](../../license/wiki40b) |
+| image | `Voc2007` | 2,501 train / 2,510 val / 4,952 test images | `[T, 5]` F32 boxes + lazy `[3, H, W]` images | [VOC terms](../../license/voc2007) |
+| image | `Voc2012` | 5,717 train / 5,823 val images | `[T, 5]` F32 boxes + lazy `[3, H, W]` images | [VOC terms](../../license/voc2012) |
+| image | `Kitti` | 7,481 train / 7,518 test images | `[T, 5]` F32 boxes + lazy `[3, H, W]` images | [CC BY-NC-SA 3.0](../../license/kitti) |
+| image | `Coco` | 118,287 train / 5,000 val images | `[T, 5]` F32 boxes + lazy `[3, H, W]` images | [COCO terms](../../license/coco) |
+| image | `WiderFace` | 12,880 train / 3,226 val / 16,097 test images | `[T, 5]` F32 boxes + lazy `[3, H, W]` images | [WIDER terms](../../license/wider_face) |
+| text | `SquadV1` | 87,599 train / 10,570 dev questions | flat byte blobs + offsets/lengths | [CC BY-SA 4.0](../../license/squad_v1) |
+| text | `MultiNli` | 393k train / 10k matched / 10k mismatched | `[N, K_i]` byte matrices + `[N]` labels | [see provenance](../../license/multi_nli) |
+| text | `Winogrande` | 40,398 train / 1,267 dev / 1,767 test | `[N, K_i]` byte matrices + `[N]` labels | [CC BY](../../license/winogrande) |
+| text | `Piqa` | 16,113 train / 1,838 valid / 3,084 test | `[N, K_i]` byte matrices + `[N]` labels | [AFL 3.0](../../license/piqa) |
+| text | `Openbookqa` | 4,957 train / 500 dev / 500 test | `[N, K_i]` byte matrices + `[N]` labels | [Apache 2.0](../../license/openbookqa) |
+| text | `YelpReviewFull` | 650,000 train / 50,000 test | `[N, 512]` F32 byte windows | [unspecified](../../license/yelp_review_full) |
+| text | `Dbpedia` | 560,000 train / 70,000 test | `[N, 512]` F32 byte windows | [CC BY-SA 3.0](../../license/dbpedia) |
+| text | `GoEmotions` | 43,410 train / 5,426 dev / 5,427 test | `[N, 512]` F32 byte windows + `[N, 28]` multi-hot | [Apache 2.0](../../license/go_emotions) |
+| text | `Enwik8` | 90M / 5M / 5M byte windows | `[seq_len]` token windows | [CC BY-SA](../../license/enwik8) |
+| tabular | `Adult` | 32,561 train / 16,281 test | `[N, 92]` F32 one-hot features + `[N]` labels | [CC BY 4.0](../../license/adult) |
+| tabular | `Covertype` | 581,012 rows | `[N, 54]` F32 features + `[N]` labels | [CC BY 4.0](../../license/covertype) |
+| image | `Quickdraw` | ~120k per class x 345 classes | `[N, 1, 28, 28]` F32 + `[N]` labels | [CC BY 4.0](../../license/quickdraw) |
+| image | `CocoCaptions` | 591,753 train / 25,014 val captions | lazy `[3, H, W]` images + `[K]` caption byte rows | [COCO terms](../../license/coco_captions) |
 
 ## Registered packs
 
@@ -152,3 +183,34 @@ texts, and provenance live under `license/`.
 | `anli_r3` | 1.0.0 | dl.fbaipublicfiles.com/anli |
 | `xnli` | 1.0.0 | dl.fbaipublicfiles.com/XNLI |
 | `gtzan` | 1.0.0 | hf.co/datasets/marsyas/gtzan |
+| `arc_easy` | 1.0.0 | ai2-public-datasets.s3.amazonaws.com/arc |
+| `arc_challenge` | 1.0.0 | ai2-public-datasets.s3.amazonaws.com/arc |
+| `cfq` | 1.0.0 | storage.googleapis.com/cfq_dataset |
+| `scan` | 1.0.0 | github.com/brendenlake/SCAN |
+| `flores101` | 1.0.0 | dl.fbaipublicfiles.com/flores101 |
+| `math_dataset` | 1.0.0 | storage.googleapis.com/mathematics-dataset |
+| `xsum` | 1.0.0 | bollin.inf.ed.ac.uk + github.com/EdinburghNLP/XSum |
+| `lm1b` | 1.0.0 | statmt.org/lm-benchmark |
+| `forest_fires` | 1.0.0 | UCI archive |
+| `german_credit` | 1.0.0 | UCI archive |
+| `trivia_qa` | 1.0.0 | nlp.cs.washington.edu/triviaqa |
+| `patch_camelyon` | 1.0.0 | zenodo.org/records/2546921 |
+| `wiki40b` | 1.0.0 | tfds-data GCS |
+| `voc2007` | 1.0.0 | host.robots.ox.ac.uk/pascal |
+| `voc2012` | 1.0.0 | host.robots.ox.ac.uk/pascal |
+| `kitti` | 1.0.0 | s3.eu-central-1.amazonaws.com/avg-kitti |
+| `coco` | 1.0.0 | images.cocodataset.org |
+| `wider_face` | 1.0.0 | huggingface.co/datasets/CUHK-CSE/wider_face |
+| `squad_v1` | 1.0.0 | rajpurkar.github.io/SQuAD-explorer |
+| `multi_nli` | 1.0.0 | cims.nyu.edu/~sbowman |
+| `winogrande` | 1.0.0 | ai2-mosaic GCS |
+| `piqa` | 1.0.0 | yonatanbisk.com/piqa |
+| `openbookqa` | 1.0.0 | ai2 s3 |
+| `yelp_review_full` | 1.0.0 | s3 fast-ai-nlp |
+| `dbpedia` | 1.0.0 | s3 fast-ai-nlp |
+| `go_emotions` | 1.0.0 | github google-research |
+| `enwik8` | 1.0.0 | mattmahoney.net/dc |
+| `adult` | 1.0.0 | archive.ics.uci.edu |
+| `covertype` | 1.0.0 | archive.ics.uci.edu |
+| `quickdraw` | 1.0.0 | quickdraw_dataset GCS |
+| `coco_captions` | 1.0.0 | images.cocodataset.org |

@@ -1,0 +1,9 @@
+pack: scan
+source: SCAN
+url: https://github.com/brendenlake/SCAN/archive/refs/heads/master.zip
+fetched: 2026-11-24
+license: see license/README.md label for scan
+
+SCAN compositional navigation tasks (Lake & Baroni 2018), GitHub
+archive of brendenlake/SCAN. Decodes the simple split
+(simple_split/tasks_{train,test}_simple.txt) IN:/OUT: line pairs.

@@ -72,7 +72,16 @@ def rust_name(pack: dict) -> str:
 
 def gen_loader(pack: dict) -> str:
 	out = [RS_BANNER, ""]
-	if pack.get("imagefolder"):
+	if pack.get("detection"):
+		out.append("use std::path::{Path, PathBuf};\n\n")
+		out.append("use oa::data::{Dataset, Sample};\n")
+		out.append("use oa::image::Image;\n")
+		out.append("use oa::matrix::{self, Matrix};\n")
+		out.append("use oa::{Engine, Error, Result};\n\n")
+		out.append("use crate::core::decode::Decoded;\n")
+		out.append("use crate::core::pack::{self, FetchProgress, Pack, PackFile};\n")
+		out.append("use crate::image::folder::{self, DetectionIndex};\n\n")
+	elif pack.get("imagefolder"):
 		out.append("use std::path::{Path, PathBuf};\n\n")
 		out.append("use oa::data::{Dataset, Sample};\n")
 		out.append("use oa::image::{Image, InterpolationMode};\n")
@@ -212,7 +221,65 @@ def gen_loader(pack: dict) -> str:
 	out.append("\t}\n}\n")
 	if pack.get("imagefolder"):
 		out.append(gen_imagefolder_impl(pack))
+	if pack.get("detection"):
+		out.append(gen_detection_impl(pack))
 	return "".join(out)
+
+
+def folder_key_lines(split: dict | None, cls: str, indent: str) -> list[str]:
+	if not split:
+		return [f'{indent}let split_key = "all";\n']
+	arms = ",\n".join(
+		f"{indent}\t{cls}Split::{v['name']} => \"{v['name'].lower()}\""
+		for v in split["variants"]
+	)
+	return [
+		f"{indent}let split_key = match config.split {{\n{arms},\n{indent}}};\n"
+	]
+
+
+def folder_files_lines(
+	pack: dict, files_map: dict | None, split: dict | None, cls: str, indent: str
+) -> list[str]:
+	if not files_map:
+		lines = [f"{indent}let members: &[&str] = &[\n"]
+		lines += [f'{indent}\t"{entry["name"]}",\n' for entry in pack["files"]]
+		lines.append(f"{indent}];\n")
+		return lines
+	if set(files_map) == {"_"}:
+		lines = [f"{indent}let members: &[&str] = &[\n"]
+		lines += [f'{indent}\t"{name}",\n' for name in files_map["_"]]
+		lines.append(f"{indent}];\n")
+		return lines
+	arms = ",\n".join(
+		f"{indent}\t{cls}Split::{variant} => &["
+		+ ", ".join(f'"{name}"' for name in files_map[variant])
+		+ "]"
+		for variant in files_map
+	)
+	missing = [v["name"] for v in split["variants"] if v["name"] not in files_map]
+	if missing:
+		arms += ",\n" + ",\n".join(
+			f"{indent}\t{cls}Split::{variant} => &[]" for variant in missing
+		)
+	return [
+		f"{indent}let members: &[&str] = match config.split {{\n{arms},\n{indent}}};\n"
+	]
+
+
+def folder_root_lines(roots: dict, cls: str, indent: str, target: str) -> list[str]:
+	if set(roots) == {"_"}:
+		root = roots["_"].rstrip("/")
+		if not root or root == ".":
+			return [f"{indent}let {target} = extracted.to_path_buf();\n"]
+		return [f'{indent}let {target} = extracted.join("{root}");\n']
+	arms = ",\n".join(
+		f'{indent}\t{cls}Split::{variant} => "{roots[variant].rstrip("/")}"'
+		for variant in roots
+	)
+	return [
+		f"{indent}let {target} = extracted.join(match config.split {{\n{arms},\n{indent}}});\n"
+	]
 
 
 def gen_imagefolder_impl(pack: dict) -> str:
@@ -223,57 +290,6 @@ def gen_imagefolder_impl(pack: dict) -> str:
 	split = pack["split"]
 	pack_const = rust_name(pack)
 	out = []
-
-	def key_lines(indent: str) -> list[str]:
-		if not split:
-			return [f'{indent}let split_key = "all";\n']
-		arms = ",\n".join(
-			f"{indent}\t{cls}Split::{v['name']} => \"{v['name'].lower()}\""
-			for v in split["variants"]
-		)
-		return [
-			f"{indent}let split_key = match config.split {{\n{arms},\n{indent}}};\n"
-		]
-
-	def files_lines(indent: str) -> list[str]:
-		if not files_map:
-			lines = [f"{indent}let members: &[&str] = &[\n"]
-			lines += [f'{indent}\t"{entry["name"]}",\n' for entry in pack["files"]]
-			lines.append(f"{indent}];\n")
-			return lines
-		if set(files_map) == {"_"}:
-			lines = [f"{indent}let members: &[&str] = &[\n"]
-			lines += [f'{indent}\t"{name}",\n' for name in files_map["_"]]
-			lines.append(f"{indent}];\n")
-			return lines
-		arms = ",\n".join(
-			f"{indent}\t{cls}Split::{variant} => &["
-			+ ", ".join(f'"{name}"' for name in files_map[variant])
-			+ "]"
-			for variant in files_map
-		)
-		missing = [v["name"] for v in split["variants"] if v["name"] not in files_map]
-		if missing:
-			arms += ",\n" + ",\n".join(
-				f"{indent}\t{cls}Split::{variant} => &[]" for variant in missing
-			)
-		return [
-			f"{indent}let members: &[&str] = match config.split {{\n{arms},\n{indent}}};\n"
-		]
-
-	def root_lines(indent: str, target: str) -> list[str]:
-		if set(roots) == {"_"}:
-			root = roots["_"].rstrip("/")
-			if not root or root == ".":
-				return [f"{indent}let {target} = extracted.to_path_buf();\n"]
-			return [f'{indent}let {target} = extracted.join("{root}");\n']
-		arms = ",\n".join(
-			f'{indent}\t{cls}Split::{variant} => "{roots[variant].rstrip("/")}"'
-			for variant in roots
-		)
-		return [
-			f"{indent}let {target} = extracted.join(match config.split {{\n{arms},\n{indent}}});\n"
-		]
 
 	index_call = (
 		"ImageIndex::class_dirs(&index_root)?"
@@ -416,14 +432,14 @@ def gen_imagefolder_impl(pack: dict) -> str:
 	out.append('\t\tlet extracted = dir.join("extracted");\n')
 	per_split = bool(files_map) and set(files_map) != {"_"}
 	if per_split:
-		out.extend(key_lines("\t\t"))
+		out.extend(folder_key_lines(split, cls, "\t\t"))
 		out.append('\t\tlet done = extracted.join(format!(".done_{split_key}"));\n')
 	else:
 		out.append('\t\tlet done = extracted.join(".done_all");\n')
 	out.append("\t\tif done.exists() {\n")
 	out.append("\t\t\treturn Ok(extracted);\n")
 	out.append("\t\t}\n")
-	out.extend(files_lines("\t\t"))
+	out.extend(folder_files_lines(pack, files_map, split, cls, "\t\t"))
 	if per_split:
 		out.append("\t\tlet target = extracted.join(split_key);\n")
 		out.append("\t\tfor member in members {\n")
@@ -443,9 +459,9 @@ def gen_imagefolder_impl(pack: dict) -> str:
 	out.append(f"\t\t{param}: &{cls}Config,\n")
 	out.append("\t\textracted: &Path,\n")
 	out.append("\t) -> Result<ImageIndex> {\n")
-	out.extend(root_lines("\t\t", "index_root"))
+	out.extend(folder_root_lines(roots, cls, "\t\t", "index_root"))
 	out.append(f"\t\tlet index = {index_call};\n")
-	out.extend(key_lines("\t\t"))
+	out.extend(folder_key_lines(split, cls, "\t\t"))
 	out.append('\t\tlet classes = extracted.join(format!(".classes_{split_key}"));\n')
 	out.append("\t\tif !classes.exists() {\n")
 	out.append("\t\t\tstd::fs::create_dir_all(extracted)\n")
@@ -467,6 +483,220 @@ def gen_imagefolder_impl(pack: dict) -> str:
 	out.append("\tfn get_sample(&self, index: i64) -> Result<Sample> {\n")
 	out.append("\t\tlet x = self.get_item(index)?;\n")
 	out.append("\t\tlet y = matrix::slice(&self.labels, 0, index, index + 1)?;\n")
+	out.append("\t\tOk(Sample::new_with_label(x, y))\n")
+	out.append("\t}\n")
+	out.append("}\n")
+	return "".join(out)
+
+
+
+def gen_detection_impl(pack: dict) -> str:
+	cls = pack["class"]
+	spec = pack["detection"]
+	roots = spec["roots"]
+	files_map = spec.get("files")
+	split = pack["split"]
+	pack_const = rust_name(pack)
+	out = []
+
+	out.append("\n")
+	out.extend(
+		line + "\n"
+		for line in doc_lines(
+			f"Device-resident {pack['name']} detection dataset implementing\n"
+			"[`oa::data::Dataset`].\n"
+			"\n"
+			"Members stay in the extracted pack cache; `get_item` lazily decodes\n"
+			"one `[3, H, W]` F32 NCHW image at native extent through [`oa::image`].\n"
+			"`boxes()` is the resident `[T, 5]` F32 `[x1, y1, x2, y2, class]`\n"
+			"matrix in native image pixels; `get_sample` slices it to `[K, 5]`\n"
+			"per image. `class` indexes into [`classes`](Self::classes)."
+		)
+	)
+	out.append(f"pub struct {cls} {{\n")
+	out.append("\tpaths: Vec<PathBuf>,\n")
+	out.append("\tboxes: Matrix,\n")
+	out.append("\toffsets: Vec<i64>,\n")
+	out.append("\tclasses: Vec<String>,\n")
+	out.append("\tengine: Engine,\n")
+	out.append("}\n\n")
+
+	out.append(f"impl {cls} {{\n")
+	out.append("\t/// Fetch, verify, extract, and index the pack on the host.\n")
+	out.append("\t///\n")
+	out.append("\t/// # Errors\n")
+	out.append("\t///\n")
+	out.append("\t/// Returns pack fetch/verification errors, archive decode errors,\n")
+	out.append("\t/// annotation parse errors, and I/O errors while materializing\n")
+	out.append("\t/// the extracted cache.\n")
+	out.append(f"\tpub fn decode(config: &{cls}Config) -> Result<Decoded> {{\n")
+	out.append("\t\tSelf::decode_with_progress(config, &mut |_| true)\n")
+	out.append("\t}\n\n")
+	out.append("\t/// [`decode`](Self::decode) with a fetch progress callback.\n")
+	out.append("\t///\n")
+	out.append("\t/// # Errors\n")
+	out.append("\t///\n")
+	out.append("\t/// Returns the errors of [`decode`](Self::decode), plus\n")
+	out.append("\t/// `Cancelled` when `progress` aborts the fetch.\n")
+	out.append("\tpub fn decode_with_progress(\n")
+	out.append(f"\t\tconfig: &{cls}Config,\n")
+	out.append("\t\tprogress: &mut impl FnMut(FetchProgress) -> bool,\n")
+	out.append("\t) -> Result<Decoded> {\n")
+	out.append("\t\tlet extracted = Self::materialize(config, progress)?;\n")
+	out.append("\t\tlet index = Self::index_of(config, &extracted)?;\n")
+	out.append("\t\tOk(Decoded {\n")
+	out.append("\t\t\tmatrices: vec![index.boxes()?, index.box_lengths()?],\n")
+	out.append("\t\t\ttext: Some(index.paths_text(&extracted)?),\n")
+	out.append("\t\t\tseq_len: 0,\n")
+	out.append("\t\t})\n")
+	out.append("\t}\n\n")
+
+	out.append("\t/// [`load_on`](Self::load_on) with a fetch progress callback.\n")
+	out.append("\t///\n")
+	out.append("\t/// # Errors\n")
+	out.append("\t///\n")
+	out.append("\t/// Returns the errors of [`load_on`](Self::load_on), plus\n")
+	out.append("\t/// `Cancelled` when `progress` aborts the fetch.\n")
+	out.append("\tpub fn load_with_progress_on(\n")
+	out.append("\t\tengine: &Engine,\n")
+	out.append(f"\t\tconfig: &{cls}Config,\n")
+	out.append("\t\tprogress: &mut impl FnMut(FetchProgress) -> bool,\n")
+	out.append("\t) -> Result<Self> {\n")
+	out.append("\t\tlet decoded = Self::decode_with_progress(config, progress)?;\n")
+	out.append('\t\tlet boxes = decoded.upload("boxes", engine)?;\n')
+	out.append("\t\tlet index = Self::index_of(config, &Self::extracted_dir(config)?)?;\n")
+	out.append("\t\tlet offsets = index.offsets();\n")
+	out.append("\t\tOk(Self {\n")
+	out.append("\t\t\tpaths: index.paths,\n")
+	out.append("\t\t\tboxes,\n")
+	out.append("\t\t\toffsets,\n")
+	out.append("\t\t\tclasses: index.classes,\n")
+	out.append("\t\t\tengine: engine.clone(),\n")
+	out.append("\t\t})\n")
+	out.append("\t}\n\n")
+
+	out.append("\t/// Class names in box-label order.\n")
+	out.append("\t#[must_use]\n")
+	out.append("\tpub fn classes(&self) -> &[String] {\n")
+	out.append("\t\t&self.classes\n\t}\n\n")
+	out.append("\t/// `[T, 5]` F32 `[x1, y1, x2, y2, class]` box matrix on the\n")
+	out.append("\t/// owning engine, native image pixels.\n")
+	out.append("\t#[must_use]\n")
+	out.append("\tpub const fn boxes(&self) -> &Matrix {\n")
+	out.append("\t\t&self.boxes\n\t}\n\n")
+	out.append("\t/// Number of indexed samples.\n")
+	out.append("\t#[must_use]\n")
+	out.append("\tpub fn count(&self) -> usize {\n")
+	out.append("\t\tself.paths.len()\n\t}\n\n")
+	out.append("\t/// Extracted image path for row `index`.\n")
+	out.append("\t///\n")
+	out.append("\t/// # Errors\n")
+	out.append("\t/// Returns `out_of_range` when `index` is outside the dataset.\n")
+	out.append("\tpub fn path(&self, index: i64) -> Result<&Path> {\n")
+	out.append("\t\tif index < 0 || index >= self.paths.len() as i64 {\n")
+	out.append(f'\t\t\treturn Err(Error::out_of_range("{pack["name"]} index is outside the dataset"));\n')
+	out.append("\t\t}\n")
+	out.append("\t\tOk(&self.paths[index as usize])\n")
+	out.append("\t}\n\n")
+	out.append("\t/// Lazily decode image `index` to a `[1, 3, H, W]` F32 NCHW\n")
+	out.append("\t/// image on the owning engine at native extent.\n")
+	out.append("\t///\n")
+	out.append("\t/// # Errors\n")
+	out.append("\t/// Returns `out_of_range` for an out-of-range index and the\n")
+	out.append("\t/// [`oa::image`] decode errors for the member.\n")
+	out.append("\tpub fn image(&self, index: i64) -> Result<Image> {\n")
+	out.append("\t\tfolder::decode(&self.engine, self.path(index)?)\n")
+	out.append("\t}\n\n")
+	out.append("\t/// `[K, 5]` F32 box slice for image `index` on the owning\n")
+	out.append("\t/// engine, sharing the resident [`boxes`](Self::boxes) storage.\n")
+	out.append("\t///\n")
+	out.append("\t/// # Errors\n")
+	out.append("\t/// Returns `out_of_range` for an out-of-range index and the\n")
+	out.append("\t/// matrix slice error for the span.\n")
+	out.append("\tpub fn boxes_at(&self, index: i64) -> Result<Matrix> {\n")
+	out.append("\t\tlet start = self.offsets[index as usize];\n")
+	out.append("\t\tlet end = self.offsets[index as usize + 1];\n")
+	out.append("\t\tif start == end {\n")
+	out.append("\t\t\treturn Matrix::new_from_f32_on(&self.engine, [0, 5], &[]);\n")
+	out.append("\t\t}\n")
+	out.append("\t\tmatrix::slice(&self.boxes, 0, start, end)\n")
+	out.append("\t}\n\n")
+
+	out.append(f"\tfn pack_dir(config: &{cls}Config) -> Result<PathBuf> {{\n")
+	out.append("\t\tlet root = match &config.cache_dir {\n")
+	out.append("\t\t\tSome(dir) => dir.clone(),\n")
+	out.append("\t\t\tNone => pack::data_root()?,\n")
+	out.append("\t\t};\n")
+	out.append(f'\t\tOk(root.join("{pack["name"]}").join("{pack["version"]}"))\n')
+	out.append("\t}\n\n")
+	out.append(f"\tfn extracted_dir(config: &{cls}Config) -> Result<PathBuf> {{\n")
+	out.append('\t\tOk(Self::pack_dir(config)?.join("extracted"))\n')
+	out.append("\t}\n\n")
+	out.append("\tfn materialize(\n")
+	out.append(f"\t\tconfig: &{cls}Config,\n")
+	out.append("\t\tprogress: &mut impl FnMut(FetchProgress) -> bool,\n")
+	out.append("\t) -> Result<PathBuf> {\n")
+	out.append("\t\tlet root = match &config.cache_dir {\n")
+	out.append("\t\t\tSome(dir) => dir.clone(),\n")
+	out.append("\t\t\tNone => pack::data_root()?,\n")
+	out.append("\t\t};\n")
+	out.append(f'\t\tlet dir = pack::ensure_pack_with_progress(&{pack_const}, &root, progress)?;\n')
+	out.append('\t\tlet extracted = dir.join("extracted");\n')
+	per_split = bool(files_map) and set(files_map) != {"_"}
+	if per_split:
+		out.extend(folder_key_lines(split, cls, "\t\t"))
+		out.append('\t\tlet done = extracted.join(format!(".done_{split_key}"));\n')
+	else:
+		out.append('\t\tlet done = extracted.join(".done_all");\n')
+	out.append("\t\tif done.exists() {\n")
+	out.append("\t\t\treturn Ok(extracted);\n")
+	out.append("\t\t}\n")
+	out.extend(folder_files_lines(pack, files_map, split, cls, "\t\t"))
+	if per_split:
+		out.append("\t\tlet target = extracted.join(split_key);\n")
+		out.append("\t\tfor member in members {\n")
+		out.append("\t\t\tfolder::extract_images(&dir.join(member), &target)?;\n")
+		out.append("\t\t}\n")
+	else:
+		out.append("\t\tfor member in members {\n")
+		out.append("\t\t\tfolder::extract_images(&dir.join(member), &extracted)?;\n")
+		out.append("\t\t}\n")
+	out.append('\t\tstd::fs::write(&done, b"done")\n')
+	out.append(f'\t\t\t.map_err(|error| Error::io("write {pack["name"]} extract marker", error))?;\n')
+	out.append("\t\tOk(extracted)\n")
+	out.append("\t}\n\n")
+	out.append("\tfn index_of(\n")
+	param = "config" if split else "_config"
+	out.append(f"\t\t{param}: &{cls}Config,\n")
+	out.append("\t\textracted: &Path,\n")
+	out.append("\t) -> Result<DetectionIndex> {\n")
+	out.extend(folder_root_lines(roots, cls, "\t\t", "index_root"))
+	out.append("\t\tlet index = super::index(&index_root, config)?;\n")
+	out.extend(folder_key_lines(split, cls, "\t\t"))
+	out.append('\t\tlet classes = extracted.join(format!(".classes_{split_key}"));\n')
+	out.append("\t\tif !classes.exists() {\n")
+	out.append("\t\t\tstd::fs::create_dir_all(extracted)\n")
+	out.append('\t\t\t\t.map_err(|error| Error::io("create extracted root", error))?;\n')
+	out.append('\t\t\tstd::fs::write(&classes, index.classes.join("\\n"))\n')
+	out.append(f'\t\t\t\t.map_err(|error| Error::io("write {pack["name"]} class table", error))?;\n')
+	out.append("\t\t}\n")
+	out.append("\t\tOk(index)\n")
+	out.append("\t}\n")
+	out.append("}\n\n")
+
+	out.append(f"impl Dataset for {cls} {{\n")
+	out.append("\tfn len(&self) -> i64 {\n")
+	out.append("\t\ti64::try_from(self.paths.len()).unwrap_or(i64::MAX)\n")
+	out.append("\t}\n\n")
+	out.append("\tfn get_item(&self, index: i64) -> Result<Matrix> {\n")
+	out.append("\t\tself.image(index)?.into_matrix().squeeze(0)\n")
+	out.append("\t}\n\n")
+	out.append("\tfn get_sample(&self, index: i64) -> Result<Sample> {\n")
+	out.append("\t\tif index < 0 || index >= self.paths.len() as i64 {\n")
+	out.append(f'\t\t\treturn Err(Error::out_of_range("{pack["name"]} index is outside the dataset"));\n')
+	out.append("\t\t}\n")
+	out.append("\t\tlet x = self.get_item(index)?;\n")
+	out.append("\t\tlet y = self.boxes_at(index)?;\n")
 	out.append("\t\tOk(Sample::new_with_label(x, y))\n")
 	out.append("\t}\n")
 	out.append("}\n")
@@ -704,10 +934,111 @@ def gen_python_imagefolder(pack: dict) -> str:
 	return "".join(out)
 
 
+
+def gen_python_detection(pack: dict) -> str:
+	py = pack["python"]
+	doc = py["doc"]
+	header = f'"""{doc}"""\n' if "\n" not in doc else f'"""{doc}\n"""\n'
+	cls = pack["class"]
+	out = [header + "\n"]
+	out.append("from array import array\n")
+	out.append("from itertools import accumulate\n")
+	out.append("from pathlib import Path\n\n")
+	out.append("import oa\n\n")
+	out.append("from .. import _native\n")
+	out.append("from .._progress import resolve\n")
+	out.append("from ..dataset import matrix\n")
+	out.append(f'\nPACK = _native.pack_manifest("{pack["name"]}")\n')
+	out.append(f"\n\nclass {cls}:\n")
+	out.append('\t"""Lazy [3, H, W] f32 NCHW images + [K, 5] [x1,y1,x2,y2,class] boxes."""\n\n')
+	out.append("\tdef __init__(self, boxes, lengths, offsets, paths, classes, engine):\n")
+	out.append("\t\tself._boxes = boxes\n")
+	out.append("\t\tself._lengths = lengths\n")
+	out.append("\t\tself._offsets = offsets\n")
+	out.append("\t\tself._paths = paths\n")
+	out.append("\t\tself._classes = classes\n")
+	out.append("\t\tself._engine = engine\n\n")
+	out.append("\t@classmethod\n")
+	out.append("\tdef load(\n")
+	out.append("\t\tcls,\n")
+	out.append('\t\tengine: "oa.Engine | None" = None,\n')
+	out.append('\t\tsplit: str = "train",\n')
+	out.append("\t\tcache_dir=None,\n")
+	out.append("\t\tprogress=True,\n")
+	out.append(f"\t) -> \"{cls}\":\n")
+	out.append('\t\t"""Fetch, verify, extract, and index the pack.\n\n')
+	out.append("\t\tMembers stay in the extracted cache and decode lazily per\n")
+	out.append("\t\tsample. `progress=True` renders the download bar; a callable\n")
+	out.append("\t\treceives (file, fetched, total) samples instead.\n")
+	out.append('\t\t"""\n')
+	out.append("\t\tfields = _native.load(\n")
+	out.append('\t\t\tPACK["name"],\n')
+	out.append("\t\t\tsplit=split,\n")
+	out.append("\t\t\tcache_dir=str(Path(cache_dir)) if cache_dir else None,\n")
+	out.append("\t\t\tprogress=resolve(progress),\n")
+	out.append("\t\t)\n")
+	out.append("\t\tresolved = engine if engine is not None else oa.Engine.current()\n")
+	out.append("\t\troot = Path(cache_dir) if cache_dir else Path(_native.data_root())\n")
+	out.append('\t\textracted = root / PACK["name"] / PACK["version"] / "extracted"\n')
+	out.append('\t\tpaths = [extracted / line for line in fields["text"].splitlines()]\n')
+	if pack["split"]:
+		out.append('\t\tclasses = (extracted / f".classes_{split}").read_text().splitlines()\n')
+	else:
+		out.append('\t\tclasses = (extracted / ".classes_all").read_text().splitlines()\n')
+	out.append('\t\tlengths = [int(v) for v in array("f", fields["box_lengths"]["data"])]\n')
+	out.append("\t\toffsets = [0, *accumulate(lengths)]\n")
+	out.append("\t\treturn cls(\n")
+	out.append('\t\t\tmatrix(fields["boxes"], resolved),\n')
+	out.append("\t\t\tlengths,\n")
+	out.append("\t\t\toffsets,\n")
+	out.append("\t\t\tpaths,\n")
+	out.append("\t\t\tclasses,\n")
+	out.append("\t\t\tresolved,\n")
+	out.append("\t\t)\n\n")
+	out.append("\tdef __len__(self) -> int:\n")
+	out.append("\t\treturn len(self._paths)\n\n")
+	out.append("\t@property\n")
+	out.append('\tdef boxes(self) -> "oa.Matrix":\n')
+	out.append('\t\t"""[T, 5] f32 [x1,y1,x2,y2,class] boxes in native pixels."""\n')
+	out.append("\t\treturn self._boxes\n\n")
+	out.append("\t@property\n")
+	out.append("\tdef classes(self) -> list:\n")
+	out.append('\t\t"""Class names in box-label order."""\n')
+	out.append("\t\treturn self._classes\n\n")
+	out.append("\tdef path(self, index: int) -> Path:\n")
+	out.append('\t\t"""Extracted image path for row `index`."""\n')
+	out.append("\t\treturn self._paths[index]\n\n")
+	out.append("\tdef box_count(self, index: int) -> int:\n")
+	out.append('\t\t"""Boxes on image `index` (host-side, no readback)."""\n')
+	out.append("\t\treturn self._lengths[index]\n\n")
+	out.append("\tdef boxes_at(self, index: int) -> \"oa.Matrix\":\n")
+	out.append('\t\t"""[K, 5] f32 box slice for image `index`."""\n')
+	out.append("\t\tif self._offsets[index] == self._offsets[index + 1]:\n")
+	out.append("\t\t\treturn oa.Matrix.new_from_f32([0, 5], [], self._engine)\n")
+	out.append("\t\treturn self._boxes.slice(\n")
+	out.append("\t\t\t0, self._offsets[index], self._offsets[index + 1]\n")
+	out.append("\t\t)\n\n")
+	out.append("\tdef image(self, index: int) -> \"oa.Image\":\n")
+	out.append('\t\t"""Lazily decode image `index` to a [1, 3, H, W] f32 NCHW image."""\n')
+	out.append("\t\treturn oa.image.decode_file(\n")
+	out.append('\t\t\tstr(self._paths[index]), "rgb", self._engine\n')
+	out.append("\t\t)\n\n")
+	out.append("\tdef get_item(self, index: int) -> \"oa.Matrix\":\n")
+	out.append('\t\t"""Lazily decode image `index` as a [3, H, W] matrix."""\n')
+	out.append("\t\titem = self.image(index).as_matrix()\n")
+	out.append("\t\treturn item.reshape(item.shape[1:])\n\n")
+	out.append("\tdef get_sample(self, index: int):\n")
+	out.append('\t\t"""(image, [K, 5] boxes) pair for one row."""\n')
+	out.append("\t\treturn self.get_item(index), self.boxes_at(index)\n")
+	return "".join(out)
+
+
 def gen_python_loader(pack: dict) -> str | None:
 	py = pack["python"]
 	if py["contract"] == "imagefolder":
 		return gen_python_imagefolder(pack)
+	if py["contract"] == "detection":
+		return gen_python_detection(pack)
 	if py["contract"] != "matrix":
 		return None
 	doc = py["doc"]
@@ -741,10 +1072,13 @@ def gen_python_loader(pack: dict) -> str | None:
 			"\trange; normalize=False keeps raw f32 values. progress=True renders\n"
 			"\tthe download bar.",
 		)
+		has_count = any(field.get("generic") == "count" for field in pack["config"])
+		count_param = ", count=None" if has_count else ""
+		count_arg = "\n\t\t\tcount=count," if has_count else ""
 		out.append(
 			f"""
 	@classmethod
-	def load(cls, engine=None, cache_dir=None, normalize: bool = True, progress=True):
+	def load(cls, engine=None, cache_dir=None, normalize: bool = True{count_param}, progress=True):
 		\"\"\"{load_doc}
 		\"\"\"
 		fields = _native.load(
@@ -752,7 +1086,7 @@ def gen_python_loader(pack: dict) -> str | None:
 			# The pack carries one unsplit set; the native split argument
 			# only accepts train/test and is ignored for this loader.
 			split="train",
-			normalize=normalize,
+			normalize=normalize,{count_arg}
 			cache_dir=str(Path(cache_dir)) if cache_dir else None,
 			progress=resolve(progress),
 		)

@@ -86,14 +86,49 @@ pub(crate) fn decode_member(
 		}
 	}
 
-	let mut widths = vec![0_usize; spec.fields.len()];
-	for texts in &rows {
+	decode_rows(
+		pack,
+		spec.fields,
+		spec.label_names,
+		spec.classes,
+		has_label,
+		&rows,
+		&labels,
+		"jsonl",
+	)
+}
+
+/// Build the resident matrices for `(texts, label)` sample rows from
+/// any member format (JSONL, line pairs, per-member records): one
+/// `[N, K_i]` F32 byte matrix per named text field, padded to that
+/// field's own maximum width, plus a `[N]` F32 `labels` matrix when
+/// `has_label`. `source` names the member format in error strings.
+#[allow(clippy::too_many_arguments)]
+pub(crate) fn decode_rows(
+	pack: &str,
+	fields: &[&'static str],
+	label_names: &[&str],
+	classes: &[&str],
+	has_label: bool,
+	rows: &[Vec<String>],
+	labels: &[String],
+	source: &str,
+) -> Result<(Decoded, Vec<String>)> {
+	let mut widths = vec![0_usize; fields.len()];
+	for texts in rows {
+		if texts.len() != fields.len() {
+			return Err(Error::data_loss(format!(
+				"{pack} {source} row maps {} fields, expected {}",
+				texts.len(),
+				fields.len()
+			)));
+		}
 		for (field, text) in texts.iter().enumerate() {
 			widths[field] = widths[field].max(text.len());
 		}
 	}
-	let mut matrices = Vec::with_capacity(spec.fields.len() + 1);
-	for (field, &name) in spec.fields.iter().enumerate() {
+	let mut matrices = Vec::with_capacity(fields.len() + 1);
+	for (field, &name) in fields.iter().enumerate() {
 		let mut values = vec![0.0f32; rows.len() * widths[field]];
 		for (row, texts) in rows.iter().enumerate() {
 			for (k, &byte) in texts[field].as_bytes().iter().enumerate() {
@@ -107,20 +142,28 @@ pub(crate) fn decode_member(
 		});
 	}
 	if has_label {
+		if labels.len() != rows.len() {
+			return Err(Error::data_loss(format!(
+				"{pack} {source} carries {} labels for {} rows",
+				labels.len(),
+				rows.len()
+			)));
+		}
 		let mut values = Vec::with_capacity(labels.len());
 		for (row, cell) in labels.iter().enumerate() {
-			let value = if spec.label_names.is_empty() {
-				cell
-					.parse::<f32>()
-					.map_err(|_| Error::data_loss(format!("{pack} jsonl row {row} label is not numeric")))?
+			let value = if label_names.is_empty() {
+				cell.parse::<f32>().map_err(|_| {
+					Error::data_loss(format!("{pack} {source} row {row} label is not numeric"))
+				})?
 			} else {
-				spec
-					.label_names
+				label_names
 					.iter()
 					.position(|name| name == cell)
 					.map(|index| index as f32)
 					.ok_or_else(|| {
-						Error::data_loss(format!("{pack} jsonl row {row} label '{cell}' is unknown"))
+						Error::data_loss(format!(
+							"{pack} {source} row {row} label '{cell}' is unknown"
+						))
 					})?
 			};
 			values.push(value);
@@ -137,7 +180,7 @@ pub(crate) fn decode_member(
 			text: None,
 			seq_len: 0,
 		},
-		spec.classes.iter().map(|name| (*name).to_owned()).collect(),
+		classes.iter().map(|name| (*name).to_owned()).collect(),
 	))
 }
 
@@ -170,8 +213,19 @@ impl RecordData {
 		let dir = pack::ensure_pack_with_progress(pack, &root, progress)?;
 		let has_label = !spec.unlabeled.iter().any(|s| member.ends_with(s));
 		let (decoded, classes) = decode_member(pack.name, &dir.join(pack_dir), member, spec)?;
-		let fields = spec
-			.fields
+		Self::upload(engine, spec.fields, &decoded, classes, has_label)
+	}
+
+	/// Upload a decoded rows payload (any member source) on `engine`:
+	/// one matrix per `fields` name plus `labels` when `has_label`.
+	pub(crate) fn upload(
+		engine: &Engine,
+		fields: &[&str],
+		decoded: &Decoded,
+		classes: Vec<String>,
+		has_label: bool,
+	) -> Result<Self> {
+		let fields = fields
 			.iter()
 			.map(|name| decoded.upload(name, engine))
 			.collect::<Result<Vec<_>>>()?;

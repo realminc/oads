@@ -1,0 +1,7 @@
+Yelp Review Full (yelp_review_full_csv.tgz)
+
+Source: https://s3.amazonaws.com/fast-ai-nlp/yelp_review_full_csv.tgz
+Zhang, Zhao, LeCun, "Character-level Convolutional Networks for Text
+Classification", NeurIPS 2015. Stars 1-5 as five ordinal classes.
+The upstream CSV distribution attaches no license text; Yelp content
+remains subject to its own terms.

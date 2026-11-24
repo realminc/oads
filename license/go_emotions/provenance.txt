@@ -1,0 +1,6 @@
+GoEmotions (train/dev/test TSV)
+
+Source: https://github.com/google-research/google-research/tree/master/goemotions
+Demszky et al., "GoEmotions: A Dataset of Fine-Grained Emotions",
+ACL 2020. Distributed Apache-2.0. 27 emotion categories plus neutral
+decode to [N, 28] multi-hot indicators.
