@@ -40,7 +40,7 @@ class Vctk:
 		speakers: list,
 		flac_dir: Path,
 		mic: str,
-		engine: "oa.Engine",
+		engine: "oa.Runtime",
 	):
 		self._speaker_ids = speaker_ids
 		self._lengths = lengths
@@ -55,7 +55,7 @@ class Vctk:
 	@classmethod
 	def load(
 		cls,
-		engine: "oa.Engine | None" = None,
+		engine: "oa.Runtime | None" = None,
 		mic: str = "mic1",
 		cache_dir=None,
 		progress=True,
@@ -81,7 +81,7 @@ class Vctk:
 		with open(extracted / f"index_{mic}.csv", newline="") as handle:
 			clips = [(row[0], row[1]) for row in csv.reader(handle)]
 		speakers = (extracted / "speakers.txt").read_text().splitlines()
-		resolved = engine if engine is not None else oa.Engine.current()
+		resolved = engine if engine is not None else oa.Runtime.current()
 		return cls(
 			matrix(fields[f"speaker_ids{suffix}"], engine),
 			matrix(fields[f"lengths{suffix}"], engine),

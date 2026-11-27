@@ -4,11 +4,11 @@
 
 use oa::data::Dataset;
 
-fn engine() -> oa::Result<oa::Engine> {
-	let engine = oa::Engine::builder()
+fn engine() -> oa::Result<oa::Runtime> {
+	let engine = oa::Runtime::builder()
 		.devices(oa::DeviceSelection::Automatic)
 		.build()?;
-	oa::Engine::set_default(engine.clone());
+	oa::Runtime::set_default(engine.clone());
 	Ok(engine)
 }
 

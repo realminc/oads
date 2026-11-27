@@ -130,7 +130,7 @@ fn decode_rows(pack: &str, rows: &[Vec<String>], spec: &GlueSpec) -> Result<Deco
 	})
 }
 
-use oa::Engine;
+use oa::Runtime;
 use oa::data::Sample;
 use oa::matrix::{self, Matrix};
 
@@ -150,7 +150,7 @@ impl GlueData {
 	/// root), extract `member` from the task zip, and upload the
 	/// resident matrices on `engine`.
 	pub(crate) fn load_on(
-		engine: &Engine,
+		engine: &Runtime,
 		pack: &Pack,
 		pack_dir: &Path,
 		member: &str,

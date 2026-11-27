@@ -40,7 +40,7 @@ class Nsynth:
 		lengths: "oa.Matrix",
 		notes: list,
 		wav_dir: Path,
-		engine: "oa.Engine",
+		engine: "oa.Runtime",
 	):
 		self._labels = labels
 		self._pitches = pitches
@@ -54,7 +54,7 @@ class Nsynth:
 	@classmethod
 	def load(
 		cls,
-		engine: "oa.Engine | None" = None,
+		engine: "oa.Runtime | None" = None,
 		cache_dir=None,
 		progress=True,
 	) -> "Nsynth":
@@ -74,7 +74,7 @@ class Nsynth:
 		extracted = root / PACK["name"] / PACK["version"] / "extracted"
 		with open(extracted / "index.csv", newline="") as handle:
 			notes = [row[0] for row in csv.reader(handle)]
-		resolved = engine if engine is not None else oa.Engine.current()
+		resolved = engine if engine is not None else oa.Runtime.current()
 		return cls(
 			matrix(fields["labels"], resolved),
 			matrix(fields["pitches"], resolved),

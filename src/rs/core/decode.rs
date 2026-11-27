@@ -3,7 +3,7 @@
 //! Every loader's `decode` materializes its pack through
 //! [`ensure_pack`](crate::core::pack::ensure_pack), decodes members into
 //! [`MatrixData`] F32 buffers, and returns a [`Decoded`] bundle. Rust
-//! loaders upload the matrices to an [`oa::Engine`]; the Python extension
+//! loaders upload the matrices to an [`oa::Runtime`]; the Python extension
 //! returns the same buffers for `oa.Matrix` construction there, so decode
 //! logic exists exactly once.
 //!
@@ -14,7 +14,7 @@
 use std::path::PathBuf;
 
 use oa::matrix::Matrix;
-use oa::{Engine, Error, Result};
+use oa::{Error, Result, Runtime};
 
 use crate::core::idx::IdxSplit;
 use crate::core::pack::{FetchProgress, Pack};
@@ -60,7 +60,7 @@ impl Decoded {
 	/// # Errors
 	///
 	/// Returns an error for a missing matrix name or a failed upload.
-	pub fn upload(&self, name: &str, engine: &Engine) -> Result<Matrix> {
+	pub fn upload(&self, name: &str, engine: &Runtime) -> Result<Matrix> {
 		let matrix = self.matrix(name)?;
 		Matrix::new_from_slice_on(engine, matrix.shape.clone(), &matrix.values)
 	}

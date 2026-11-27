@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 use oa::data::{Dataset, Sample};
 use oa::image::Image;
 use oa::matrix::{self, Matrix};
-use oa::{Engine, Error, Result};
+use oa::{Error, Result, Runtime};
 
 use crate::core::decode::Decoded;
 use crate::core::pack::{self, FetchProgress, Pack, PackFile};
@@ -81,7 +81,7 @@ impl super::Voc2007 {
 	/// [`load_on`](Self::load_on).
 	#[inline]
 	pub fn load(config: &Voc2007Config) -> Result<Self> {
-		Self::load_on(&Engine::current()?, config)
+		Self::load_on(&Runtime::current()?, config)
 	}
 
 	/// Decode the selected split and upload it on `engine`.
@@ -94,7 +94,7 @@ impl super::Voc2007 {
 	/// Returns the errors of
 	/// [`load_with_progress_on`](Self::load_with_progress_on).
 	#[inline]
-	pub fn load_on(engine: &Engine, config: &Voc2007Config) -> Result<Self> {
+	pub fn load_on(engine: &Runtime, config: &Voc2007Config) -> Result<Self> {
 		Self::load_with_progress_on(engine, config, &mut |_| true)
 	}
 
@@ -110,7 +110,7 @@ impl super::Voc2007 {
 		config: &Voc2007Config,
 		progress: &mut impl FnMut(FetchProgress) -> bool,
 	) -> Result<Self> {
-		Self::load_with_progress_on(&Engine::current()?, config, progress)
+		Self::load_with_progress_on(&Runtime::current()?, config, progress)
 	}
 }
 
@@ -127,7 +127,7 @@ pub struct Voc2007 {
 	boxes: Matrix,
 	offsets: Vec<i64>,
 	classes: Vec<String>,
-	engine: Engine,
+	engine: Runtime,
 }
 
 impl Voc2007 {
@@ -168,7 +168,7 @@ impl Voc2007 {
 	/// Returns the errors of [`load_on`](Self::load_on), plus
 	/// `Cancelled` when `progress` aborts the fetch.
 	pub fn load_with_progress_on(
-		engine: &Engine,
+		engine: &Runtime,
 		config: &Voc2007Config,
 		progress: &mut impl FnMut(FetchProgress) -> bool,
 	) -> Result<Self> {

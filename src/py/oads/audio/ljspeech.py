@@ -34,7 +34,7 @@ class LjSpeech:
 		audio_lengths: "oa.Matrix",
 		ids: list,
 		wav_dir: Path,
-		engine: "oa.Engine",
+		engine: "oa.Runtime",
 	):
 		self._transcripts = transcripts
 		self._transcript_lengths = transcript_lengths
@@ -46,7 +46,7 @@ class LjSpeech:
 	@classmethod
 	def load(
 		cls,
-		engine: "oa.Engine | None" = None,
+		engine: "oa.Runtime | None" = None,
 		cache_dir=None,
 		progress=True,
 	) -> "LjSpeech":
@@ -66,7 +66,7 @@ class LjSpeech:
 		extracted = root / PACK["name"] / PACK["version"] / "extracted"
 		with open(extracted / "metadata.csv", newline="") as handle:
 			ids = [row[0] for row in csv.reader(handle, delimiter="|")]
-		resolved = engine if engine is not None else oa.Engine.current()
+		resolved = engine if engine is not None else oa.Runtime.current()
 		return cls(
 			matrix(fields["transcripts"], engine),
 			matrix(fields["transcript_lengths"], engine),

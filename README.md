@@ -44,7 +44,7 @@ through `oads._native`.
 use oa::data::collate;
 use oads::{Mnist, MnistConfig};
 
-// Uploads on this thread's default engine (oa::Engine::current()).
+// Uploads on this thread's default engine (oa::Runtime::current()).
 let dataset = Mnist::load(&MnistConfig::default())?;
 assert_eq!(dataset.images().shape(), &[60_000, 1, 28, 28]);
 
@@ -56,7 +56,7 @@ assert_eq!(batch.x.shape(), &[2, 1, 28, 28]);
 ```python
 import oads
 
-dataset = oads.Mnist.load()  # engine=None resolves oa.Engine.current()
+dataset = oads.Mnist.load()  # engine=None resolves oa.Runtime.current()
 assert dataset.images.shape == [60000, 1, 28, 28]
 
 x, y = dataset.get_sample(0)
@@ -67,8 +67,8 @@ Every loader follows the OA engine convention: the engineless `load` /
 `load_with_progress` resolve the calling thread's default engine, and the
 `*_on` variants — `Mnist::load_on(&engine, &config)`,
 `Mnist::load_with_progress_on(&engine, &config, &mut cb)` — pin an explicit
-one. Install a default once with `oa::Engine::set_default` /
-`oa.Engine.set_default` and every subsequent `load` targets it.
+one. Install a default once with `oa::Runtime::set_default` /
+`oa.Runtime.set_default` and every subsequent `load` targets it.
 
 Loaders implement `oa::data::Dataset`, so `oa.data` collation, shuffling,
 and `random_split` work unchanged — oads produces the data; OA owns the

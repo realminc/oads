@@ -10,7 +10,7 @@
 use std::path::{Path, PathBuf};
 
 use oa::image::{Image, ImageFormat};
-use oa::{Engine, Error, Result};
+use oa::{Error, Result, Runtime};
 
 use crate::core::decode::MatrixData;
 use crate::core::extract;
@@ -239,7 +239,7 @@ pub(crate) fn extract_images(archive: &Path, dest: &Path) -> Result<()> {
 
 /// Decode `path` to a `[1, C, H, W]` F32 device image at its native size
 /// through [`oa::image::decode_file_on`].
-pub(crate) fn decode(engine: &Engine, path: &Path) -> Result<Image> {
+pub(crate) fn decode(engine: &Runtime, path: &Path) -> Result<Image> {
 	oa::image::decode_file_on(engine, path, ImageFormat::Rgb)
 }
 

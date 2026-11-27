@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 use oa::data::{Dataset, Sample};
 use oa::image::{Image, InterpolationMode};
 use oa::matrix::{self, Matrix};
-use oa::{Engine, Error, Result};
+use oa::{Error, Result, Runtime};
 
 use crate::core::decode::Decoded;
 use crate::core::pack::{self, FetchProgress, Pack, PackFile};
@@ -91,7 +91,7 @@ impl super::OxfordFlowers102 {
 	/// [`load_on`](Self::load_on).
 	#[inline]
 	pub fn load(config: &OxfordFlowers102Config) -> Result<Self> {
-		Self::load_on(&Engine::current()?, config)
+		Self::load_on(&Runtime::current()?, config)
 	}
 
 	/// Decode the selected split and upload it on `engine`.
@@ -104,7 +104,7 @@ impl super::OxfordFlowers102 {
 	/// Returns the errors of
 	/// [`load_with_progress_on`](Self::load_with_progress_on).
 	#[inline]
-	pub fn load_on(engine: &Engine, config: &OxfordFlowers102Config) -> Result<Self> {
+	pub fn load_on(engine: &Runtime, config: &OxfordFlowers102Config) -> Result<Self> {
 		Self::load_with_progress_on(engine, config, &mut |_| true)
 	}
 
@@ -120,7 +120,7 @@ impl super::OxfordFlowers102 {
 		config: &OxfordFlowers102Config,
 		progress: &mut impl FnMut(FetchProgress) -> bool,
 	) -> Result<Self> {
-		Self::load_with_progress_on(&Engine::current()?, config, progress)
+		Self::load_with_progress_on(&Runtime::current()?, config, progress)
 	}
 }
 
@@ -135,7 +135,7 @@ pub struct OxfordFlowers102 {
 	labels: Matrix,
 	classes: Vec<String>,
 	size: Option<(u32, u32)>,
-	engine: Engine,
+	engine: Runtime,
 }
 
 impl OxfordFlowers102 {
@@ -175,7 +175,7 @@ impl OxfordFlowers102 {
 	/// Returns the errors of [`load_on`](Self::load_on), plus
 	/// `Cancelled` when `progress` aborts the fetch.
 	pub fn load_with_progress_on(
-		engine: &Engine,
+		engine: &Runtime,
 		config: &OxfordFlowers102Config,
 		progress: &mut impl FnMut(FetchProgress) -> bool,
 	) -> Result<Self> {

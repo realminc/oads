@@ -7,7 +7,7 @@ from oads import pack
 
 @pytest.fixture(scope="session")
 def engine():
-	return oa.Engine(logging=oa.LogOptions().console_output(False))
+	return oa.Runtime(logging=oa.LogOptions().console_output(False))
 
 
 @pytest.fixture(scope="session")

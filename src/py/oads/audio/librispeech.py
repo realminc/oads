@@ -37,7 +37,7 @@ class Librispeech:
 		clips: list,
 		speakers: list,
 		flac_dir: Path,
-		engine: "oa.Engine",
+		engine: "oa.Runtime",
 	):
 		self._speaker_ids = speaker_ids
 		self._lengths = lengths
@@ -51,7 +51,7 @@ class Librispeech:
 	@classmethod
 	def load(
 		cls,
-		engine: "oa.Engine | None" = None,
+		engine: "oa.Runtime | None" = None,
 		cache_dir=None,
 		progress=True,
 	) -> "Librispeech":
@@ -73,7 +73,7 @@ class Librispeech:
 			clips = [(row[0], row[1]) for row in csv.reader(handle)]
 		with open(extracted / "speakers.txt") as handle:
 			speakers = [line.strip() for line in handle]
-		resolved = engine if engine is not None else oa.Engine.current()
+		resolved = engine if engine is not None else oa.Runtime.current()
 		return cls(
 			matrix(fields["speaker_ids"], resolved),
 			matrix(fields["lengths"], resolved),

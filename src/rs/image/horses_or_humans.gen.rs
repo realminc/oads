@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 use oa::data::{Dataset, Sample};
 use oa::image::{Image, InterpolationMode};
 use oa::matrix::{self, Matrix};
-use oa::{Engine, Error, Result};
+use oa::{Error, Result, Runtime};
 
 use crate::core::decode::Decoded;
 use crate::core::pack::{self, FetchProgress, Pack, PackFile};
@@ -86,7 +86,7 @@ impl super::HorsesOrHumans {
 	/// [`load_on`](Self::load_on).
 	#[inline]
 	pub fn load(config: &HorsesOrHumansConfig) -> Result<Self> {
-		Self::load_on(&Engine::current()?, config)
+		Self::load_on(&Runtime::current()?, config)
 	}
 
 	/// Decode the selected split and upload it on `engine`.
@@ -99,7 +99,7 @@ impl super::HorsesOrHumans {
 	/// Returns the errors of
 	/// [`load_with_progress_on`](Self::load_with_progress_on).
 	#[inline]
-	pub fn load_on(engine: &Engine, config: &HorsesOrHumansConfig) -> Result<Self> {
+	pub fn load_on(engine: &Runtime, config: &HorsesOrHumansConfig) -> Result<Self> {
 		Self::load_with_progress_on(engine, config, &mut |_| true)
 	}
 
@@ -115,7 +115,7 @@ impl super::HorsesOrHumans {
 		config: &HorsesOrHumansConfig,
 		progress: &mut impl FnMut(FetchProgress) -> bool,
 	) -> Result<Self> {
-		Self::load_with_progress_on(&Engine::current()?, config, progress)
+		Self::load_with_progress_on(&Runtime::current()?, config, progress)
 	}
 }
 
@@ -130,7 +130,7 @@ pub struct HorsesOrHumans {
 	labels: Matrix,
 	classes: Vec<String>,
 	size: Option<(u32, u32)>,
-	engine: Engine,
+	engine: Runtime,
 }
 
 impl HorsesOrHumans {
@@ -170,7 +170,7 @@ impl HorsesOrHumans {
 	/// Returns the errors of [`load_on`](Self::load_on), plus
 	/// `Cancelled` when `progress` aborts the fetch.
 	pub fn load_with_progress_on(
-		engine: &Engine,
+		engine: &Runtime,
 		config: &HorsesOrHumansConfig,
 		progress: &mut impl FnMut(FetchProgress) -> bool,
 	) -> Result<Self> {

@@ -27,7 +27,7 @@ class GlueCola:
 	@classmethod
 	def load(
 		cls,
-		engine: "oa.Engine | None" = None,
+		engine: "oa.Runtime | None" = None,
 		split: str = "train",
 		cache_dir=None,
 		progress=True,

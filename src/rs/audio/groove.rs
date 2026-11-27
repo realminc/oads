@@ -13,7 +13,7 @@
 
 use oa::data::{Dataset, Sample};
 use oa::matrix::{self, Matrix};
-use oa::{Engine, Error, Result};
+use oa::{Error, Result, Runtime};
 use std::collections::{HashMap, HashSet};
 
 use crate::core::csv;
@@ -145,7 +145,7 @@ impl Groove {
 	///
 	/// Returns the errors of [`load_on`](Self::load_on).
 	pub fn load_with_progress_on(
-		engine: &Engine,
+		engine: &Runtime,
 		config: &GrooveConfig,
 		progress: &mut impl FnMut(FetchProgress) -> bool,
 	) -> Result<Self> {

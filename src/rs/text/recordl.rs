@@ -15,7 +15,7 @@ use std::path::{Path, PathBuf};
 
 use oa::data::Sample;
 use oa::matrix::{self, Matrix};
-use oa::{Engine, Error, Result};
+use oa::{Error, Result, Runtime};
 
 use crate::core::decode::{Decoded, MatrixData};
 use crate::core::pack::{self, FetchProgress, Pack};
@@ -198,7 +198,7 @@ impl RecordData {
 	/// root), extract `member` from the task zip, and upload the
 	/// resident matrices on `engine`.
 	pub(crate) fn load_on(
-		engine: &Engine,
+		engine: &Runtime,
 		pack: &Pack,
 		pack_dir: &Path,
 		member: &str,
@@ -219,7 +219,7 @@ impl RecordData {
 	/// Upload a decoded rows payload (any member source) on `engine`:
 	/// one matrix per `fields` name plus `labels` when `has_label`.
 	pub(crate) fn upload(
-		engine: &Engine,
+		engine: &Runtime,
 		fields: &[&str],
 		decoded: &Decoded,
 		classes: Vec<String>,

@@ -4,7 +4,7 @@
 
 use oa::data::Dataset;
 
-fn engine() -> oa::Result<oa::Engine> {
+fn engine() -> oa::Result<oa::Runtime> {
 	let selection = match std::env::var("OA_TEST_DEVICE_INDEX") {
 		Ok(index) => oa::DeviceSelection::Index(
 			index
@@ -14,8 +14,8 @@ fn engine() -> oa::Result<oa::Engine> {
 		Err(std::env::VarError::NotPresent) => oa::DeviceSelection::Automatic,
 		Err(_) => panic!("OA_TEST_DEVICE_INDEX must be Unicode"),
 	};
-	let engine = oa::Engine::builder().devices(selection).build()?;
-	oa::Engine::set_default(engine.clone());
+	let engine = oa::Runtime::builder().devices(selection).build()?;
+	oa::Runtime::set_default(engine.clone());
 	Ok(engine)
 }
 

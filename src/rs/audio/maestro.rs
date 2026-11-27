@@ -17,7 +17,7 @@
 
 use oa::data::{Dataset, Sample};
 use oa::matrix::{self, Matrix};
-use oa::{Engine, Error, Result};
+use oa::{Error, Result, Runtime};
 use std::collections::HashMap;
 
 use crate::core::decode::{Decoded, MatrixData};
@@ -152,7 +152,7 @@ impl Maestro {
 	///
 	/// Returns the errors of [`load_on`](Self::load_on).
 	pub fn load_with_progress_on(
-		engine: &Engine,
+		engine: &Runtime,
 		config: &MaestroConfig,
 		progress: &mut impl FnMut(FetchProgress) -> bool,
 	) -> Result<Self> {
@@ -160,7 +160,7 @@ impl Maestro {
 		Self::from_decoded(engine, &decoded, config)
 	}
 
-	fn from_decoded(engine: &Engine, decoded: &Decoded, config: &MaestroConfig) -> Result<Self> {
+	fn from_decoded(engine: &Runtime, decoded: &Decoded, config: &MaestroConfig) -> Result<Self> {
 		let notes = decoded.upload("notes", engine)?;
 		let offsets = decoded
 			.matrix("windows")?

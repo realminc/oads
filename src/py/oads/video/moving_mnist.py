@@ -25,7 +25,7 @@ class MovingMnist:
 	@classmethod
 	def load(
 		cls,
-		engine: "oa.Engine | None" = None,
+		engine: "oa.Runtime | None" = None,
 		count=None,
 		normalize: bool = True,
 		cache_dir=None,

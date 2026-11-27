@@ -39,7 +39,7 @@ class MatrixDataset:
 	@classmethod
 	def load(
 		cls,
-		engine: "oa.Engine | None" = None,
+		engine: "oa.Runtime | None" = None,
 		split: str = "train",
 		cache_dir=None,
 		normalize: bool = True,
@@ -49,7 +49,7 @@ class MatrixDataset:
 		"""Fetch, verify, decode, and upload the selected split.
 
 		engine=None resolves the calling thread's default engine
-		(oa.Engine.current()); pass an oa.Engine to pin one explicitly.
+		(oa.Runtime.current()); pass an oa.Runtime to pin one explicitly.
 		cache_dir=None resolves OA_DATA_DIR then the platform cache.
 		normalize=True scales features into the pack's canonical unit
 		range; normalize=False keeps raw f32 values. count caps decoded

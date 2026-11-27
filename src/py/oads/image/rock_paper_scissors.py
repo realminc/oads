@@ -26,7 +26,7 @@ class RockPaperScissors:
 	@classmethod
 	def load(
 		cls,
-		engine: "oa.Engine | None" = None,
+		engine: "oa.Runtime | None" = None,
 		split: str = "train",
 		size=None,
 		cache_dir=None,
@@ -45,7 +45,7 @@ class RockPaperScissors:
 			cache_dir=str(Path(cache_dir)) if cache_dir else None,
 			progress=resolve(progress),
 		)
-		resolved = engine if engine is not None else oa.Engine.current()
+		resolved = engine if engine is not None else oa.Runtime.current()
 		root = Path(cache_dir) if cache_dir else Path(_native.data_root())
 		extracted = root / PACK["name"] / PACK["version"] / "extracted"
 		paths = [extracted / line for line in fields["text"].splitlines()]

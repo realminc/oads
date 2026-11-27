@@ -20,7 +20,7 @@ use std::path::PathBuf;
 
 use oa::data::{Dataset, Sample};
 use oa::matrix::{self, Matrix};
-use oa::{Engine, Error, Result};
+use oa::{Error, Result, Runtime};
 
 use crate::core::decode::{Decoded, MatrixData};
 use crate::core::pack::{self, FetchProgress};
@@ -50,7 +50,7 @@ pub struct Libritts {
 	clips: Vec<(String, String)>,
 	speakers: Vec<String>,
 	wav_dir: PathBuf,
-	engine: Engine,
+	engine: Runtime,
 }
 
 impl Libritts {
@@ -151,7 +151,7 @@ impl Libritts {
 	/// Returns the errors of [`load_on`](Self::load_on), plus `Cancelled`
 	/// when the callback aborts a fetch.
 	pub fn load_with_progress_on(
-		engine: &Engine,
+		engine: &Runtime,
 		config: &LibrittsConfig,
 		progress: &mut impl FnMut(FetchProgress) -> bool,
 	) -> Result<Self> {

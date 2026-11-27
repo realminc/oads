@@ -27,7 +27,7 @@ class TinyShakespeare:
 	@classmethod
 	def load(
 		cls,
-		engine: "oa.Engine | None" = None,
+		engine: "oa.Runtime | None" = None,
 		seq_len: int = DEFAULT_SEQ_LEN,
 		cache_dir=None,
 		progress=True,

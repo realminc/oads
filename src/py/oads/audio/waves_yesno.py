@@ -27,7 +27,7 @@ class WavesYesno:
 	@classmethod
 	def load(
 		cls,
-		engine: "oa.Engine | None" = None,
+		engine: "oa.Runtime | None" = None,
 		cache_dir=None,
 		progress=True,
 	) -> "WavesYesno":

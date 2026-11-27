@@ -9,7 +9,7 @@
 
 use oa::data::{Dataset, MatrixDataset, Sample};
 use oa::matrix::Matrix;
-use oa::{Engine, Error, Result};
+use oa::{Error, Result, Runtime};
 
 use crate::core::decode::{Decoded, MatrixData};
 use crate::core::extract;
@@ -113,7 +113,7 @@ impl Cifar10 {
 	/// Returns the errors of [`load_on`](Self::load_on), plus `Cancelled` when
 	/// the callback aborts a fetch.
 	pub fn load_with_progress_on(
-		engine: &Engine,
+		engine: &Runtime,
 		config: &Cifar10Config,
 		progress: &mut impl FnMut(FetchProgress) -> bool,
 	) -> Result<Self> {

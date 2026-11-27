@@ -8,7 +8,7 @@
 
 use oa::data::{Dataset, Sample};
 use oa::matrix::Matrix;
-use oa::{Engine, Result};
+use oa::{Result, Runtime};
 
 use crate::core::decode::Decoded;
 use crate::core::jsonl;
@@ -106,7 +106,7 @@ impl SuperglueRecord {
 	/// Returns the errors of [`load_on`](Self::load_on), plus
 	/// `Cancelled` when the callback aborts a fetch.
 	pub fn load_with_progress_on(
-		engine: &Engine,
+		engine: &Runtime,
 		config: &SuperglueRecordConfig,
 		progress: &mut impl FnMut(FetchProgress) -> bool,
 	) -> Result<Self> {

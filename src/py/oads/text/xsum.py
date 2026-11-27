@@ -30,7 +30,7 @@ class Xsum:
 	@classmethod
 	def load(
 		cls,
-		engine: "oa.Engine | None" = None,
+		engine: "oa.Runtime | None" = None,
 		split: str = "train",
 		count=None,
 		cache_dir=None,

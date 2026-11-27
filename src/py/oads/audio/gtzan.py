@@ -34,7 +34,7 @@ class Gtzan:
 		clips: list,
 		genres: list,
 		wav_dir: Path,
-		engine: "oa.Engine",
+		engine: "oa.Runtime",
 	):
 		self._genre_ids = genre_ids
 		self._lengths = lengths
@@ -46,7 +46,7 @@ class Gtzan:
 	@classmethod
 	def load(
 		cls,
-		engine: "oa.Engine | None" = None,
+		engine: "oa.Runtime | None" = None,
 		cache_dir=None,
 		progress=True,
 	) -> "Gtzan":
@@ -68,7 +68,7 @@ class Gtzan:
 			clips = [(row[0], row[1]) for row in csv.reader(handle)]
 		with open(extracted / "genres.txt") as handle:
 			genres = [line.strip() for line in handle]
-		resolved = engine if engine is not None else oa.Engine.current()
+		resolved = engine if engine is not None else oa.Runtime.current()
 		return cls(
 			matrix(fields["genre_ids"], resolved),
 			matrix(fields["lengths"], resolved),

@@ -12,7 +12,7 @@
 
 use oa::data::{Dataset, Sample};
 use oa::matrix::{self, Matrix};
-use oa::{Engine, Error, Result};
+use oa::{Error, Result, Runtime};
 
 use crate::core::decode::{Decoded, MatrixData};
 use crate::core::extract;
@@ -110,7 +110,7 @@ impl Enwik8 {
 	/// when `progress` aborts a fetch, an error when `seq_len` is 0 or
 	/// leaves no sample window, and matrix upload errors.
 	pub fn load_with_progress_on(
-		engine: &Engine,
+		engine: &Runtime,
 		config: &Enwik8Config,
 		progress: &mut impl FnMut(FetchProgress) -> bool,
 	) -> Result<Self> {

@@ -14,7 +14,7 @@ use std::path::{Path, PathBuf};
 use oa::data::{Dataset, Sample};
 use oa::image::Image;
 use oa::matrix::{self, Matrix};
-use oa::{Engine, Error, Result};
+use oa::{Error, Result, Runtime};
 
 use crate::core::decode::{Decoded, MatrixData};
 use crate::core::pack::{self, FetchProgress};
@@ -170,7 +170,7 @@ pub struct CocoCaptions {
 	offsets: Vec<i64>,
 	image_ids: Vec<i64>,
 	split: CocoCaptionsSplit,
-	engine: Engine,
+	engine: Runtime,
 }
 
 impl CocoCaptions {
@@ -216,7 +216,7 @@ impl CocoCaptions {
 	/// Returns the errors of [`load_on`](Self::load_on), plus
 	/// `Cancelled` when `progress` aborts the fetch.
 	pub fn load_with_progress_on(
-		engine: &Engine,
+		engine: &Runtime,
 		config: &CocoCaptionsConfig,
 		progress: &mut impl FnMut(FetchProgress) -> bool,
 	) -> Result<Self> {
